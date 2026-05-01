@@ -10201,7 +10201,7 @@ window.setTimeout(() => {
 }, 0);
 
 // Final interaction guard: preserve existing page flows while preventing older handlers from stealing clicks.
-if (!window.__duariFinalRecordFlowGuard) {
+if (false && !window.__duariFinalRecordFlowGuard) {
   window.__duariFinalRecordFlowGuard = true;
 
   const duariOpenRecordFromCard = (card) => {
@@ -10343,7 +10343,7 @@ function duariOpenRecordCardWithExistingFlow(card) {
   });
 }
 
-if (!window.__duariFinalAlbumAndRecordRestore) {
+if (false && !window.__duariFinalAlbumAndRecordRestore) {
   window.__duariFinalAlbumAndRecordRestore = true;
   window.addEventListener("click", (event) => {
     const albumTab = event.target.closest?.("#album [data-album-view]");
@@ -10764,5 +10764,47 @@ if (!window.__duariDiaryAddAiFlowGuard) {
       ? state.activeMemoryIndex
       : null;
     openDiaryModal(linkedIndex);
+  }, true);
+}
+
+// Single final record click router. This must stay after older guards.
+if (!window.__duariRecordClickRouterFinal) {
+  window.__duariRecordClickRouterFinal = true;
+  const openRecordCardDetail = (card) => {
+    const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
+    const sourceTab = card.closest(".screen")?.id || state.tab || "home";
+    openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
+      closeModal();
+      setTab(sourceTab === "album" ? "album" : "home");
+    });
+  };
+
+  window.addEventListener("click", (event) => {
+    const albumTab = event.target.closest?.("#album [data-album-view]");
+    if (albumTab) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      state.albumView = albumTab.dataset.albumView || "record";
+      renderAlbum();
+      return;
+    }
+
+    const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
+    if (!card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openRecordCardDetail(card);
+  }, true);
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
+    if (!card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openRecordCardDetail(card);
   }, true);
 }
