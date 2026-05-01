@@ -10491,13 +10491,23 @@ function duariCurrentDiaryDraft(fallback = {}) {
 
 function duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex) {
   const hasLinked = diaryHasLinkedRecord?.(linkedTitle);
-  const record = hasLinked ? state.memories[linkedMemoryIndex ?? recordIndexByTitle(linkedTitle, 0)] : null;
+  const recordIndex = hasLinked ? (linkedMemoryIndex ?? recordIndexByTitle(linkedTitle, 0)) : null;
+  const record = hasLinked ? state.memories[recordIndex] : null;
   const recordHtml = hasLinked && record ? `
     <article class="linked-record-pill linked-record-detail-card">
       <div class="linked-record-title-row title-between">
         <span class="linked-record-title-text">${duariEscapeHtml(record.title)}</span>
         <span class="linked-record-right-tools">
           <span class="linked-record-scope">${scopeLabelForRecord(record)}</span>
+          <span class="linked-record-menu-wrap">
+            <button class="icon-btn linked-record-kebab" type="button" data-linked-record-menu aria-label="더보기" title="더보기">
+              <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+            </button>
+            <span class="linked-record-dropdown" data-linked-record-dropdown hidden>
+              <button type="button" data-linked-record-detail="${recordIndex}">상세 보기</button>
+              <button type="button" data-diary-unlink-record>삭제</button>
+            </span>
+          </span>
         </span>
       </div>
       <p class="meta">${record.date} · ${record.place || "장소 없음"} · ${record.type || "일상"}</p>
@@ -10549,6 +10559,41 @@ function duariBindDiaryEditor(args = {}) {
   qs("[data-duari-new-record]", sheet)?.addEventListener("click", () => {
     const draft = duariCurrentDiaryDraft(args);
     openMemoryCreatePage(() => renderDiaryEditor({ heading: draft.heading, diary: draft, linkedMemoryIndex: draft.linkedMemoryIndex, backAction: draft.backAction }));
+  });
+  sheet.addEventListener("click", (event) => {
+    const menuButton = event.target.closest("[data-linked-record-menu]");
+    if (menuButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const menu = menuButton.closest(".linked-record-menu-wrap")?.querySelector("[data-linked-record-dropdown]");
+      const willOpen = !!menu?.hidden;
+      qsa("[data-linked-record-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-linked-record-menu]", sheet).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        menuButton.classList.add("active");
+      }
+      return;
+    }
+
+    const detailButton = event.target.closest("[data-linked-record-detail]");
+    if (detailButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      qsa("[data-linked-record-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      const draft = duariCurrentDiaryDraft(args);
+      const index = Number(detailButton.dataset.linkedRecordDetail || draft.linkedMemoryIndex || 0);
+      openRecordPickerDetail(index, draft);
+      return;
+    }
+
+    const unlinkButton = event.target.closest("[data-diary-unlink-record]");
+    if (unlinkButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      qsa("[data-linked-record-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      openDiaryUnlinkDeleteConfirmOverlay?.(args.backAction || diaryEditorFlowBackAction);
+    }
   });
   qs("[data-duari-ai-message]", sheet)?.addEventListener("click", () => {
     duariDiaryAiDraft = duariCurrentDiaryDraft(args);
