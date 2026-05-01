@@ -1192,9 +1192,8 @@ h3 {
 
 .photo-detail-viewer {
   align-items: center;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  display: block;
+  position: relative;
 }
 
 .photo-detail-image {
@@ -1207,7 +1206,9 @@ h3 {
   box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
   display: flex;
   justify-content: center;
-  min-height: 360px;
+  max-height: min(300px, calc(100vh - 280px));
+  min-height: 220px;
+  width: 100%;
   overflow: hidden;
   position: relative;
 }
@@ -1261,7 +1262,19 @@ h3 {
   height: 34px;
   justify-content: center;
   padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   width: 34px;
+  z-index: 2;
+}
+
+.photo-detail-chevron[data-photo-prev] {
+  left: 10px;
+}
+
+.photo-detail-chevron[data-photo-next] {
+  right: 10px;
 }
 
 .photo-detail-chevron:disabled {
