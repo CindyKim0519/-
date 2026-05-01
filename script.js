@@ -33,7 +33,7 @@ const state = {
   ],
 };
 
-const titles = { home: "홈", album: "앨범", diary: "다이어리", questions: "질문", my: "마이" };
+const titles = { home: "홈", album: "기록", diary: "일기", questions: "질문", my: "마이" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
