@@ -1,0 +1,77 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>듀아리 Duari</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="app-frame" aria-label="Duari app prototype">
+    <section id="onboarding" class="onboarding is-visible">
+      <div class="brand-mark">D</div>
+      <p class="eyebrow">Duo + Diary</p>
+      <h1>듀아리</h1>
+      <div class="onboarding-card" id="onboardingCard"></div>
+      <div class="dots" id="onboardingDots"></div>
+      <div class="login-grid">
+        <button class="ghost-btn" data-provider="E" aria-label="이메일 로그인">이메일</button>
+        <button class="ghost-btn kakao" data-provider="K" aria-label="카카오 로그인">카카오</button>
+        <button class="ghost-btn" data-provider="A" aria-label="애플 로그인">Apple</button>
+        <button class="ghost-btn" data-provider="G" aria-label="구글 로그인">Google</button>
+      </div>
+      <button class="primary-btn full" id="startApp">닉네임/PIN 설정 후 시작</button>
+      <p class="tiny-note">사진 권한은 온보딩에서, 알림 권한은 커플 연결 완료 후 요청합니다.</p>
+    </section>
+
+    <section id="app" class="app is-hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="relationshipKicker">현재 관계</p>
+          <h2 id="screenTitle">홈</h2>
+        </div>
+        <button class="icon-btn" id="openNotifications" aria-label="알림">알림</button>
+      </header>
+
+      <section id="home" class="screen active"></section>
+      <section id="album" class="screen"></section>
+      <section id="diary" class="screen"></section>
+      <section id="questions" class="screen"></section>
+      <section id="my" class="screen"></section>
+
+      <nav class="bottom-nav" aria-label="하단 탭">
+        <button class="nav-item active" data-tab="home"><span>⌂</span>홈</button>
+        <button class="nav-item" data-tab="album"><span>▧</span>앨범</button>
+        <button class="nav-item" data-tab="diary"><span>✎</span>다이어리</button>
+        <button class="nav-item" data-tab="questions"><span>?</span>질문</button>
+        <button class="nav-item" data-tab="my"><span>☰</span>마이</button>
+      </nav>
+    </section>
+  </main>
+
+  <aside class="desktop-panel">
+    <p class="eyebrow">Prototype Map</p>
+    <h2>기획서 v1 반영</h2>
+    <p>하단 탭과 주요 플로우를 빠르게 눌러보며 MVP 범위를 확인할 수 있는 HTML 프로토타입입니다.</p>
+    <ul>
+      <li>혼자/연결 상태 전환</li>
+      <li>우리 기록 작성 및 상세</li>
+      <li>앨범 보기 방식 전환</li>
+      <li>개인/공유 다이어리</li>
+      <li>질문 답변과 AI 정제</li>
+      <li>관계 관리, PIN, 보관함 정책</li>
+    </ul>
+  </aside>
+
+  <div id="modal" class="modal" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
