@@ -785,6 +785,37 @@ h3 {
   width: 100%;
 }
 
+.album-filter-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.album-record-toolbar .primary-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.album-record-list .memory-card {
+  align-items: center;
+}
+
+.album-record-list .memory-card > div:last-child {
+  align-self: center;
+}
+
+.record-pagination {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.record-pagination .chip-btn {
+  justify-content: center;
+  width: 100%;
+}
+
 .photo-stack {
   background: var(--color-gray-100);
   border: 0;

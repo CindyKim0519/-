@@ -11076,6 +11076,93 @@ openModal = function openModalWithTwoButtonRows(html) {
   duariNormalizeTwoButtonRows(qs("#modal"));
 };
 
+function renderAlbum() {
+  const album = qs("#album");
+  const views = ["record", "photo", "calendar"];
+  const labels = { record: "기록", photo: "사진", calendar: "캘린더" };
+  const currentView = views.includes(state.albumView) ? state.albumView : "record";
+  const recordCount = state.memories.length;
+  const recordTypes = [...new Set(state.memories.map((memory) => memory.type).filter(Boolean))];
+  state.albumView = currentView;
+
+  let content = "";
+  if (currentView === "record") {
+    content = `
+      <div class="album-record-toolbar">
+        <div class="between">
+          <span class="meta">총 ${recordCount}개 기록</span>
+          <button class="primary-btn" type="button" data-action="new-memory">새 기록 추가</button>
+        </div>
+      </div>
+      <div class="list album-record-list">${memoryCards(state.memories)}</div>
+      <nav class="record-pagination" aria-label="기록 페이지">
+        <button class="chip-btn" type="button" disabled>이전</button>
+        <span class="meta">1 / 1</span>
+        <button class="chip-btn" type="button" disabled>다음</button>
+      </nav>
+    `;
+  }
+  if (currentView === "photo") {
+    content = `
+      <section class="card">
+        <h3>사진 중심 보기</h3>
+        <p>사진은 기록 단위로 연결되며, 선택 순서 변경과 추가/삭제 정책은 기록 상세에서 관리합니다.</p>
+      </section>
+      <div class="quick-grid">
+        ${Array.from({ length: 6 }, (_, index) => `<button class="photo-stack" data-action="photo-detail" aria-label="${index + 1}번째 사진"></button>`).join("")}
+      </div>
+    `;
+  }
+  if (currentView === "calendar") {
+    content = `
+      <div class="calendar-grid">
+        ${Array.from({ length: 28 }, (_, index) => {
+          const day = index + 1;
+          const cls = day === 21 ? "today" : day === 26 ? "selected" : "";
+          const mark = day === 21 ? "대화" : day === 26 ? "데이트+1" : "";
+          return `<div class="day ${cls}" aria-label="4월 ${day}일"><span>${day}</span><small>${mark}</small></div>`;
+        }).join("")}
+      </div>
+      <div class="list" style="margin-top:12px">${memoryCards(state.memories.slice(0, 1))}</div>
+    `;
+  }
+
+  album.innerHTML = `
+    <div class="section-stack">
+      <div class="tabs">
+        ${views.map((view) => `<button class="chip-btn ${currentView === view ? "active" : ""}" type="button" data-album-view="${view}">${labels[view]}</button>`).join("")}
+      </div>
+      <div class="form-field">
+        <label for="albumSearch">기록 검색</label>
+        <input id="albumSearch" placeholder="제목, 장소, 기록 유형" />
+      </div>
+      ${currentView === "record" ? `
+        <div class="album-filter-grid">
+          <div class="form-field">
+            <label for="albumDateFilter">날짜</label>
+            <input id="albumDateFilter" type="date" />
+          </div>
+          <div class="form-field">
+            <label for="albumTypeFilter">기록 유형</label>
+            <select id="albumTypeFilter">
+              <option>전체</option>
+              ${recordTypes.map((type) => `<option>${type}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      ` : ""}
+      ${content}
+    </div>
+  `;
+  qsa("[data-album-view]", album).forEach((button) => {
+    button.addEventListener("click", () => {
+      state.albumView = button.dataset.albumView;
+      renderAlbum();
+    });
+  });
+  bindActions(album);
+}
+
 function openQuestionModal() {
   duariQuestionAnswerDraft.question = duariCurrentQuestionText();
   const activeTab = qs(".screen.active")?.id || state.tab || "home";
