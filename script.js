@@ -10510,7 +10510,6 @@ function duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex) {
           </span>
         </span>
       </div>
-      <p class="meta">${record.date} · ${record.place || "장소 없음"} · ${record.type || "일상"}</p>
     </article>
   ` : `<p class="linked-record-empty">연결된 기록이 없습니다.</p>`;
 
@@ -10583,7 +10582,12 @@ function duariBindDiaryEditor(args = {}) {
       qsa("[data-linked-record-dropdown]", sheet).forEach((item) => { item.hidden = true; });
       const draft = duariCurrentDiaryDraft(args);
       const index = Number(detailButton.dataset.linkedRecordDetail || draft.linkedMemoryIndex || 0);
-      openRecordPickerDetail(index, draft);
+      openMemoryDetailLatestV3(index, () => renderDiaryEditor({
+        heading: draft.heading,
+        diary: draft,
+        linkedMemoryIndex: draft.linkedMemoryIndex,
+        backAction: draft.backAction
+      }));
       return;
     }
 
