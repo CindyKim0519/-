@@ -658,6 +658,10 @@ h3 {
   gap: 12px;
 }
 
+.home-shared-diary-section .linked-diary-list {
+  margin-top: 0;
+}
+
 .home-shared-diary-card .tag-row {
   margin-top: 0;
 }
