@@ -11081,8 +11081,7 @@ function renderAlbum() {
   const views = ["record", "photo", "calendar"];
   const labels = { record: "기록", photo: "사진", calendar: "캘린더" };
   const currentView = views.includes(state.albumView) ? state.albumView : "record";
-  const recordCount = state.memories.length;
-  const recordTypes = [...new Set(state.memories.map((memory) => memory.type).filter(Boolean))];
+  const recordTypes = ["데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
   state.albumView = currentView;
 
   let content = "";
@@ -11090,15 +11089,15 @@ function renderAlbum() {
     content = `
       <div class="album-record-toolbar">
         <div class="between">
-          <span class="meta">총 ${recordCount}개 기록</span>
+          <span class="meta" data-record-count>총 ${state.memories.length}개</span>
           <button class="primary-btn" type="button" data-action="new-memory">새 기록 추가</button>
         </div>
       </div>
-      <div class="list album-record-list">${memoryCards(state.memories)}</div>
+      <div class="list album-record-list" data-album-record-list>${memoryCards(state.memories)}</div>
       <nav class="record-pagination" aria-label="기록 페이지">
-        <button class="chip-btn" type="button" disabled>이전</button>
+        <button class="chip-btn icon-only" type="button" disabled aria-label="이전">‹</button>
         <span class="meta">1 / 1</span>
-        <button class="chip-btn" type="button" disabled>다음</button>
+        <button class="chip-btn icon-only" type="button" disabled aria-label="다음">›</button>
       </nav>
     `;
   }
@@ -11160,6 +11159,30 @@ function renderAlbum() {
       renderAlbum();
     });
   });
+  if (currentView === "record") {
+    const searchInput = qs("#albumSearch", album);
+    const dateInput = qs("#albumDateFilter", album);
+    const typeSelect = qs("#albumTypeFilter", album);
+    const recordList = qs("[data-album-record-list]", album);
+    const countLabel = qs("[data-record-count]", album);
+    const applyRecordFilters = () => {
+      const query = (searchInput?.value || "").trim().toLowerCase();
+      const selectedDate = dateInput?.value || "";
+      const selectedType = typeSelect?.value || "전체";
+      const filtered = state.memories.filter((memory) => {
+        const matchesQuery = !query || [memory.title, memory.place, memory.type].some((value) => String(value || "").toLowerCase().includes(query));
+        const matchesDate = !selectedDate || toDateInputValue(memory.date) === selectedDate;
+        const matchesType = selectedType === "전체" || memory.type === selectedType;
+        return matchesQuery && matchesDate && matchesType;
+      });
+      recordList.innerHTML = filtered.length ? memoryCards(filtered) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`;
+      countLabel.textContent = `총 ${filtered.length}개`;
+    };
+    [searchInput, dateInput, typeSelect].forEach((input) => {
+      input?.addEventListener("input", applyRecordFilters);
+      input?.addEventListener("change", applyRecordFilters);
+    });
+  }
   bindActions(album);
 }
 
