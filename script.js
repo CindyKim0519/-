@@ -43,11 +43,11 @@ function qsa(selector, root = document) {
   return [...root.querySelectorAll(selector)];
 }
 
-function memoryPhotoScrollerLatest(count = 7) {
+function memoryPhotoScrollerLatest(count = 7, memoryIndex = Number(state.activeMemoryIndex) || 0) {
   return Array.from({ length: count }, (_, index) => `
-    <div class="memory-photo-slide" aria-label="${index + 1}번째 사진">
+    <button class="memory-photo-slide" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${index}" data-photo-back="memory" aria-label="${index + 1}번째 사진">
       <span>${index + 1}/${count}</span>
-    </div>
+    </button>
   `).join("");
 }
 
@@ -10034,7 +10034,7 @@ function openMemoryDetailLatestV3(index, backAction = null) {
       <div class="section-stack">
         <section class="memory-photo-gallery" aria-label="사진 영역">
           <div class="memory-photo-main">
-            <div class="memory-photo-scroll">${memoryPhotoScrollerLatest(7)}</div>
+            <div class="memory-photo-scroll">${memoryPhotoScrollerLatest(7, safeIndex)}</div>
           </div>
         </section>
         <section class="card">
@@ -11420,9 +11420,18 @@ function openPhotoDetail(trigger = null) {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-photo-detail-back]")?.addEventListener("click", closeModal);
-  qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1) } }));
-  qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1) } }));
+  const backTarget = trigger?.dataset?.photoBack || state.photoDetailBackTarget || "";
+  state.photoDetailBackTarget = backTarget;
+  const goBack = () => {
+    if (backTarget === "memory") {
+      openMemoryDetailLatestV3(memoryIndex);
+      return;
+    }
+    closeModal();
+  };
+  qs("[data-photo-detail-back]")?.addEventListener("click", goBack);
+  qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1), photoBack: backTarget } }));
+  qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1), photoBack: backTarget } }));
   bindActions(qs("#modal"));
 }
 
