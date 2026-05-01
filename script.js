@@ -11055,6 +11055,29 @@ function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {
   });
 }
 
+const DUARI_ALBUM_RECORD_PAGE_SIZE = 10;
+
+function duariAlbumRecordPageInfo(memories = state.memories) {
+  const totalPages = Math.max(1, Math.ceil(memories.length / DUARI_ALBUM_RECORD_PAGE_SIZE));
+  const currentPage = Math.min(Math.max(Number(state.albumRecordPage) || 1, 1), totalPages);
+  const start = (currentPage - 1) * DUARI_ALBUM_RECORD_PAGE_SIZE;
+  state.albumRecordPage = currentPage;
+  return {
+    currentPage,
+    totalPages,
+    pageMemories: memories.slice(start, start + DUARI_ALBUM_RECORD_PAGE_SIZE)
+  };
+}
+
+function renderAlbumRecordPage(memories = state.memories) {
+  const { currentPage, totalPages, pageMemories } = duariAlbumRecordPageInfo(memories);
+  return {
+    html: pageMemories.length ? memoryCards(pageMemories) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`,
+    currentPage,
+    totalPages
+  };
+}
+
 function renderAlbumPhotoGroups(memories = state.memories) {
   if (!memories.length) return `<p class="linked-record-empty">조건에 맞는 사진이 없습니다.</p>`;
   const groups = memories.reduce((acc, memory) => {
@@ -11235,6 +11258,7 @@ function renderAlbum() {
 
   let content = "";
   if (currentView === "record") {
+    const recordPage = renderAlbumRecordPage(state.memories);
     content = `
       <div class="album-record-toolbar">
         <div class="between">
@@ -11242,11 +11266,11 @@ function renderAlbum() {
           <button class="primary-btn" type="button" data-action="new-memory">새 기록 추가</button>
         </div>
       </div>
-      <div class="list album-record-list" data-album-record-list>${memoryCards(state.memories)}</div>
+      <div class="list album-record-list" data-album-record-list>${recordPage.html}</div>
       <nav class="record-pagination" aria-label="기록 페이지">
-        <button class="chip-btn icon-only" type="button" disabled aria-label="이전">‹</button>
-        <span class="meta">1 / 1</span>
-        <button class="chip-btn icon-only" type="button" disabled aria-label="다음">›</button>
+        <button class="chip-btn icon-only" type="button" data-record-page-prev ${recordPage.currentPage <= 1 ? "disabled" : ""} aria-label="이전">‹</button>
+        <span class="meta" data-record-page-label>${recordPage.currentPage} / ${recordPage.totalPages}</span>
+        <button class="chip-btn icon-only" type="button" data-record-page-next ${recordPage.currentPage >= recordPage.totalPages ? "disabled" : ""} aria-label="다음">›</button>
       </nav>
     `;
   }
@@ -11301,17 +11325,25 @@ function renderAlbum() {
     const searchInput = qs("#albumSearch", album);
     const dateInput = qs("#albumDateFilter", album);
     const typeSelect = qs("#albumTypeFilter", album);
+    let filteredRecords = state.memories;
+    const renderRecordPagination = (filtered) => {
+      const recordPage = renderAlbumRecordPage(filtered);
+      qs("[data-album-record-list]", album).innerHTML = recordPage.html;
+      qs("[data-record-count]", album).textContent = `총 ${filtered.length}개`;
+      qs("[data-record-page-label]", album).textContent = `${recordPage.currentPage} / ${recordPage.totalPages}`;
+      qs("[data-record-page-prev]", album).disabled = recordPage.currentPage <= 1;
+      qs("[data-record-page-next]", album).disabled = recordPage.currentPage >= recordPage.totalPages;
+    };
     const applyFilters = () => {
       const filtered = duariAlbumFilterMemories({
         query: searchInput?.value,
         date: dateInput?.value,
         type: typeSelect?.value || "전체"
       });
+      filteredRecords = filtered;
       if (currentView === "record") {
-        const recordList = qs("[data-album-record-list]", album);
-        const countLabel = qs("[data-record-count]", album);
-        recordList.innerHTML = filtered.length ? memoryCards(filtered) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`;
-        countLabel.textContent = `총 ${filtered.length}개`;
+        state.albumRecordPage = 1;
+        renderRecordPagination(filtered);
       }
       if (currentView === "photo") {
         const totalPhotos = filtered.reduce((sum, memory) => sum + (state.memories.indexOf(memory) === 0 ? 7 : 4), 0);
@@ -11322,6 +11354,16 @@ function renderAlbum() {
     [searchInput, dateInput, typeSelect].forEach((input) => {
       input?.addEventListener("input", applyFilters);
       input?.addEventListener("change", applyFilters);
+    });
+    qs("[data-record-page-prev]", album)?.addEventListener("click", () => {
+      state.albumRecordPage = (Number(state.albumRecordPage) || 1) - 1;
+      renderRecordPagination(filteredRecords);
+      bindActions(album);
+    });
+    qs("[data-record-page-next]", album)?.addEventListener("click", () => {
+      state.albumRecordPage = (Number(state.albumRecordPage) || 1) + 1;
+      renderRecordPagination(filteredRecords);
+      bindActions(album);
     });
   }
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
