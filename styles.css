@@ -1235,21 +1235,6 @@ h3 {
   width: 22%;
 }
 
-.photo-detail-image span {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.88);
-  border-radius: var(--radius-pill);
-  color: var(--color-gray-800);
-  display: inline-flex;
-  font-size: 18px;
-  font-weight: 800;
-  height: 38px;
-  justify-content: center;
-  position: relative;
-  width: 38px;
-  z-index: 1;
-}
-
 .photo-detail-chevron {
   align-items: center;
   background: var(--color-white);
@@ -1288,6 +1273,47 @@ h3 {
   line-height: var(--line-height-sm);
   margin: -2px 0 0;
   text-align: center;
+}
+
+.photo-delete-overlay {
+  align-items: center;
+  background: rgba(48, 48, 48, 0.32);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 30;
+}
+
+.photo-delete-sheet {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  gap: 12px;
+  max-width: 335px;
+  padding: 18px;
+  width: 100%;
+}
+
+.photo-delete-sheet h3 {
+  margin: 0;
+  text-align: center;
+}
+
+.photo-delete-sheet p {
+  color: var(--text-body);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-md);
+  margin: 0;
+  text-align: center;
+}
+
+.photo-delete-sheet .primary-btn:disabled {
+  background: var(--color-gray-200);
+  border-color: var(--color-gray-200);
+  color: var(--text-secondary);
 }
 
 .day {

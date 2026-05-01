@@ -1758,7 +1758,7 @@ function handleAction(action, element) {
     "share-consent-requested": openShareConsentRequestedModal,
     "share-consent-complete": openShareConsentCompleteModal,
     "hide-photo-confirm": () => openConfirmModal("사진 숨김", "숨김은 내 화면에서만 적용되고 상대에게 알림이 가지 않습니다.", "숨기기", () => showToast("사진을 숨겼어요. 되돌리기")),
-    "delete-photo-confirm": () => openConfirmModal("사진 삭제", "내가 올린 사진만 삭제할 수 있고, 삭제하면 양쪽에서 사라집니다. 복구할 수 없습니다.", "삭제하기", () => showToast("사진 삭제 확인 흐름을 완료했어요.")),
+    "delete-photo-confirm": openPhotoDeleteConfirm,
     "restore-photo-confirm": () => openConfirmModal("사진 복구", "숨긴 사진을 다시 앨범과 기록 상세에 표시합니다.", "복구하기", () => showToast("숨긴 사진을 복구했어요.")),
     "hide-message-confirm": () => openConfirmModal("메시지 숨김", "숨김은 내 화면에서만 적용됩니다. 상대 화면에서는 그대로 유지돼요.", "숨기기", () => showToast("메시지를 내 화면에서 숨겼어요.")),
     "delete-message-confirm": () => openConfirmModal("메시지 삭제", "작성자만 양쪽 삭제를 할 수 있습니다. 삭제 후에는 복구할 수 없습니다.", "양쪽에서 삭제", () => showToast("메시지 삭제 확인 흐름을 완료했어요.")),
@@ -1777,7 +1777,7 @@ function handleAction(action, element) {
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": openConnectModal,
     "add-anniversary": () => showToast("직접 기념일을 추가했어요. D-7과 D-day 알림을 사용할 수 있어요."),
-    "download-photo": () => showToast("사진 다운로드를 시작했어요. 다운로드 알림은 보내지 않습니다."),
+    "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
       if (!element.classList.contains("chip-btn")) {
@@ -11408,9 +11408,7 @@ function openPhotoDetail(trigger = null) {
       <div class="section-stack">
         <section class="photo-detail-viewer" aria-label="${memory.title} 사진 ${photoIndex + 1}">
           <button class="photo-detail-chevron" type="button" data-photo-prev ${photoIndex <= 0 ? "disabled" : ""} aria-label="이전 사진">‹</button>
-          <div class="photo-detail-image">
-            <span>${photoIndex + 1}</span>
-          </div>
+          <div class="photo-detail-image"></div>
           <button class="photo-detail-chevron" type="button" data-photo-next ${photoIndex >= photoCount - 1 ? "disabled" : ""} aria-label="다음 사진">›</button>
         </section>
         <p class="photo-detail-count">${photoIndex + 1} / ${photoCount}</p>
@@ -11426,6 +11424,46 @@ function openPhotoDetail(trigger = null) {
   qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1) } }));
   qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1) } }));
   bindActions(qs("#modal"));
+}
+
+function duariPhotoIsMine(memoryIndex, photoIndex) {
+  const photoCount = duariPhotoCountForMemory(memoryIndex);
+  return Number(photoIndex) < Math.ceil(photoCount / 2);
+}
+
+function openPhotoDeleteConfirm() {
+  const modal = qs("#modal");
+  const inPhotoDetail = qs(".photo-detail-page", modal);
+  if (!inPhotoDetail) {
+    openConfirmModal("사진 삭제", "작성자가 올린 사진이면 삭제하면 양쪽에서 사라집니다.", "삭제", () => showToast("사진을 삭제했어요."));
+    return;
+  }
+
+  const memoryIndex = Number(state.activeMemoryIndex) || 0;
+  const photoIndex = Number(state.activePhotoIndex) || 0;
+  const isMine = duariPhotoIsMine(memoryIndex, photoIndex);
+  const existing = qs(".photo-delete-overlay", modal);
+  if (existing) existing.remove();
+
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="photo-delete-overlay" role="dialog" aria-modal="true">
+      <section class="photo-delete-sheet">
+        <h3>사진을 삭제할까요?</h3>
+        <p>${isMine ? "작성자가 올린 사진이면 삭제하면 양쪽에서 사라집니다." : "이 사진은 상대방이 올린 사진이어서 삭제할 수 없습니다."}</p>
+        <div class="inline-action-pair">
+          <button class="ghost-btn" type="button" data-photo-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-photo-delete-confirm ${isMine ? "" : "disabled"}>삭제</button>
+        </div>
+      </section>
+    </div>
+  `);
+
+  qs("[data-photo-delete-cancel]", modal)?.addEventListener("click", () => qs(".photo-delete-overlay", modal)?.remove());
+  qs("[data-photo-delete-confirm]", modal)?.addEventListener("click", () => {
+    qs(".photo-delete-overlay", modal)?.remove();
+    closeModal();
+    showToast("사진을 삭제했어요.");
+  });
 }
 
 function openQuestionModal() {
