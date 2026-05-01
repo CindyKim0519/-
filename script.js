@@ -10137,7 +10137,7 @@ function renderHome() {
         <section class="diary-card">
           <h3>최근 공유 일기</h3>
           <p>연결 전에는 공유 일기를 사용할 수 없어요.</p>
-          <button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button>
+          <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
         </section>
         <section class="question-card">
           <p class="eyebrow">오늘의 질문</p>
@@ -10160,7 +10160,7 @@ function renderHome() {
         <div class="between">
           <div>
             <p class="relationship-name">봄이 & 하린</p>
-            <h3>함께한 지 421일</h3>
+            <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">421</strong><span>일</span></h3>
           </div>
           <span class="anniversary-pill">D-7 여행 1주년</span>
         </div>
@@ -10179,7 +10179,7 @@ function renderHome() {
           <span class="reaction-icon" aria-label="고마워 반응">♡</span>
         </div>
         <p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p>
-        <button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button>
+        <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
       </section>
       <section class="question-card">
         <p class="eyebrow">오늘의 질문</p>

@@ -639,6 +639,20 @@ h3 {
   margin: 0 0 2px;
 }
 
+.together-days {
+  align-items: baseline;
+  display: inline-flex;
+  font-weight: 400;
+  gap: 2px;
+}
+
+.together-days-number {
+  color: var(--accent-primary);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 30px;
+}
+
 .home-hero .between {
   align-items: flex-start;
 }
