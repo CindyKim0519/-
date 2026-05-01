@@ -1743,7 +1743,7 @@ function handleAction(action, element) {
     "new-diary": openDiaryModal,
     "diary-scope-first": openDiaryScopeModal,
     "memory-detail": () => openMemoryDetailLatestV3(Number(element.dataset.index || 0)),
-    "photo-detail": openPhotoDetail,
+    "photo-detail": () => openPhotoDetail(element),
     "diary-detail": openDiaryDetail,
     "answer-question": openQuestionModal,
     "ai-message": openAiModal,
@@ -11095,7 +11095,8 @@ function renderAlbumPhotoGroups(memories = state.memories) {
           <span class="meta">${groupPhotoCount}장</span>
         </div>
         ${groupMemories.map((memory) => {
-          const photoCount = state.memories.indexOf(memory) === 0 ? 7 : 4;
+          const memoryIndex = state.memories.indexOf(memory);
+          const photoCount = memoryIndex === 0 ? 7 : 4;
           return `
             <div class="album-photo-record-group">
               <div class="album-photo-record-head">
@@ -11107,7 +11108,7 @@ function renderAlbumPhotoGroups(memories = state.memories) {
               </div>
               <div class="album-photo-grid">
                 ${Array.from({ length: photoCount }, (_, photoIndex) => `
-                  <button class="album-photo-thumb" type="button" data-action="photo-detail" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
+                  <button class="album-photo-thumb" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${photoIndex}" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
                     <span>${photoIndex + 1}</span>
                   </button>
                 `).join("")}
@@ -11381,6 +11382,56 @@ function renderAlbum() {
     });
   });
   bindActions(album);
+}
+
+function duariPhotoCountForMemory(index) {
+  return Number(index) === 0 ? 7 : 4;
+}
+
+function openPhotoDetail(trigger = null) {
+  const requestedMemoryIndex = Number(trigger?.dataset?.memoryIndex);
+  const requestedPhotoIndex = Number(trigger?.dataset?.photoIndex);
+  const memoryIndex = Number.isFinite(requestedMemoryIndex) ? requestedMemoryIndex : Number(state.activeMemoryIndex) || 0;
+  const photoCount = duariPhotoCountForMemory(memoryIndex);
+  const photoIndex = Math.min(Math.max(Number.isFinite(requestedPhotoIndex) ? requestedPhotoIndex : Number(state.activePhotoIndex) || 0, 0), photoCount - 1);
+  const memory = state.memories[memoryIndex] || state.memories[0];
+  state.activeMemoryIndex = memoryIndex;
+  state.activePhotoIndex = photoIndex;
+
+  openModal(`
+    <div class="modal-sheet notification-page photo-detail-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" type="button" data-photo-detail-back aria-label="뒤로가기">←</button>
+        <h3>사진 상세</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="photo-detail-viewer" aria-label="${memory.title} 사진 ${photoIndex + 1}">
+          <button class="photo-detail-chevron" type="button" data-photo-prev ${photoIndex <= 0 ? "disabled" : ""} aria-label="이전 사진">‹</button>
+          <div class="photo-detail-image">
+            <span>${photoIndex + 1}</span>
+          </div>
+          <button class="photo-detail-chevron" type="button" data-photo-next ${photoIndex >= photoCount - 1 ? "disabled" : ""} aria-label="다음 사진">›</button>
+        </section>
+        <section class="card photo-detail-meta">
+          <div class="between">
+            <strong>${memory.title}</strong>
+            <span class="meta">${photoIndex + 1} / ${photoCount}</span>
+          </div>
+          <p class="meta">${memory.date} · ${memory.place}</p>
+        </section>
+        <div class="inline-action-pair">
+          <button class="ghost-btn" type="button" data-action="download-photo">다운로드</button>
+          <button class="primary-btn" type="button" data-action="delete-photo-confirm">사진 삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-photo-detail-back]")?.addEventListener("click", closeModal);
+  qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1) } }));
+  qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1) } }));
+  bindActions(qs("#modal"));
 }
 
 function openQuestionModal() {
