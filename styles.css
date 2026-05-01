@@ -634,7 +634,7 @@ h3 {
 .relationship-name {
   color: var(--text-primary);
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 26px;
   margin: 0 0 2px;
 }
@@ -642,14 +642,14 @@ h3 {
 .together-days {
   align-items: baseline;
   display: inline-flex;
-  font-weight: 700;
+  font-weight: 400;
   gap: 2px;
 }
 
 .together-days-number {
   color: var(--accent-primary);
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 30px;
 }
 
