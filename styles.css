@@ -804,6 +804,14 @@ h3 {
   align-self: center;
 }
 
+.selected-calendar-records .memory-card {
+  align-items: center;
+}
+
+.selected-calendar-records .memory-card > div:last-child {
+  align-self: center;
+}
+
 .record-pagination {
   align-items: center;
   display: grid;
