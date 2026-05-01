@@ -775,8 +775,14 @@ h3 {
 .home-question-actions {
   display: grid;
   gap: 10px;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 14px;
+}
+
+.home-question-actions .primary-btn,
+.home-question-actions .ghost-btn {
+  min-width: 0;
+  width: 100%;
 }
 
 .photo-stack {
