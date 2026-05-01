@@ -72,6 +72,61 @@
   <div id="modal" class="modal" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script>
+    window.__duariFinalRecordFlowGuard = true;
+    window.__duariFinalAlbumAndRecordRestore = true;
+  </script>
   <script src="script.js"></script>
+  <script>
+    (() => {
+      if (window.__duariRecordDetailRouter) return;
+      window.__duariRecordDetailRouter = true;
+
+      const getRecordIndex = (card) => {
+        const raw = card?.dataset?.memoryOpen ?? card?.dataset?.index ?? "0";
+        const index = Number(raw);
+        return Number.isFinite(index) ? index : 0;
+      };
+
+      const openRecordDetail = (card) => {
+        if (!card || typeof openMemoryDetailLatestV3 !== "function") return;
+        const index = getRecordIndex(card);
+        const sourceTab = card.closest(".screen")?.id || "home";
+        openMemoryDetailLatestV3(index, () => {
+          if (typeof closeModal === "function") closeModal();
+          if (typeof setTab === "function") setTab(sourceTab === "album" ? "album" : "home");
+        });
+      };
+
+      window.addEventListener("click", (event) => {
+        const albumTab = event.target.closest?.("#album [data-album-view]");
+        if (albumTab) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          if (typeof state !== "undefined") state.albumView = albumTab.dataset.albumView || albumTab.dataset.view || "record";
+          if (typeof renderAlbum === "function") renderAlbum();
+          return;
+        }
+
+        const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
+        if (!card) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        openRecordDetail(card);
+      }, true);
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
+        if (!card) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        openRecordDetail(card);
+      }, true);
+    })();
+  </script>
 </body>
 </html>
