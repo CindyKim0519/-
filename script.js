@@ -10201,7 +10201,7 @@ window.setTimeout(() => {
 }, 0);
 
 // Final interaction guard: preserve existing page flows while preventing older handlers from stealing clicks.
-if (false && !window.__duariFinalRecordFlowGuard) {
+if (!window.__duariFinalRecordFlowGuard) {
   window.__duariFinalRecordFlowGuard = true;
 
   const duariOpenRecordFromCard = (card) => {
@@ -10343,7 +10343,7 @@ function duariOpenRecordCardWithExistingFlow(card) {
   });
 }
 
-if (false && !window.__duariFinalAlbumAndRecordRestore) {
+if (!window.__duariFinalAlbumAndRecordRestore) {
   window.__duariFinalAlbumAndRecordRestore = true;
   window.addEventListener("click", (event) => {
     const albumTab = event.target.closest?.("#album [data-album-view]");
@@ -10446,49 +10446,6 @@ window.setTimeout(() => {
   if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
   if ((qs(".screen.active")?.id || state.tab) === "album") renderAlbum();
 }, 0);
-
-// Stable final record click routing. Keep this after all render/detail overrides.
-if (!window.__duariStableRecordClickRouting) {
-  window.__duariStableRecordClickRouting = true;
-  window.addEventListener("click", (event) => {
-    const albumTab = event.target.closest?.("#album [data-album-view]");
-    if (albumTab) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      state.albumView = albumTab.dataset.albumView || "record";
-      renderAlbum();
-      return;
-    }
-
-    const card = event.target.closest?.(".memory-card, [data-memory-open]");
-    if (!card || !card.closest("#home, #album")) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
-    const sourceTab = card.closest(".screen")?.id || state.tab || "home";
-    openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-      closeModal();
-      setTab(sourceTab === "album" ? "album" : "home");
-    });
-  }, true);
-
-  window.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest?.(".memory-card, [data-memory-open]");
-    if (!card || !card.closest("#home, #album")) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
-    const sourceTab = card.closest(".screen")?.id || state.tab || "home";
-    openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-      closeModal();
-      setTab(sourceTab === "album" ? "album" : "home");
-    });
-  }, true);
-}
 
 // Duari final diary-add AI flow.
 // Keeps the newest requested flow isolated from older generic data-action handlers.
