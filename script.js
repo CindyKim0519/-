@@ -10201,7 +10201,7 @@ window.setTimeout(() => {
 }, 0);
 
 // Final interaction guard: preserve existing page flows while preventing older handlers from stealing clicks.
-if (!window.__duariFinalRecordFlowGuard) {
+if (false && !window.__duariFinalRecordFlowGuard) {
   window.__duariFinalRecordFlowGuard = true;
 
   const duariOpenRecordFromCard = (card) => {
@@ -10343,7 +10343,7 @@ function duariOpenRecordCardWithExistingFlow(card) {
   });
 }
 
-if (!window.__duariFinalAlbumAndRecordRestore) {
+if (false && !window.__duariFinalAlbumAndRecordRestore) {
   window.__duariFinalAlbumAndRecordRestore = true;
   window.addEventListener("click", (event) => {
     const albumTab = event.target.closest?.("#album [data-album-view]");
@@ -10765,4 +10765,19 @@ if (!window.__duariDiaryAddAiFlowGuard) {
       : null;
     openDiaryModal(linkedIndex);
   }, true);
+}
+
+// Final function-level restore for existing document capture listeners.
+function openMemoryCardFromElement(card) {
+  openMemoryCardFromElementFinal(card);
+}
+
+function openMemoryCardFromElementFinal(card) {
+  if (!card) return;
+  const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
+  const sourceTab = card.closest(".screen")?.id || state.tab || "home";
+  openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
+    closeModal();
+    setTab(sourceTab === "album" ? "album" : "home");
+  });
 }
