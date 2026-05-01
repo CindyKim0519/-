@@ -10143,7 +10143,7 @@ function renderHome() {
           <p class="eyebrow">오늘의 질문</p>
           <h3>요즘 나에게 가장 힘이 되는 말은 뭐야?</h3>
           <div class="home-question-actions">
-            <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
+            <button class="primary-btn" data-action="answer-question">답변 추가</button>
             <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
           </div>
         </section>
@@ -10193,13 +10193,13 @@ function renderHome() {
           <button class="chip-btn" data-tab-go="diary">더보기</button>
         </div>
         <div class="linked-diary-list">${homeSharedDiaryCards}</div>
-        <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
+        <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
       </section>
       <section class="question-card">
         <p class="eyebrow">오늘의 질문</p>
         <h3>요즘 나에게 가장 힘이 되는 말은 뭐야?</h3>
         <div class="home-question-actions">
-          <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
+          <button class="primary-btn" data-action="answer-question">답변 추가</button>
           <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
         </div>
       </section>
