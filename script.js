@@ -10766,3 +10766,50 @@ if (!window.__duariDiaryAddAiFlowGuard) {
     openDiaryModal(linkedIndex);
   }, true);
 }
+
+// Final fix: the previous linkedDiariesLatest wrapper captured itself because
+// later function declarations are hoisted. Keep record detail flows intact by
+// sourcing linked diaries from stable defaults plus any diaries added per record.
+const duariDefaultLinkedDiaries = [
+  {
+    type: "나만 보기",
+    title: "아직 정리 중인 마음",
+    body: "그 시간에 느꼈던 마음을 천천히 적어두고 있어요.",
+    editable: true,
+    feelings: ["편안함", "고마움"],
+    partnerFeelings: [],
+    scope: "개인",
+    linked: "성수에서 보낸 오후",
+    author: "나"
+  },
+  {
+    type: "내 공유",
+    title: "오늘 고마웠던 것",
+    body: "함께 걸으면서 편하게 웃을 수 있어서 좋았어요.",
+    editable: true,
+    feelings: ["고마움", "다정함"],
+    partnerFeelings: [],
+    scope: "공유",
+    linked: "성수에서 보낸 오후",
+    author: "나"
+  },
+  {
+    type: "상대 공유",
+    title: "나도 기억하고 있어",
+    body: "네가 남긴 기록을 읽으면서 그날의 공기가 다시 떠올랐어.",
+    editable: false,
+    feelings: [],
+    partnerFeelings: ["고마움", "소중함"],
+    scope: "공유",
+    linked: "성수에서 보낸 오후",
+    author: "봄이"
+  }
+];
+
+function linkedDiariesLatest() {
+  const activeIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+  const added = typeof memoryLinkedAddedDiaries !== "undefined" ? (memoryLinkedAddedDiaries[activeIndex] || []) : [];
+  return [...added, ...duariDefaultLinkedDiaries].slice(0, 6);
+}
+
+window.linkedDiariesLatest = linkedDiariesLatest;
