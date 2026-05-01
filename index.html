@@ -73,46 +73,5 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
-  <script>
-    (() => {
-      if (window.__duariHtmlRecordRouter) return;
-      window.__duariHtmlRecordRouter = true;
-
-      const getIndex = (card) => {
-        const raw = card?.dataset?.memoryOpen ?? card?.dataset?.index ?? "0";
-        const index = Number(raw);
-        return Number.isFinite(index) ? index : 0;
-      };
-
-      const openRecord = (card) => {
-        if (!card || typeof openMemoryDetailLatestV3 !== "function") return;
-        const index = getIndex(card);
-        const sourceTab = card.closest(".screen")?.id || (typeof state !== "undefined" ? state.tab : "home") || "home";
-        openMemoryDetailLatestV3(index, () => {
-          if (typeof closeModal === "function") closeModal();
-          if (typeof setTab === "function") setTab(sourceTab === "album" ? "album" : "home");
-        });
-      };
-
-      window.addEventListener("click", (event) => {
-        const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
-        if (!card) return;
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        openRecord(card);
-      }, true);
-
-      window.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
-        if (!card) return;
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        openRecord(card);
-      }, true);
-    })();
-  </script>
 </body>
 </html>
