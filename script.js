@@ -11044,3 +11044,152 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     showToast("AI 결과를 답변 본문에 저장했어요.");
   });
 }
+
+function openQuestionModal() {
+  duariQuestionAnswerDraft.question = duariCurrentQuestionText();
+  const activeTab = qs(".screen.active")?.id || state.tab || "home";
+  openModal(`
+    <div class="modal-sheet notification-page question-answer-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
+        <h3>답변 추가</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <p class="eyebrow">오늘의 질문</p>
+          <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
+        </section>
+        <div class="form-field">
+          <label>답변</label>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="솔직하게 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+        </div>
+        <p class="meta question-delivery-note">답변은 상대방에게 전달됩니다.</p>
+        <div class="diary-editor-action-stack">
+          <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬어서 보내기</button>
+          <button class="primary-btn full" type="button" data-question-send-original>상대에게 전달하기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-question-back]")?.addEventListener("click", () => {
+    closeModal();
+    setTab(activeTab);
+  });
+  qs("#questionAnswerBody")?.addEventListener("input", (event) => {
+    duariQuestionAnswerDraft.body = event.target.value;
+  });
+  qs("[data-question-send-original]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || "";
+    openQuestionSendConfirmOverlay();
+  });
+  qs("[data-question-ai]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || "";
+    openQuestionAiSourcePage({
+      original: duariQuestionAnswerDraft.body,
+      tone: "부드럽게"
+    });
+  });
+}
+
+function openQuestionAiSourcePage({ original = "", tone = "부드럽게" } = {}) {
+  openModal(`
+    <div class="modal-sheet notification-page ai-page question-ai-source-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-ai-source-back aria-label="뒤로가기">←</button>
+        <h3>AI로 다듬기</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="tone-section">
+          <h3>톤 선택</h3>
+          <div class="chip-row" data-question-ai-tone>${aiTonePresets.map((item) => `<button class="chip-btn ${item === tone ? "active" : ""}" type="button">${item}</button>`).join("")}</div>
+        </section>
+        <div class="form-field">
+          <label>원문</label>
+          <textarea id="questionAiOriginalText" class="diary-body-large">${duariEscapeHtml(original)}</textarea>
+        </div>
+        <button class="primary-btn full" type="button" data-question-ai-generate>AI로 다듬기</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qsa("[data-question-ai-tone] .chip-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      qsa("[data-question-ai-tone] .chip-btn").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+    });
+  });
+  qs("[data-question-ai-source-back]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAiOriginalText")?.value || original;
+    openQuestionModal();
+  });
+  qs("[data-question-ai-generate]")?.addEventListener("click", () => {
+    const nextOriginal = qs("#questionAiOriginalText")?.value || "";
+    const selectedTone = qs("[data-question-ai-tone] .chip-btn.active")?.textContent.trim() || tone;
+    openQuestionAiResultPage({
+      original: nextOriginal,
+      tone: selectedTone,
+      result: makeAiResult(nextOriginal, selectedTone)
+    });
+  });
+}
+
+function openQuestionAiResultPage({ original = "", tone = "부드럽게", result = "" } = {}) {
+  const cleanResult = cleanAiResultText?.(result || makeAiResult(original, tone)) || makeAiResult(original, tone);
+  openModal(`
+    <div class="modal-sheet notification-page ai-page ai-result-page question-ai-result-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-ai-back aria-label="뒤로가기">←</button>
+        <h3>AI 결과</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>원문</h3>
+          <p class="readonly-source">${duariEscapeHtml(original)}</p>
+        </section>
+        <div class="form-field">
+          <p class="ai-field-title">AI 결과</p>
+          <textarea id="questionAiResultText" class="diary-body-large">${duariEscapeHtml(cleanResult)}</textarea>
+        </div>
+        <section class="tone-section">
+          <h3>톤 선택</h3>
+          <div class="chip-row" data-question-ai-tone>${aiTonePresets.map((item) => `<button class="chip-btn ${item === tone ? "active" : ""}" type="button">${item}</button>`).join("")}</div>
+        </section>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-question-ai-cancel>취소</button>
+          <button class="ghost-btn" type="button" data-question-ai-redraft>AI로 다시 다듬기</button>
+          <button class="primary-btn full-row" type="button" data-question-ai-apply>본문에 저장</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qsa("[data-question-ai-tone] .chip-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      qsa("[data-question-ai-tone] .chip-btn").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+    });
+  });
+  qs("[data-question-ai-back]")?.addEventListener("click", () => {
+    openQuestionAiSourcePage({ original, tone });
+  });
+  qs("[data-question-ai-cancel]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = original;
+    openQuestionModal();
+  });
+  qs("[data-question-ai-redraft]")?.addEventListener("click", () => {
+    const selectedTone = qs("[data-question-ai-tone] .chip-btn.active")?.textContent.trim() || tone;
+    const textarea = qs("#questionAiResultText");
+    if (!textarea) return;
+    textarea.value = "";
+    textarea.value = makeFreshAiRedraftFromOriginal(original, selectedTone);
+  });
+  qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
+    openQuestionModal();
+    showToast("AI 결과를 답변 본문에 저장했어요.");
+  });
+}
