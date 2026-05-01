@@ -11045,6 +11045,58 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
   });
 }
 
+function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {}) {
+  const normalizedQuery = String(query || "").trim().toLowerCase();
+  return state.memories.filter((memory) => {
+    const matchesQuery = !normalizedQuery || [memory.title, memory.place, memory.type].some((value) => String(value || "").toLowerCase().includes(normalizedQuery));
+    const matchesDate = !date || toDateInputValue(memory.date) === date;
+    const matchesType = type === "전체" || memory.type === type;
+    return matchesQuery && matchesDate && matchesType;
+  });
+}
+
+function renderAlbumPhotoGroups(memories = state.memories) {
+  if (!memories.length) return `<p class="linked-record-empty">조건에 맞는 사진이 없습니다.</p>`;
+  const groups = memories.reduce((acc, memory) => {
+    const date = memory.date || "날짜 없음";
+    if (!acc.has(date)) acc.set(date, []);
+    acc.get(date).push(memory);
+    return acc;
+  }, new Map());
+  return Array.from(groups.entries()).map(([date, groupMemories]) => {
+    const groupPhotoCount = groupMemories.reduce((sum, memory) => sum + (state.memories.indexOf(memory) === 0 ? 7 : 4), 0);
+    return `
+      <section class="album-photo-date-group">
+        <div class="album-photo-date-head">
+          <h3>${date}</h3>
+          <span class="meta">${groupPhotoCount}장</span>
+        </div>
+        ${groupMemories.map((memory) => {
+          const photoCount = state.memories.indexOf(memory) === 0 ? 7 : 4;
+          return `
+            <div class="album-photo-record-group">
+              <div class="album-photo-record-head">
+                <div>
+                  <strong>${memory.title}</strong>
+                  <p class="meta">${memory.place} · ${memory.type}</p>
+                </div>
+                <span class="linked-record-scope">${scopeLabelForRecord(memory)}</span>
+              </div>
+              <div class="album-photo-grid">
+                ${Array.from({ length: photoCount }, (_, photoIndex) => `
+                  <button class="album-photo-thumb" type="button" data-action="photo-detail" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
+                    <span>${photoIndex + 1}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }).join("");
+}
+
 function duariNormalizeTwoButtonRows(root = document) {
   qsa(".section-stack, .card, .diary-editor-action-stack, .ai-confirm-sheet", root).forEach((parent) => {
     if (parent.closest(".tabs, .chip-row, .home-question-actions, .inline-action-pair, .ai-action-grid, .record-picker-actions")) return;
@@ -11103,13 +11155,10 @@ function renderAlbum() {
   }
   if (currentView === "photo") {
     content = `
-      <section class="card">
-        <h3>사진 중심 보기</h3>
-        <p>사진은 기록 단위로 연결되며, 선택 순서 변경과 추가/삭제 정책은 기록 상세에서 관리합니다.</p>
-      </section>
-      <div class="quick-grid">
-        ${Array.from({ length: 6 }, (_, index) => `<button class="photo-stack" data-action="photo-detail" aria-label="${index + 1}번째 사진"></button>`).join("")}
+      <div class="album-photo-summary">
+        <span class="meta" data-photo-count>총 ${state.memories.reduce((sum, _memory, index) => sum + (index === 0 ? 7 : 4), 0)}장</span>
       </div>
+      <div class="album-photo-groups" data-album-photo-groups>${renderAlbumPhotoGroups(state.memories)}</div>
     `;
   }
   if (currentView === "calendar") {
@@ -11135,7 +11184,7 @@ function renderAlbum() {
         <label for="albumSearch">기록 검색</label>
         <input id="albumSearch" placeholder="제목, 장소, 기록 유형" />
       </div>
-      ${currentView === "record" ? `
+      ${currentView === "record" || currentView === "photo" ? `
         <div class="album-filter-grid">
           <div class="form-field">
             <label for="albumDateFilter">날짜</label>
@@ -11159,28 +11208,31 @@ function renderAlbum() {
       renderAlbum();
     });
   });
-  if (currentView === "record") {
+  if (currentView === "record" || currentView === "photo") {
     const searchInput = qs("#albumSearch", album);
     const dateInput = qs("#albumDateFilter", album);
     const typeSelect = qs("#albumTypeFilter", album);
-    const recordList = qs("[data-album-record-list]", album);
-    const countLabel = qs("[data-record-count]", album);
-    const applyRecordFilters = () => {
-      const query = (searchInput?.value || "").trim().toLowerCase();
-      const selectedDate = dateInput?.value || "";
-      const selectedType = typeSelect?.value || "전체";
-      const filtered = state.memories.filter((memory) => {
-        const matchesQuery = !query || [memory.title, memory.place, memory.type].some((value) => String(value || "").toLowerCase().includes(query));
-        const matchesDate = !selectedDate || toDateInputValue(memory.date) === selectedDate;
-        const matchesType = selectedType === "전체" || memory.type === selectedType;
-        return matchesQuery && matchesDate && matchesType;
+    const applyFilters = () => {
+      const filtered = duariAlbumFilterMemories({
+        query: searchInput?.value,
+        date: dateInput?.value,
+        type: typeSelect?.value || "전체"
       });
-      recordList.innerHTML = filtered.length ? memoryCards(filtered) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`;
-      countLabel.textContent = `총 ${filtered.length}개`;
+      if (currentView === "record") {
+        const recordList = qs("[data-album-record-list]", album);
+        const countLabel = qs("[data-record-count]", album);
+        recordList.innerHTML = filtered.length ? memoryCards(filtered) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`;
+        countLabel.textContent = `총 ${filtered.length}개`;
+      }
+      if (currentView === "photo") {
+        const totalPhotos = filtered.reduce((sum, memory) => sum + (state.memories.indexOf(memory) === 0 ? 7 : 4), 0);
+        qs("[data-album-photo-groups]", album).innerHTML = renderAlbumPhotoGroups(filtered);
+        qs("[data-photo-count]", album).textContent = `총 ${totalPhotos}장`;
+      }
     };
     [searchInput, dateInput, typeSelect].forEach((input) => {
-      input?.addEventListener("input", applyRecordFilters);
-      input?.addEventListener("change", applyRecordFilters);
+      input?.addEventListener("input", applyFilters);
+      input?.addEventListener("change", applyFilters);
     });
   }
   bindActions(album);

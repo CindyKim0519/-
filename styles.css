@@ -822,6 +822,127 @@ h3 {
   line-height: 1;
 }
 
+.album-photo-summary {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.album-photo-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.album-photo-date-group {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.album-photo-date-head {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.album-photo-date-head h3 {
+  font-size: 16px;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.album-photo-record-group {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xs);
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.album-photo-record-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.album-photo-record-head > div {
+  min-width: 0;
+}
+
+.album-photo-record-head strong {
+  color: var(--color-gray-900);
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-photo-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.album-photo-thumb {
+  aspect-ratio: 1;
+  background:
+    linear-gradient(135deg, rgba(255, 222, 232, 0.9), rgba(255, 248, 250, 0.95)),
+    var(--color-gray-100);
+  border: 0;
+  border-radius: var(--radius-xs);
+  box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
+  overflow: hidden;
+  position: relative;
+}
+
+.album-photo-thumb::before {
+  background: var(--color-mint-100);
+  border-radius: 50% 50% 42% 42%;
+  content: "";
+  height: 54%;
+  left: 13%;
+  position: absolute;
+  top: 24%;
+  width: 58%;
+}
+
+.album-photo-thumb::after {
+  background: var(--accent-primary);
+  border-radius: var(--radius-pill);
+  bottom: 12%;
+  content: "";
+  height: 22%;
+  position: absolute;
+  right: 12%;
+  width: 22%;
+}
+
+.album-photo-thumb span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: var(--radius-pill);
+  color: var(--color-gray-700);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  height: 22px;
+  justify-content: center;
+  left: 8px;
+  position: absolute;
+  top: 8px;
+  width: 22px;
+  z-index: 1;
+}
+
 .photo-stack {
   background: var(--color-gray-100);
   border: 0;
