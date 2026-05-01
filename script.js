@@ -11130,17 +11130,18 @@ function duariCalendarShiftMonth(amount) {
   state.calendarSelectedDate = duariMemoryDateValue(firstMemory) || `${nextMonth}-01`;
 }
 
-function duariCalendarTypeMark(type) {
-  const marks = {
-    "데이트": "데",
-    "여행": "여",
-    "기념일": "기",
-    "일상": "일",
-    "대화": "대",
-    "마음 기록": "마",
-    "기타": "기타"
+function duariCalendarTypeClass(type) {
+  const normalized = String(type || "").replace(/\s+/g, "-");
+  const classes = {
+    "데이트": "date",
+    "여행": "trip",
+    "기념일": "anniversary",
+    "일상": "daily",
+    "대화": "talk",
+    "마음-기록": "heart",
+    "기타": "etc"
   };
-  return marks[type] || "기록";
+  return classes[normalized] || "etc";
 }
 
 function renderAlbumCalendar() {
@@ -11165,7 +11166,9 @@ function renderAlbumCalendar() {
       const day = index + 1;
       const dateValue = `${month}-${String(day).padStart(2, "0")}`;
       const dayMemories = memoriesByDate.get(dateValue) || [];
-      const marks = dayMemories.slice(0, 2).map((memory) => `<span>${duariCalendarTypeMark(memory.type)}</span>`).join("");
+      const marks = dayMemories.slice(0, 2).map((memory) => `
+        <span class="calendar-record-dot type-${duariCalendarTypeClass(memory.type)}" title="${memory.type}" aria-label="${memory.type} 기록"></span>
+      `).join("");
       const moreCount = dayMemories.length > 2 ? `<small>+${dayMemories.length - 2}</small>` : "";
       const classes = [
         "calendar-day",

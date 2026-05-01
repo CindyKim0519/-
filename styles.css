@@ -1150,11 +1150,45 @@ h3 {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
   min-height: 18px;
 }
 
-.calendar-day-marks span,
+.calendar-record-dot {
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  height: 7px;
+  width: 7px;
+}
+
+.calendar-record-dot.type-date {
+  background: var(--accent-primary);
+}
+
+.calendar-record-dot.type-trip {
+  background: var(--color-mint-400);
+}
+
+.calendar-record-dot.type-anniversary {
+  background: var(--color-yellow-300);
+}
+
+.calendar-record-dot.type-daily {
+  background: var(--color-gray-400);
+}
+
+.calendar-record-dot.type-talk {
+  background: #8fb8ff;
+}
+
+.calendar-record-dot.type-heart {
+  background: #c59cff;
+}
+
+.calendar-record-dot.type-etc {
+  background: var(--color-gray-500);
+}
+
 .calendar-day-marks small {
   align-items: center;
   background: var(--color-gray-100);
@@ -1169,7 +1203,6 @@ h3 {
   padding: 0 5px;
 }
 
-.calendar-day.is-selected .calendar-day-marks span,
 .calendar-day.is-selected .calendar-day-marks small {
   background: var(--color-white);
   color: var(--accent-primary);
