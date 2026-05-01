@@ -11281,10 +11281,12 @@ function renderAlbum() {
       <div class="tabs">
         ${views.map((view) => `<button class="chip-btn ${currentView === view ? "active" : ""}" type="button" data-album-view="${view}">${labels[view]}</button>`).join("")}
       </div>
-      <div class="form-field">
-        <label for="albumSearch">기록 검색</label>
-        <input id="albumSearch" placeholder="제목, 장소, 기록 유형" />
-      </div>
+      ${currentView === "record" || currentView === "photo" ? `
+        <div class="form-field">
+          <label for="albumSearch">기록 검색</label>
+          <input id="albumSearch" placeholder="제목, 장소, 기록 유형" />
+        </div>
+      ` : ""}
       ${currentView === "record" || currentView === "photo" ? `
         <div class="album-filter-grid">
           <div class="form-field">
