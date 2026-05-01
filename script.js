@@ -10912,3 +10912,135 @@ if (!window.__duariHomeSharedDiaryClickGuard) {
     openHomeSharedDiaryDetail(card.dataset.homeSharedDiaryIndex || 0);
   }, true);
 }
+
+const duariQuestionAnswerDraft = {
+  question: "요즘 나에게 가장 힘이 되는 말은 뭐야?",
+  body: ""
+};
+
+function duariCurrentQuestionText() {
+  return qs("#home .question-card h3")?.textContent?.trim()
+    || qs("#questions .question-card h3")?.textContent?.trim()
+    || duariQuestionAnswerDraft.question;
+}
+
+function openQuestionModal() {
+  duariQuestionAnswerDraft.question = duariCurrentQuestionText();
+  const activeTab = qs(".screen.active")?.id || state.tab || "home";
+  openModal(`
+    <div class="modal-sheet notification-page question-answer-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
+        <h3>답변 추가</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <p class="eyebrow">오늘의 질문</p>
+          <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
+        </section>
+        <div class="form-field">
+          <label>답변</label>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="솔직하게 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+        </div>
+        <p class="meta question-delivery-note">답변은 상대방에게 전달됩니다.</p>
+        <div class="diary-editor-action-stack">
+          <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬어서 보내기</button>
+          <button class="primary-btn full" type="button" data-question-send-original>원문으로 보내기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-question-back]")?.addEventListener("click", () => {
+    closeModal();
+    setTab(activeTab);
+  });
+  qs("#questionAnswerBody")?.addEventListener("input", (event) => {
+    duariQuestionAnswerDraft.body = event.target.value;
+  });
+  qs("[data-question-send-original]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || "";
+    openQuestionSendConfirmOverlay();
+  });
+  qs("[data-question-ai]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || "";
+    openQuestionAiResultPage({
+      original: duariQuestionAnswerDraft.body,
+      tone: "부드럽게",
+      result: makeAiResult(duariQuestionAnswerDraft.body, "부드럽게")
+    });
+  });
+}
+
+function openQuestionSendConfirmOverlay() {
+  const page = qs(".question-answer-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>상대방에게 전달할까요?</h3>
+        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-question-send-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-question-send-confirm]", page)?.addEventListener("click", () => {
+    qs(".ai-confirm-overlay", page)?.remove();
+    closeModal();
+    setTab("home");
+    showToast("답변을 상대방에게 전달했어요.");
+  });
+}
+
+function openQuestionAiResultPage({ original = "", tone = "부드럽게", result = "" } = {}) {
+  const cleanResult = cleanAiResultText?.(result || makeAiResult(original, tone)) || makeAiResult(original, tone);
+  openModal(`
+    <div class="modal-sheet notification-page ai-page ai-result-page question-ai-result-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-ai-back aria-label="뒤로가기">←</button>
+        <h3>AI 결과</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>원문</h3>
+          <p class="readonly-source">${duariEscapeHtml(original)}</p>
+        </section>
+        <div class="form-field">
+          <p class="ai-field-title">AI 결과</p>
+          <textarea id="questionAiResultText" class="diary-body-large">${duariEscapeHtml(cleanResult)}</textarea>
+        </div>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-question-ai-cancel>취소</button>
+          <button class="ghost-btn" type="button" data-question-ai-redraft>AI로 다시 다듬기</button>
+          <button class="primary-btn full-row" type="button" data-question-ai-apply>본문에 저장</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-question-ai-back]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = original;
+    openQuestionModal();
+  });
+  qs("[data-question-ai-cancel]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = original;
+    openQuestionModal();
+  });
+  qs("[data-question-ai-redraft]")?.addEventListener("click", () => {
+    const textarea = qs("#questionAiResultText");
+    if (!textarea) return;
+    textarea.value = "";
+    textarea.value = makeFreshAiRedraftFromOriginal(original, tone);
+  });
+  qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
+    openQuestionModal();
+    showToast("AI 결과를 답변 본문에 저장했어요.");
+  });
+}
