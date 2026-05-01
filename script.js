@@ -10383,6 +10383,70 @@ window.setTimeout(() => {
   if (activeTab === "home") renderHome();
 }, 0);
 
+// Restore the original album tab content order and panels.
+function renderAlbum() {
+  const album = qs("#album");
+  const views = ["record", "photo", "calendar"];
+  const labels = { record: "기록", photo: "사진", calendar: "캘린더" };
+  const currentView = views.includes(state.albumView) ? state.albumView : "record";
+  state.albumView = currentView;
+
+  let content = "";
+  if (currentView === "record") {
+    content = `<div class="list">${memoryCards(state.memories)}</div>`;
+  }
+  if (currentView === "photo") {
+    content = `
+      <section class="card">
+        <h3>사진 중심 보기</h3>
+        <p>사진은 기록 단위로 연결되며, 선택 순서 변경과 추가/삭제 정책은 기록 상세에서 관리합니다.</p>
+      </section>
+      <div class="quick-grid">
+        ${Array.from({ length: 6 }, (_, index) => `<button class="photo-stack" data-action="photo-detail" aria-label="${index + 1}번째 사진"></button>`).join("")}
+      </div>
+    `;
+  }
+  if (currentView === "calendar") {
+    content = `
+      <div class="calendar-grid">
+        ${Array.from({ length: 28 }, (_, index) => {
+          const day = index + 1;
+          const cls = day === 21 ? "today" : day === 26 ? "selected" : "";
+          const mark = day === 21 ? "대화" : day === 26 ? "데이트 +1" : "";
+          return `<div class="day ${cls}" aria-label="4월 ${day}일"><span>${day}</span><small>${mark}</small></div>`;
+        }).join("")}
+      </div>
+      <div class="list" style="margin-top:12px">${memoryCards(state.memories.slice(0, 1))}</div>
+    `;
+  }
+
+  album.innerHTML = `
+    <div class="section-stack">
+      <div class="tabs">
+        ${views.map((view) => `<button class="chip-btn ${currentView === view ? "active" : ""}" data-album-view="${view}">${labels[view]}</button>`).join("")}
+      </div>
+      <div class="form-field">
+        <label for="albumSearch">앨범 검색</label>
+        <input id="albumSearch" placeholder="제목, 장소, 메모, 기록 유형" />
+      </div>
+      ${content}
+      <button class="primary-btn full" data-action="new-memory">새 기록 추가</button>
+    </div>
+  `;
+  qsa("[data-album-view]", album).forEach((button) => {
+    button.addEventListener("click", () => {
+      state.albumView = button.dataset.albumView;
+      renderAlbum();
+    });
+  });
+  bindActions(album);
+}
+
+window.setTimeout(() => {
+  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
+  if ((qs(".screen.active")?.id || state.tab) === "album") renderAlbum();
+}, 0);
+
 // Duari final diary-add AI flow.
 // Keeps the newest requested flow isolated from older generic data-action handlers.
 let duariDiaryAiDraft = null;
