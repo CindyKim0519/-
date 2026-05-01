@@ -11130,20 +11130,6 @@ function duariCalendarShiftMonth(amount) {
   state.calendarSelectedDate = duariMemoryDateValue(firstMemory) || `${nextMonth}-01`;
 }
 
-function duariCalendarTypeClass(type) {
-  const normalized = String(type || "").replace(/\s+/g, "-");
-  const classes = {
-    "데이트": "date",
-    "여행": "trip",
-    "기념일": "anniversary",
-    "일상": "daily",
-    "대화": "talk",
-    "마음-기록": "heart",
-    "기타": "etc"
-  };
-  return classes[normalized] || "etc";
-}
-
 function renderAlbumCalendar() {
   const { month, selectedDate } = duariCalendarState();
   const [year, monthNumber] = month.split("-").map(Number);
@@ -11166,10 +11152,7 @@ function renderAlbumCalendar() {
       const day = index + 1;
       const dateValue = `${month}-${String(day).padStart(2, "0")}`;
       const dayMemories = memoriesByDate.get(dateValue) || [];
-      const marks = dayMemories.slice(0, 2).map((memory) => `
-        <span class="calendar-record-dot type-${duariCalendarTypeClass(memory.type)}" title="${memory.type}" aria-label="${memory.type} 기록"></span>
-      `).join("");
-      const moreCount = dayMemories.length > 2 ? `<small>+${dayMemories.length - 2}</small>` : "";
+      const recordCountBadge = dayMemories.length ? `<small>${dayMemories.length > 9 ? "9+" : dayMemories.length}</small>` : "";
       const classes = [
         "calendar-day",
         dateValue === todayValue ? "is-today" : "",
@@ -11179,7 +11162,7 @@ function renderAlbumCalendar() {
       return `
         <button class="${classes}" type="button" data-calendar-date="${dateValue}" aria-label="${monthNumber}월 ${day}일">
           <span class="calendar-day-number">${day}</span>
-          <span class="calendar-day-marks">${marks}${moreCount}</span>
+          <span class="calendar-day-marks">${recordCountBadge}</span>
         </button>
       `;
     })
