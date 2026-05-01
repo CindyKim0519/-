@@ -10157,8 +10157,8 @@ function renderHome() {
     .filter((diary) => normalizeDiaryScopeValue(diary.scope) === "공유")
     .slice(0, 2);
   const homeSharedDiaryCards = sharedDiaries.length
-    ? sharedDiaries.map((diary) => `
-        <article class="linked-diary-card home-shared-diary-card">
+    ? sharedDiaries.map((diary, index) => `
+        <article class="linked-diary-card home-shared-diary-card" role="button" tabindex="0" data-home-shared-diary-index="${index}">
           <div class="between">
             <strong>${diary.title || "제목 없는 일기"}</strong>
             <span class="linked-diary-type">내 공유</span>
@@ -10190,7 +10190,7 @@ function renderHome() {
       <section class="diary-card home-shared-diary-section">
         <div class="between">
           <h3>최근 공유 일기</h3>
-          <span class="meta">최대 2개</span>
+          <button class="chip-btn" data-tab-go="diary">더보기</button>
         </div>
         <div class="linked-diary-list">${homeSharedDiaryCards}</div>
         <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
@@ -10876,3 +10876,39 @@ function linkedDiariesLatest() {
 }
 
 window.linkedDiariesLatest = linkedDiariesLatest;
+
+function duariHomeSharedDiaries() {
+  return state.diaries
+    .filter((diary) => normalizeDiaryScopeValue(diary.scope) === "공유")
+    .slice(0, 2);
+}
+
+function openHomeSharedDiaryDetail(index = 0) {
+  const entry = duariHomeSharedDiaries()[Number(index)] || duariHomeSharedDiaries()[0];
+  if (!entry) return;
+  renderDiaryDetailReadOnly(entry, () => {
+    closeModal();
+    setTab("home");
+  });
+}
+
+if (!window.__duariHomeSharedDiaryClickGuard) {
+  window.__duariHomeSharedDiaryClickGuard = true;
+  window.addEventListener("click", (event) => {
+    const card = event.target.closest?.("[data-home-shared-diary-index]");
+    if (!card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openHomeSharedDiaryDetail(card.dataset.homeSharedDiaryIndex || 0);
+  }, true);
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const card = event.target.closest?.("[data-home-shared-diary-index]");
+    if (!card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openHomeSharedDiaryDetail(card.dataset.homeSharedDiaryIndex || 0);
+  }, true);
+}

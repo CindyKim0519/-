@@ -662,6 +662,13 @@ h3 {
   margin-top: 0;
 }
 
+.home-shared-diary-card .chip-btn {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  text-align: center;
+}
+
 .home-hero .between {
   align-items: flex-start;
 }
