@@ -642,7 +642,7 @@ h3 {
 .together-days {
   align-items: baseline;
   display: inline-flex;
-  font-weight: 400;
+  font-weight: 700;
   gap: 2px;
 }
 
@@ -651,6 +651,15 @@ h3 {
   font-size: 26px;
   font-weight: 800;
   line-height: 30px;
+}
+
+.home-shared-diary-section {
+  display: grid;
+  gap: 12px;
+}
+
+.home-shared-diary-card .tag-row {
+  margin-top: 0;
 }
 
 .home-hero .between {

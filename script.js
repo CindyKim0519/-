@@ -10153,7 +10153,21 @@ function renderHome() {
     return;
   }
 
-  const sharedDiary = state.diaries.find((diary) => normalizeDiaryScopeValue(diary.scope) === "공유") || state.diaries[0];
+  const sharedDiaries = state.diaries
+    .filter((diary) => normalizeDiaryScopeValue(diary.scope) === "공유")
+    .slice(0, 2);
+  const homeSharedDiaryCards = sharedDiaries.length
+    ? sharedDiaries.map((diary) => `
+        <article class="linked-diary-card home-shared-diary-card">
+          <div class="between">
+            <strong>${diary.title || "제목 없는 일기"}</strong>
+            <span class="linked-diary-type">내 공유</span>
+          </div>
+          <p>${diary.body || "작성된 내용이 없습니다."}</p>
+          <div class="tag-row">${(diary.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}</div>
+        </article>
+      `).join("")
+    : `<p>아직 공유 일기가 없어요.</p>`;
   home.innerHTML = `
     <div class="section-stack">
       <section class="hero-card home-hero">
@@ -10173,12 +10187,12 @@ function renderHome() {
         <div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div>
         <button class="primary-btn full" data-action="new-memory">기록 추가</button>
       </section>
-      <section class="diary-card">
+      <section class="diary-card home-shared-diary-section">
         <div class="between">
           <h3>최근 공유 일기</h3>
-          <span class="reaction-icon" aria-label="고마워 반응">♡</span>
+          <span class="meta">최대 2개</span>
         </div>
-        <p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p>
+        <div class="linked-diary-list">${homeSharedDiaryCards}</div>
         <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
       </section>
       <section class="question-card">
