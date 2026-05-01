@@ -2553,6 +2553,10 @@ h3 {
   margin-top: 12px;
 }
 
+.auto-two-button-row {
+  margin-top: 0;
+}
+
 .inline-action-pair .ghost-btn,
 .inline-action-pair .primary-btn {
   min-width: 0;

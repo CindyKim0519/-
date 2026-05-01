@@ -11045,6 +11045,37 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
   });
 }
 
+function duariNormalizeTwoButtonRows(root = document) {
+  qsa(".section-stack, .card, .diary-editor-action-stack, .ai-confirm-sheet", root).forEach((parent) => {
+    if (parent.closest(".tabs, .chip-row, .home-question-actions, .inline-action-pair, .ai-action-grid, .record-picker-actions")) return;
+    if (qs(":scope > .inline-action-pair", parent)) return;
+
+    const directButtons = [...parent.children].filter((child) => child.matches?.("button"));
+    const actionButtons = directButtons.filter((button) => button.matches(".ghost-btn, .primary-btn"));
+    if (directButtons.length !== 2 || actionButtons.length !== 2) return;
+
+    const children = [...parent.children];
+    const firstIndex = children.indexOf(actionButtons[0]);
+    const secondIndex = children.indexOf(actionButtons[1]);
+    if (secondIndex !== firstIndex + 1) return;
+
+    const row = document.createElement("div");
+    row.className = "inline-action-pair auto-two-button-row";
+    actionButtons[0].before(row);
+    actionButtons.forEach((button) => {
+      button.classList.remove("full");
+      button.style.marginTop = "";
+      row.appendChild(button);
+    });
+  });
+}
+
+const duariOpenModalBeforeTwoButtonRows = openModal;
+openModal = function openModalWithTwoButtonRows(html) {
+  duariOpenModalBeforeTwoButtonRows(html);
+  duariNormalizeTwoButtonRows(qs("#modal"));
+};
+
 function openQuestionModal() {
   duariQuestionAnswerDraft.question = duariCurrentQuestionText();
   const activeTab = qs(".screen.active")?.id || state.tab || "home";
