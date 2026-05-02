@@ -11159,6 +11159,7 @@ renderDiary = function renderDiary() {
         <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
       </div>
       <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
+      <p class="meta diary-list-count">총 ${entries.length}개</p>
       <div class="list">
         ${visibleEntries.map((entry, index) => `
           <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
@@ -11450,6 +11451,7 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
             <input id="questionHistoryDate" type="date" value="${String(date || "").replaceAll(".", "-")}" />
           </div>
         </div>
+        <p class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</p>
         <div class="question-history-list" data-question-history-list>
           ${duariQuestionHistoryListHtml(history, filtered)}
         </div>
@@ -11480,6 +11482,8 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
     );
     const list = qs("[data-question-history-list]", sheet);
     if (list) list.innerHTML = duariQuestionHistoryListHtml(history, nextFiltered);
+    const count = qs("[data-question-history-count]", sheet);
+    if (count) count.textContent = `총 ${nextFiltered.length}개`;
   };
   searchInput?.addEventListener("input", applyQuestionHistoryFilters);
   dateInput?.addEventListener("input", applyQuestionHistoryFilters);
