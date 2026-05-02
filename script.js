@@ -15,6 +15,12 @@ const state = {
   memories: [
     { title: "성수에서 보낸 오후", date: "2026.04.26", place: "서울숲", type: "데이트", note: "바람이 좋아서 오래 걸었다.", scope: "우리 둘이 보기", feelings: ["편안함", "고마움"], reaction: "또 가자", author: "나" },
     { title: "비 오는 날의 통화", date: "2026.04.21", place: "집", type: "대화", note: "말하기 어려운 것도 천천히 꺼냈다.", scope: "나만 보기", feelings: ["솔직함"], reaction: "", author: "나" },
+    { title: "한강에서 먹은 저녁", date: "2026.04.18", place: "한강공원", type: "데이트", note: "돗자리 위에서 오래 이야기했다.", scope: "우리 둘이 보기", feelings: ["즐거움", "편안함"], reaction: "좋았어", author: "나" },
+    { title: "첫 봄 산책", date: "2026.04.12", place: "올림픽공원", type: "일상", note: "꽃이 피는 길을 천천히 걸었다.", scope: "우리 둘이 보기", feelings: ["설렘", "고마움"], reaction: "소중해", author: "나" },
+    { title: "기념일 케이크", date: "2026.04.05", place: "연남동", type: "기념일", note: "작은 케이크 하나로도 충분히 특별했다.", scope: "우리 둘이 보기", feelings: ["소중함", "기쁨"], reaction: "고마워", author: "나" },
+    { title: "늦은 밤 메시지", date: "2026.03.29", place: "집", type: "마음 기록", note: "전하고 싶었던 말을 조금씩 정리했다.", scope: "나만 보기", feelings: ["솔직함", "기대"], reaction: "", author: "나" },
+    { title: "주말 짧은 여행", date: "2026.03.22", place: "강릉", type: "여행", note: "바다를 보며 다음 여행 이야기를 했다.", scope: "우리 둘이 보기", feelings: ["기대", "편안함"], reaction: "또 가자", author: "나" },
+    { title: "조용한 화해", date: "2026.03.16", place: "카페", type: "대화", note: "서로의 속도를 다시 맞춰보기로 했다.", scope: "우리 둘이 보기", feelings: ["안도", "고마움"], reaction: "나도 그래", author: "나" },
   ],
   diaries: [
     { title: "오늘 고마웠던 것", body: "작은 말에도 내 편이 있다는 느낌이 들었다.", scope: "공유", type: "내 공유", feelings: ["고마움", "안정"], linked: "성수에서 보낸 오후", author: "나", date: "2026.05.02" },
@@ -11579,7 +11585,7 @@ function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {
   });
 }
 
-const DUARI_ALBUM_RECORD_PAGE_SIZE = 10;
+const DUARI_ALBUM_RECORD_PAGE_SIZE = 5;
 
 function duariAlbumRecordVisibleCount() {
   if (!state.albumRecordVisibleCount) state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
