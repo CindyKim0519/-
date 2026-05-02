@@ -11115,10 +11115,26 @@ linkedDiaryCardsLatest = function linkedDiaryCardsLatest() {
 };
 
 const duariRenderDiaryWithDateBase = renderDiary;
+function duariDiaryVisibleCount() {
+  state.diaryVisibleCounts = state.diaryVisibleCounts || {};
+  const view = state.diaryView || "mineShared";
+  if (!state.diaryVisibleCounts[view]) state.diaryVisibleCounts[view] = 5;
+  return state.diaryVisibleCounts[view];
+}
+
+function duariIncreaseDiaryVisibleCount() {
+  state.diaryVisibleCounts = state.diaryVisibleCounts || {};
+  const view = state.diaryView || "mineShared";
+  state.diaryVisibleCounts[view] = duariDiaryVisibleCount() + 5;
+}
+
 renderDiary = function renderDiary() {
   normalizeDiaryView();
   const diary = qs("#diary");
   const entries = diaryEntriesForCurrentView();
+  const visibleCount = duariDiaryVisibleCount();
+  const visibleEntries = entries.slice(0, visibleCount);
+  const hasMoreEntries = entries.length > visibleEntries.length;
   diary.innerHTML = `
     <div class="section-stack">
       <div class="tabs diary-tabs">
@@ -11128,7 +11144,7 @@ renderDiary = function renderDiary() {
       </div>
       <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
       <div class="list">
-        ${entries.map((entry, index) => `
+        ${visibleEntries.map((entry, index) => `
           <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
             <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
             <p>${entry.body}</p>
@@ -11139,6 +11155,7 @@ renderDiary = function renderDiary() {
           </article>
         `).join("")}
       </div>
+      ${hasMoreEntries ? `<button class="ghost-btn full diary-load-more" type="button" data-diary-load-more>더보기</button>` : ""}
     </div>
   `;
   qsa("[data-diary-view]", diary).forEach((button) => {
@@ -11159,6 +11176,10 @@ renderDiary = function renderDiary() {
         openEntry();
       }
     });
+  });
+  qs("[data-diary-load-more]", diary)?.addEventListener("click", () => {
+    duariIncreaseDiaryVisibleCount();
+    renderDiary();
   });
   bindActions(diary);
 };
