@@ -1,6 +1,6 @@
 # Pet Family App Design System
 
-Reference image: soft mobile onboarding and account flow for a pet-care/family app. The system combines clean form usability with playful hand-drawn pet illustrations, coral-pink headers, white cards, and gentle rounded surfaces.
+Reference image: soft mobile onboarding and account flow for a pet-care/family app. The system combines clean form usability with playful hand-drawn pet illustrations, fresh sage-green headers, white cards, and gentle rounded surfaces.
 
 ## 1. Design Direction
 
@@ -19,11 +19,11 @@ Illustrations can be whimsical, but UI controls should remain crisp: thin border
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| `--color-pink-50` | `#FFF1F5` | Very soft pink wash |
-| `--color-pink-100` | `#FFD6DF` | Secondary pink background |
-| `--color-pink-300` | `#FF8DA3` | Header gradient light stop |
-| `--color-pink-500` | `#FF5F83` | Primary CTA, selected states |
-| `--color-pink-600` | `#F04B72` | Pressed CTA, focus accent |
+| `--color-pink-50` | `#EFFAF3` | Very soft sage wash |
+| `--color-pink-100` | `#CFEEDD` | Secondary sage background |
+| `--color-pink-300` | `#83D7A9` | Header gradient light stop |
+| `--color-pink-500` | `#42B978` | Primary CTA, selected states |
+| `--color-pink-600` | `#2F9F63` | Pressed CTA, focus accent |
 | `--color-mint-50` | `#EFFBFA` | Illustration sky/water wash |
 | `--color-mint-100` | `#D9F4F1` | Soft illustration background blobs |
 | `--color-sand-50` | `#FFF9F1` | Warm success-screen base |
@@ -58,7 +58,7 @@ Illustrations can be whimsical, but UI controls should remain crisp: thin border
 
 - 60% white cards and form fields
 - 18% light gray app background and dividers
-- 14% coral pink for headers, CTAs, selected chips, and progress
+- 14% sage green for headers, CTAs, selected chips, and progress
 - 6% mint/sand illustration washes
 - 2% dark text and outline details
 
@@ -69,7 +69,7 @@ Avoid heavy dark backgrounds, neon colors, and large saturated gradients outside
 Use gradients only for the rounded top header panels.
 
 ```css
---gradient-header: linear-gradient(135deg, #ff8da3 0%, #ff6f8f 52%, #ff5f83 100%);
+--gradient-header: linear-gradient(135deg, #83d7a9 0%, #5ec58d 52%, #42b978 100%);
 ```
 
 Header decoration can include subtle vertical strings, tiny hearts, stars, and dots at low opacity. Keep them ornamental and non-interactive.
@@ -182,7 +182,7 @@ Use for sign up, continue, yes, save, and next.
 - Text: white, `12-14px`, `700`
 - Shadow: none by default
 - Pressed: `--accent-primary-pressed`, `translateY(1px)`
-- Disabled: `#F5B5C3` with white text at `0.8` opacity
+- Disabled: `#A9DEC0` with white text at `0.8` opacity
 
 ### Secondary Button
 
@@ -213,12 +213,12 @@ Use for final step navigation and add-photo/add-condition actions.
 - Padding: `0 12px`
 - Label: `10-12px`, `--text-secondary`
 - Text: `13-14px`, `--text-primary`
-- Focus: `--border-active`, optional `0 0 0 3px rgba(255, 95, 131, 0.12)`
+- Focus: `--border-active`, optional `0 0 0 3px rgba(66, 185, 120, 0.14)`
 - Error: `--color-error` border and helper text
 
 ### Password Field
 
-Same as text field with a trailing visibility icon button. The icon should be gray by default and pink on hover/focus.
+Same as text field with a trailing visibility icon button. The icon should be gray by default and green on hover/focus.
 
 ### Radio and Segmented Choices
 
@@ -261,13 +261,13 @@ Use centered copy such as `or continue with`.
 - Fill: `#F3F3F3`
 - Radius: `4px`
 - Placeholder illustration: low-contrast gray
-- Add button: pink circular button at bottom-right
+- Add button: green circular button at bottom-right
 
 ### Medical Concern Chips
 
 - Shape: circular icon chip with short label below
 - Selected fill: `--accent-primary`
-- Default border: pink outline
+- Default border: green outline
 - Use simple icons for skin, tone, dental, and add.
 
 ## 9. Iconography
@@ -278,7 +278,7 @@ Recommended icon style:
 
 - Stroke: `1.5-2px`
 - Default color: `--color-gray-500`
-- Active color: white on pink fill or `--accent-primary` on white
+- Active color: white on green fill or `--accent-primary` on white
 - Avoid complex detail inside small buttons.
 
 Core icons: arrow-right, plus, eye, calendar, dog, cat, bird, fish, paw, tooth, skin/hand, social logos.
@@ -350,7 +350,7 @@ Avoid:
 
 - Minimum touch target: `44px` for primary controls, `36px` for compact icon buttons.
 - Text and input borders must meet contrast expectations on white and gray backgrounds.
-- Do not rely on pink alone for state. Pair color with checkmarks, borders, labels, or `aria-pressed`.
+- Do not rely on color alone for state. Pair color with checkmarks, borders, labels, or `aria-pressed`.
 - Inputs need visible labels, not placeholder-only labels.
 - Password visibility buttons need accessible names.
 - Social login buttons need provider names.
@@ -362,11 +362,11 @@ Avoid:
 :root {
   color-scheme: light;
 
-  --color-pink-50: #fff1f5;
-  --color-pink-100: #ffd6df;
-  --color-pink-300: #ff8da3;
-  --color-pink-500: #ff5f83;
-  --color-pink-600: #f04b72;
+  --color-pink-50: #effaf3;
+  --color-pink-100: #cfeedd;
+  --color-pink-300: #83d7a9;
+  --color-pink-500: #42b978;
+  --color-pink-600: #2f9f63;
   --color-mint-50: #effbfa;
   --color-mint-100: #d9f4f1;
   --color-sand-50: #fff9f1;
@@ -391,7 +391,7 @@ Avoid:
   --border-active: var(--color-pink-500);
   --accent-primary: var(--color-pink-500);
   --accent-primary-pressed: var(--color-pink-600);
-  --gradient-header: linear-gradient(135deg, #ff8da3 0%, #ff6f8f 52%, #ff5f83 100%);
+  --gradient-header: linear-gradient(135deg, #83d7a9 0%, #5ec58d 52%, #42b978 100%);
 
   --font-body: "Pretendard", "Nunito", Arial, sans-serif;
   --radius-xs: 4px;

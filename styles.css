@@ -11,7 +11,7 @@ html {
 body {
   align-items: center;
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 214, 223, 0.7), transparent 28%),
+    radial-gradient(circle at 18% 12%, rgba(207, 238, 221, 0.72), transparent 28%),
     linear-gradient(180deg, var(--color-pink-50), var(--color-gray-50) 42%);
   display: flex;
   gap: 32px;
@@ -218,9 +218,9 @@ h3 {
 
 .illustration.diary::before {
   background: var(--color-white);
-  border: 1px solid #f1c8d2;
+  border: 1px solid #b8dec9;
   border-radius: 12px;
-  box-shadow: 14px 12px 0 rgba(255, 95, 131, 0.14);
+  box-shadow: 14px 12px 0 rgba(66, 185, 120, 0.14);
   height: 70px;
   left: 80px;
   top: 34px;
@@ -271,9 +271,9 @@ h3 {
 
 .illustration.message::before {
   background: var(--color-white);
-  border: 1px solid #f3c2cd;
+  border: 1px solid #b4ddc5;
   border-radius: 18px;
-  box-shadow: 0 10px 0 rgba(255, 214, 223, 0.55);
+  box-shadow: 0 10px 0 rgba(207, 238, 221, 0.58);
   height: 62px;
   left: 62px;
   top: 34px;
@@ -511,7 +511,7 @@ h3 {
 
 .screen::before {
   background: var(--color-white);
-  border: 1px solid rgba(255, 206, 218, 0.72);
+  border: 1px solid rgba(188, 226, 205, 0.76);
   border-bottom: 0;
   border-radius: 28px 28px 0 0;
   bottom: 0;
@@ -990,11 +990,11 @@ h3 {
 .album-photo-thumb {
   aspect-ratio: 1;
   background:
-    linear-gradient(135deg, rgba(255, 222, 232, 0.9), rgba(255, 248, 250, 0.95)),
+    linear-gradient(135deg, rgba(213, 243, 225, 0.92), rgba(247, 255, 250, 0.96)),
     var(--color-gray-100);
   border: 0;
   border-radius: var(--radius-xs);
-  box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(66, 185, 120, 0.16);
   overflow: hidden;
   position: relative;
 }
@@ -1082,8 +1082,8 @@ h3 {
   min-height: 70px;
   border: 0;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #ffe2ea, #fff5f7);
-  box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
+  background: linear-gradient(135deg, #e4f8ed, #f6fff9);
+  box-shadow: inset 0 0 0 1px rgba(66, 185, 120, 0.16);
 }
 
 .photo-thumb span {
@@ -1232,7 +1232,7 @@ h3 {
 }
 
 .calendar-day.has-record {
-  box-shadow: inset 0 -2px 0 rgba(228, 112, 142, 0.18);
+  box-shadow: inset 0 -2px 0 rgba(66, 185, 120, 0.18);
 }
 
 .calendar-day-number {
@@ -1287,10 +1287,10 @@ h3 {
   align-items: center;
   aspect-ratio: 1;
   background:
-    linear-gradient(135deg, rgba(255, 222, 232, 0.9), rgba(255, 248, 250, 0.95)),
+    linear-gradient(135deg, rgba(213, 243, 225, 0.92), rgba(247, 255, 250, 0.96)),
     var(--color-gray-100);
   border-radius: var(--radius-sm);
-  box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(66, 185, 120, 0.16);
   display: flex;
   justify-content: center;
   max-height: min(300px, calc(100vh - 280px));
@@ -1461,7 +1461,7 @@ h3 {
 .form-field select:focus,
 .form-field textarea:focus {
   border-color: var(--border-active);
-  box-shadow: 0 0 0 3px rgba(255, 95, 131, 0.12);
+  box-shadow: 0 0 0 3px rgba(66, 185, 120, 0.14);
   outline: 0;
 }
 
@@ -1673,7 +1673,7 @@ h3 {
 .notification-type-label {
   align-self: flex-start;
   background: var(--color-pink-50);
-  border: 1px solid rgba(255, 95, 131, 0.18);
+  border: 1px solid rgba(66, 185, 120, 0.2);
   border-radius: var(--radius-pill);
   flex: 0 0 auto;
   color: var(--accent-primary);
@@ -1710,7 +1710,7 @@ h3 {
 
 .memory-photo-main {
   background:
-    linear-gradient(135deg, rgba(255, 214, 223, 0.8), rgba(204, 239, 226, 0.72)),
+    linear-gradient(135deg, rgba(207, 238, 221, 0.88), rgba(232, 246, 238, 0.76)),
     var(--color-pink-50);
   border-radius: var(--radius-md);
   min-height: 210px;
@@ -1731,7 +1731,7 @@ h3 {
 
 .memory-photo-slide {
   background:
-    linear-gradient(135deg, rgba(255, 214, 223, 0.82), rgba(204, 239, 226, 0.72)),
+    linear-gradient(135deg, rgba(207, 238, 221, 0.9), rgba(232, 246, 238, 0.78)),
     var(--color-pink-50);
   border: 0;
   display: block;
@@ -1811,7 +1811,7 @@ h3 {
 .memory-photo-thumb {
   aspect-ratio: 1;
   background: linear-gradient(135deg, var(--color-pink-50), var(--color-mint-100));
-  border: 1px solid rgba(255, 206, 218, 0.72);
+  border: 1px solid rgba(188, 226, 205, 0.76);
   border-radius: var(--radius-sm);
   position: relative;
 }
@@ -2316,7 +2316,7 @@ h3 {
 
 .share-preview-card {
   background: var(--color-pink-50);
-  border: 1px solid rgba(255, 206, 218, 0.72);
+  border: 1px solid rgba(188, 226, 205, 0.76);
   border-radius: var(--radius-md);
   margin: 10px 0;
   padding: 14px;
