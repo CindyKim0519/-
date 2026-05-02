@@ -1715,7 +1715,9 @@ function renderMy() {
         ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["고객센터/약관", "문의, FAQ, 약관, 개인정보처리방침", "support"],
+        ["고객센터", "문의, FAQ, 오류/복구 정책", "support"],
+        ["약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
+        ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
       <p class="tiny-note">Duari v0.1.0</p>
     </div>
