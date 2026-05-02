@@ -3485,8 +3485,9 @@ function relationAddDraftDefaults(draft = {}) {
     method: draft.method || "link",
     code: draft.code || "DUARI-0520",
     partnerName: draft.partnerName || "봄이",
-    myName: draft.myName || "하린",
+    myName: draft.myName || state.accountNickname || "하린",
     startDate: draft.startDate || "2026-05-02",
+    fromOnboarding: !!draft.fromOnboarding,
   };
 }
 
@@ -3516,6 +3517,7 @@ function collectRelationAddDraft(sheet, draft = {}) {
     partnerName: qs("[data-relation-add-partner]", sheet)?.value.trim() || draft.partnerName,
     myName: qs("[data-relation-add-my-name]", sheet)?.value.trim() || draft.myName,
     startDate: qs("[data-relation-add-start]", sheet)?.value || draft.startDate,
+    fromOnboarding: !!draft.fromOnboarding,
   });
 }
 
@@ -3598,8 +3600,14 @@ function openRelationAddPage(step = 1, draft = {}) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".relation-add-page");
   const backTarget = () => {
-    if (step <= 1) openRelationManagementModal();
-    else if (step >= 4) openRelationManagementModal();
+    if (step <= 1) {
+      if (data.fromOnboarding) openStartMethodPage();
+      else openRelationManagementModal();
+    }
+    else if (step >= 4) {
+      if (data.fromOnboarding) openStartMethodPage();
+      else openRelationManagementModal();
+    }
     else openRelationAddPage(step - 1, collectRelationAddDraft(sheet, data));
   };
   qs("[data-relation-add-back]", sheet)?.addEventListener("click", backTarget);
@@ -3628,6 +3636,8 @@ function openRelationAddPage(step = 1, draft = {}) {
   });
   qs("[data-relation-add-home]", sheet)?.addEventListener("click", () => {
     closeModal();
+    qs("#onboarding")?.classList.add("is-hidden");
+    qs("#app")?.classList.remove("is-hidden");
     setTab("home");
     renderHome();
     showToast("새 관계 홈으로 이동했어요.");
@@ -12220,6 +12230,203 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     showToast("AI 결과를 답변 본문에 저장했어요.");
   });
 }
+
+// Final entry flow: onboarding -> login/signup -> nickname/PIN -> start method -> home.
+function openLoginModal(provider = "이메일") {
+  const isEmail = provider === "이메일";
+  openModal(`
+    <div class="modal-sheet notification-page entry-flow-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>${isEmail ? "이메일 로그인" : `${provider} 로그인`}</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        ${isEmail ? `
+          <div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div>
+          <div class="form-field"><label>비밀번호</label><input type="password" placeholder="비밀번호" /></div>
+          <button class="primary-btn full" type="button" data-entry-login-complete>로그인</button>
+          <button class="ghost-btn full" type="button" data-entry-signup>이메일로 회원가입</button>
+        ` : `
+          <section class="card">
+            <h3>소셜 계정으로 계속하기</h3>
+            <p>로그인 후 닉네임과 6자리 PIN만 설정하면 바로 시작할 수 있어요.</p>
+          </section>
+          <button class="primary-btn full" type="button" data-entry-login-complete>계속하기</button>
+        `}
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-entry-login-complete]")?.addEventListener("click", openFirstSetupPage);
+  qs("[data-entry-signup]")?.addEventListener("click", openSignupModal);
+}
+
+function openSignupModal() {
+  openModal(`
+    <div class="modal-sheet notification-page entry-flow-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-entry-login-back aria-label="뒤로가기">←</button>
+        <h3>회원가입</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div>
+        <div class="form-field"><label>비밀번호</label><input type="password" /></div>
+        <div class="form-field"><label>비밀번호 확인</label><input type="password" /></div>
+        <section class="card">
+          <h3>약관 동의</h3>
+          <p>이용약관과 개인정보처리방침에 동의한 뒤 가입합니다.</p>
+          <div class="chip-row" style="margin-top:10px">
+            <button class="chip-btn active" type="button">필수 약관</button>
+            <button class="chip-btn active" type="button">개인정보</button>
+          </div>
+        </section>
+        <button class="primary-btn full" type="button" data-entry-signup-complete>가입 후 설정</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
+  qs("[data-entry-signup-complete]")?.addEventListener("click", openFirstSetupPage);
+}
+
+function startSetup() {
+  openFirstSetupPage();
+}
+
+function openFirstSetupPage() {
+  openModal(`
+    <div class="modal-sheet notification-page entry-flow-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>첫 설정</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>필수 설정</h3>
+          <p>계정 기본 닉네임과 앱 보안 PIN을 설정해요. 프로필 사진은 나중에 우리 정보에서 관리할 수 있어요.</p>
+        </section>
+        <div class="form-field">
+          <label>닉네임</label>
+          <input data-entry-nickname value="${state.accountNickname || "하린"}" />
+        </div>
+        <div class="form-field">
+          <label>앱 보안 PIN 6자리</label>
+          <input data-entry-pin maxlength="6" value="123456" inputmode="numeric" />
+        </div>
+        <button class="primary-btn full" type="button" data-entry-setup-next>시작 방식 선택</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-entry-setup-next]")?.addEventListener("click", () => {
+    const nickname = qs("[data-entry-nickname]")?.value.trim();
+    const pin = qs("[data-entry-pin]")?.value.trim();
+    if (!nickname) {
+      showToast("닉네임을 입력해 주세요.");
+      return;
+    }
+    if (!/^\d{6}$/.test(pin || "")) {
+      showToast("PIN은 숫자 6자리로 입력해 주세요.");
+      return;
+    }
+    state.accountNickname = nickname;
+    openStartMethodPage();
+  });
+}
+
+function openStartMethodPage() {
+  openModal(`
+    <div class="modal-sheet notification-page entry-flow-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-entry-setup-back aria-label="뒤로가기">←</button>
+        <h3>시작 방식</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>어떻게 시작할까요?</h3>
+          <p>상대와 연결해 함께 기록하거나, 혼자 먼저 기록을 시작할 수 있어요.</p>
+        </section>
+        <button class="primary-btn full" type="button" data-entry-connect>상대와 연결하기</button>
+        <button class="ghost-btn full" type="button" data-entry-alone>혼자 먼저 시작하기</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-entry-setup-back]")?.addEventListener("click", openFirstSetupPage);
+  qs("[data-entry-connect]")?.addEventListener("click", () => {
+    openRelationAddPage(1, { fromOnboarding: true, myName: state.accountNickname || "하린" });
+  });
+  qs("[data-entry-alone]")?.addEventListener("click", openStartAlonePage);
+}
+
+function openStartAlonePage() {
+  openModal(`
+    <div class="modal-sheet notification-page start-alone-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-start-method-back aria-label="뒤로가기">←</button>
+        <h3>혼자 먼저 시작하기</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="hero-card">
+          <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
+          <p>나만 보기 기록, 개인 일기, 비공개 질문 답변, 전할 말 초안을 먼저 남길 수 있어요.</p>
+        </section>
+        <div class="solo-feature-grid">
+          ${["나만 보기 기록", "개인 일기", "질문 답변 비공개 저장", "전할 말 초안 작성"].map((item) => `<section class="card"><strong>${item}</strong></section>`).join("")}
+        </div>
+        <section class="card">
+          <h3>연결 전 제한</h3>
+          <ul class="solo-limit-list">
+            <li>상대에게 보내기</li>
+            <li>공유 일기</li>
+            <li>상대 반응</li>
+            <li>커플 공동 기록</li>
+          </ul>
+        </section>
+        <button class="primary-btn full" type="button" data-entry-confirm-alone>혼자 시작하기</button>
+        <button class="ghost-btn full" type="button" data-entry-connect>상대와 연결하기</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-start-method-back]")?.addEventListener("click", openStartMethodPage);
+  qs("[data-entry-confirm-alone]")?.addEventListener("click", () => {
+    state.connected = false;
+    state.aloneCtaHidden = false;
+    closeModal();
+    qs("#onboarding").classList.add("is-hidden");
+    qs("#app").classList.remove("is-hidden");
+    setTab("home");
+    showToast("혼자 먼저 시작했어요. 상대 초대는 언제든 할 수 있어요.");
+  });
+  qs("[data-entry-connect]")?.addEventListener("click", () => openRelationAddPage(1, { fromOnboarding: true, myName: state.accountNickname || "하린" }));
+}
+
+(() => {
+  const onboarding = qs("#onboarding");
+  const startButton = qs("#startApp");
+  const loginButtons = qsa(".login-grid .ghost-btn");
+  startButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openLoginModal("이메일");
+  }, true);
+  loginButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      openLoginModal(button.textContent.trim() === "Apple" ? "애플" : button.textContent.trim());
+    }, true);
+  });
+  onboarding?.classList.add("is-visible");
+})();
 
 // Final diary date display across every diary card/detail surface.
 function duariTodayDiaryDate() {
