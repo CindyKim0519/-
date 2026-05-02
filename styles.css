@@ -853,6 +853,14 @@ h3 {
   gap: 14px;
 }
 
+.my-profile-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .my-profile-summary {
   align-items: center;
   display: flex;
@@ -885,15 +893,10 @@ h3 {
   white-space: nowrap;
 }
 
-.my-profile-actions {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.my-profile-actions .ghost-btn,
-.my-profile-actions .chip-btn {
-  min-width: 0;
+.my-profile-header > .chip-btn {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 6px 12px;
 }
 
 .card .question-history-card {
