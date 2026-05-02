@@ -1418,6 +1418,13 @@ h3 {
   color: var(--accent-primary);
 }
 
+.relation-current-badge {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  text-align: center;
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);
