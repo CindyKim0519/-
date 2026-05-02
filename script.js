@@ -2680,14 +2680,16 @@ function openSupportContactPage() {
             <label>문의 내용</label>
             <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
           </div>
-          <section class="support-photo-field form-field">
+          <div class="form-field">
             <label>사진 추가</label>
-            <div class="support-photo-grid">
-              <button class="support-photo-add" type="button" data-action="settings-toggle" aria-label="사진 추가">+</button>
-              <div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>1</span></div>
-              <div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>2</span></div>
-            </div>
-          </section>
+            <section class="support-photo-field">
+              <div class="support-photo-grid" data-support-photo-grid>
+                <button class="support-photo-add" type="button" data-support-add-photo aria-label="사진 추가">+</button>
+                <div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>1</span></div>
+                <div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>2</span></div>
+              </div>
+            </section>
+          </div>
           <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
         </section>
         <section class="card support-tab-panel" data-support-panel="history">
@@ -2713,8 +2715,14 @@ function openSupportContactPage() {
   bindActions(sheet);
   bindSupportTabs(sheet);
   qs("[data-support-submit]", sheet).addEventListener("click", () => openSupportSubmitNotice());
-  qsa("[data-support-remove-photo]", sheet).forEach((button) => {
-    button.addEventListener("click", () => button.closest(".support-photo-preview")?.remove());
+  qs("[data-support-add-photo]", sheet).addEventListener("click", () => {
+    const grid = qs("[data-support-photo-grid]", sheet);
+    const nextIndex = qsa(".support-photo-preview", grid).length + 1;
+    grid.insertAdjacentHTML("beforeend", `<div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>${nextIndex}</span></div>`);
+  });
+  qs("[data-support-photo-grid]", sheet).addEventListener("click", (event) => {
+    const removeButton = event.target.closest?.("[data-support-remove-photo]");
+    if (removeButton) removeButton.closest(".support-photo-preview")?.remove();
   });
   qsa("[data-support-inquiry-index]", sheet).forEach((button) => {
     button.addEventListener("click", () => openSupportInquiryDetail(inquiries[Number(button.dataset.supportInquiryIndex)]));
@@ -2722,6 +2730,7 @@ function openSupportContactPage() {
 }
 
 function openSupportInquiryDetail(inquiry) {
+  const editable = inquiry.status === "접수됨";
   openModal(`
     <div class="modal-sheet notification-page support-inquiry-detail-page">
       <header class="notification-header">
@@ -2745,15 +2754,42 @@ function openSupportInquiryDetail(inquiry) {
           </div>
         </section>
         ${inquiry.answer ? `<section class="card"><h3>답변</h3><p>${inquiry.answer}</p></section>` : ""}
-        <div class="support-submit-actions">
-          <button class="ghost-btn" type="button" data-action="settings-toggle">수정</button>
-          <button class="primary-btn" type="button" data-action="delete-message-confirm">삭제</button>
-        </div>
+        ${editable ? `
+          <div class="support-submit-actions">
+            <button class="ghost-btn" type="button" data-action="settings-toggle">수정</button>
+            <button class="primary-btn" type="button" data-support-inquiry-delete>삭제</button>
+          </div>
+        ` : ""}
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qs("[data-support-inquiry-delete]", sheet)?.addEventListener("click", () => openSupportInquiryDeleteConfirm());
+}
+
+function openSupportInquiryDeleteConfirm() {
+  const modal = qs("#modal");
+  const existing = qs(".support-submit-overlay", modal);
+  if (existing) existing.remove();
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="support-submit-overlay" role="dialog" aria-modal="true">
+      <div class="support-submit-sheet">
+        <h3>문의 삭제할까요?</h3>
+        <p>삭제한 문의는 문의내역에서 사라지고 다시 확인할 수 없어요.</p>
+        <div class="support-submit-actions">
+          <button class="ghost-btn" type="button" data-support-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-support-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-support-delete-cancel]", modal).addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
+  qs("[data-support-delete-confirm]", modal).addEventListener("click", () => {
+    qs(".support-submit-overlay", modal)?.remove();
+    showToast("문의가 삭제됐어요.");
+  });
 }
 
 function bindSupportTabs(sheet) {
