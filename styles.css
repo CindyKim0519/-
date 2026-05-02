@@ -1451,6 +1451,52 @@ h3 {
   gap: 12px;
 }
 
+.support-photo-field {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.support-photo-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.support-photo-add,
+.support-photo-preview {
+  align-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xs);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.support-photo-add {
+  background: var(--color-white);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.support-photo-preview {
+  background: linear-gradient(135deg, var(--color-pink-100), var(--color-pink-50));
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.support-history-card {
+  text-align: left;
+  width: 100%;
+}
+
+.support-history-photo-grid {
+  grid-template-columns: repeat(4, 46px);
+}
+
 .setting-switch-track,
 .setting-switch-knob,
 .setting-switch-label {

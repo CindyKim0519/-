@@ -2626,6 +2626,26 @@ function openSupportModal() {
 }
 
 function openSupportContactPage() {
+  const inquiries = [
+    {
+      title: "사진 업로드 문의",
+      status: "답변 완료",
+      date: "2026.05.01",
+      type: "사진",
+      body: "기록 수정 화면에서 사진을 추가했는데 일부 사진만 올라가고 나머지는 실패로 표시됐어요. 실패한 사진을 다시 추가할 수 있는지 확인하고 싶어요.",
+      photos: 2,
+      answer: "일부 사진만 실패한 경우 실패한 사진을 제외하고 먼저 저장한 뒤, 사진 추가에서 다시 선택할 수 있어요.",
+    },
+    {
+      title: "PIN 재설정 문의",
+      status: "접수됨",
+      date: "2026.04.29",
+      type: "PIN",
+      body: "PIN 재설정 인증 메일을 보냈는데 메일함에서 바로 확인되지 않았어요. 다시 보낼 수 있는지 궁금합니다.",
+      photos: 1,
+      answer: "",
+    },
+  ];
   openModal(`
     <div class="modal-sheet notification-page support-contact-page">
       <header class="notification-header">
@@ -2660,19 +2680,29 @@ function openSupportContactPage() {
             <label>문의 내용</label>
             <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
           </div>
+          <section class="support-photo-field">
+            <div class="between"><strong>사진 추가</strong><span class="meta">선택</span></div>
+            <div class="support-photo-grid">
+              <button class="support-photo-add" type="button" data-action="settings-toggle">사진 추가</button>
+              <div class="support-photo-preview"><span>1</span></div>
+              <div class="support-photo-preview"><span>2</span></div>
+            </div>
+          </section>
           <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
         </section>
         <section class="card support-tab-panel" data-support-panel="history">
-          <div class="between"><h3>문의내역</h3><span class="meta">2개</span></div>
+          <div class="between"><h3>문의내역</h3><span class="meta">${inquiries.length}개</span></div>
           <div class="list">
-            <article class="card inner-card">
-              <div class="between"><strong>사진 업로드 문의</strong><span class="meta">답변 완료</span></div>
-              <p>2026.05.01 · 사진 일부가 올라가지 않는 상황</p>
-            </article>
-            <article class="card inner-card">
-              <div class="between"><strong>PIN 재설정 문의</strong><span class="meta">접수됨</span></div>
-              <p>2026.04.29 · 인증 메일 확인 관련 문의</p>
-            </article>
+            ${inquiries.map((item, index) => `
+              <button class="card inner-card support-history-card" type="button" data-support-inquiry-index="${index}">
+                <div class="between"><strong>${item.title}</strong><span class="meta">${item.status}</span></div>
+                <p>${item.date}</p>
+                <p>${item.body}</p>
+                <div class="support-photo-grid support-history-photo-grid">
+                  ${Array.from({ length: item.photos }, (_, photoIndex) => `<div class="support-photo-preview"><span>${photoIndex + 1}</span></div>`).join("")}
+                </div>
+              </button>
+            `).join("")}
           </div>
         </section>
       </div>
@@ -2683,6 +2713,44 @@ function openSupportContactPage() {
   bindActions(sheet);
   bindSupportTabs(sheet);
   qs("[data-support-submit]", sheet).addEventListener("click", () => openSupportSubmitNotice());
+  qsa("[data-support-inquiry-index]", sheet).forEach((button) => {
+    button.addEventListener("click", () => openSupportInquiryDetail(inquiries[Number(button.dataset.supportInquiryIndex)]));
+  });
+}
+
+function openSupportInquiryDetail(inquiry) {
+  openModal(`
+    <div class="modal-sheet notification-page support-inquiry-detail-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-action="support-contact" aria-label="뒤로가기">←</button>
+        <h3>문의 상세</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <div class="between"><h3>${inquiry.title}</h3><span class="meta">${inquiry.status}</span></div>
+          <p>${inquiry.date} · ${inquiry.type}</p>
+        </section>
+        <section class="card">
+          <h3>문의 내용</h3>
+          <p>${inquiry.body}</p>
+        </section>
+        <section class="card">
+          <div class="between"><h3>첨부 사진</h3><span class="meta">${inquiry.photos}장</span></div>
+          <div class="support-photo-grid">
+            ${Array.from({ length: inquiry.photos }, (_, index) => `<div class="support-photo-preview"><span>${index + 1}</span></div>`).join("")}
+          </div>
+        </section>
+        ${inquiry.answer ? `<section class="card"><h3>답변</h3><p>${inquiry.answer}</p></section>` : ""}
+        <div class="support-submit-actions">
+          <button class="ghost-btn" type="button" data-action="settings-toggle">수정</button>
+          <button class="primary-btn" type="button" data-action="delete-message-confirm">삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  bindActions(qs(".modal-sheet"));
 }
 
 function bindSupportTabs(sheet) {
