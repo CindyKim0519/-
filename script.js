@@ -12270,7 +12270,11 @@ function openLoginModal(provider = "이메일") {
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-complete]")?.addEventListener("click", () => {
     if (isEmail) {
-      returnToEntryScreen("회원가입 후 로그인해 주세요.");
+      if (state.emailSignupCompleted) {
+        completeEmailLogin();
+      } else {
+        returnToEntryScreen("회원가입 후 로그인해 주세요.");
+      }
       return;
     }
     openFirstSetupPage();
@@ -12304,6 +12308,7 @@ function openSignupModal() {
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
   qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
+    state.emailSignupCompleted = true;
     openLoginModal("이메일");
     showToast("회원가입이 완료됐어요. 이메일로 로그인해 주세요.");
   });
@@ -12321,6 +12326,15 @@ function returnToEntryScreen(message = "") {
   qs("#onboarding")?.classList.add("is-visible");
   renderOnboarding();
   if (message) showToast(message);
+}
+
+function completeEmailLogin() {
+  closeModal();
+  state.connected = true;
+  qs("#onboarding")?.classList.add("is-hidden");
+  qs("#app")?.classList.remove("is-hidden");
+  setTab("home");
+  showToast("로그인했어요.");
 }
 
 function openFirstSetupPage() {
