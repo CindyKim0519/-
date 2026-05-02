@@ -11055,6 +11055,29 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
   });
 }
 
+// Final question tab layout: keep the tab focused on today's question.
+function renderQuestions() {
+  const questions = qs("#questions");
+  if (!questions) return;
+  questions.innerHTML = `
+    <div class="section-stack">
+      <section class="question-card">
+        <p class="eyebrow">오늘의 질문</p>
+        <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
+        <div class="home-question-actions question-action-row">
+          <button class="primary-btn" data-action="answer-question">답변 추가</button>
+          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+        </div>
+      </section>
+    </div>
+  `;
+  bindActions(questions);
+}
+
+window.setTimeout(() => {
+  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
+}, 0);
+
 function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {}) {
   const normalizedQuery = String(query || "").trim().toLowerCase();
   return state.memories.filter((memory) => {
