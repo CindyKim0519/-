@@ -1650,7 +1650,7 @@ function renderDiary() {
     <div class="section-stack">
       <div class="tabs"><button class="chip-btn ${state.diaryView === "shared" ? "active" : ""}" data-diary-view="shared">공유</button><button class="chip-btn ${state.diaryView === "personal" ? "active" : ""}" data-diary-view="personal">개인</button></div>
       <button class="primary-btn full" data-action="diary-scope-first">일기 쓰기</button>
-      <div class="list">${diaries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="meta">${entry.scope}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${entry.feelings.map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}<span class="meta">${entry.linked}</span></div></article>`).join("")}</div>
+      <div class="list">${diaries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="meta">${entry.scope}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${entry.feelings.map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}</div></article>`).join("")}</div>
     </div>
   `;
   qsa("[data-diary-view]", diary).forEach((button) => {
@@ -4414,7 +4414,7 @@ function renderDiary() {
     <div class="section-stack">
       <div class="tabs"><button class="chip-btn ${state.diaryView === "shared" ? "active" : ""}" data-diary-view="shared">공유</button><button class="chip-btn ${state.diaryView === "personal" ? "active" : ""}" data-diary-view="personal">나만보기</button></div>
       <button class="primary-btn full" data-action="diary-scope-first">일기 쓰기</button>
-      <div class="list">${diaries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="meta">${entry.scope === "개인" ? "나만보기" : "공유"}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${entry.feelings.map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}<span class="meta">${entry.linked}</span></div></article>`).join("")}</div>
+      <div class="list">${diaries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="meta">${entry.scope === "개인" ? "나만보기" : "공유"}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${entry.feelings.map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}</div></article>`).join("")}</div>
     </div>
   `;
   qsa("[data-diary-view]", diary).forEach((button) => {
@@ -7218,7 +7218,7 @@ function renderDiary() {
         <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
       </div>
       <button class="primary-btn full" data-action="diary-scope-first">일기 쓰기</button>
-      <div class="list">${entries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}<span class="meta">${entry.linked || "관련 기록 없음"}</span></div></article>`).join("")}</div>
+      <div class="list">${entries.map((entry) => `<article class="diary-card" data-action="diary-detail"><div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div><p>${entry.body}</p><div class="tag-row" style="margin-top:10px">${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}</div></article>`).join("")}</div>
     </div>
   `;
   qsa("[data-diary-view]", diary).forEach((button) => {
@@ -8108,7 +8108,6 @@ function renderDiary() {
             <p>${entry.body}</p>
             <div class="tag-row" style="margin-top:10px">
               ${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}
-              <span class="meta">${diaryHasLinkedRecord(entry.linked) ? entry.linked : "관련 기록 없음"}</span>
             </div>
           </article>
         `).join("")}
