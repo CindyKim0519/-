@@ -11107,9 +11107,9 @@ linkedDiaryCardsLatest = function linkedDiaryCardsLatest() {
   return linkedDiariesLatest().map((diary, index) => `
     <article class="linked-diary-card" role="button" tabindex="0" data-linked-diary-index="${index}">
       <div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div>
-      ${duariDiaryDateMeta(diary)}
       <p>${diary.body}</p>
       ${linkedDiaryEmotionRow(diary)}
+      ${duariDiaryDateMeta(diary)}
     </article>
   `).join("");
 };
@@ -11131,11 +11131,11 @@ renderDiary = function renderDiary() {
         ${entries.map((entry, index) => `
           <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
             <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
-            ${duariDiaryDateMeta(entry)}
             <p>${entry.body}</p>
             <div class="tag-row" style="margin-top:10px">
               ${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}
             </div>
+            ${duariDiaryDateMeta(entry)}
           </article>
         `).join("")}
       </div>
@@ -11168,7 +11168,7 @@ renderDiaryDetailReadOnly = function renderDiaryDetailReadOnly(diary, backAction
   duariRenderDiaryDetailWithDateBase(diary, backAction);
   const summary = qs(".diary-detail-page .diary-detail-summary");
   if (!summary || qs(".diary-date-meta", summary)) return;
-  qs(".diary-detail-summary .between")?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
+  qs(".diary-detail-summary .diary-detail-feelings")?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
 };
 
 const duariRenderHomeWithDiaryDateBase = renderHome;
@@ -11179,7 +11179,7 @@ renderHome = function renderHome() {
   cards.forEach((card) => {
     if (qs(".diary-date-meta", card)) return;
     const diary = diaries[Number(card.dataset.homeSharedDiaryIndex)] || diaries[0] || {};
-    qs(".between", card)?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
+    qs(".tag-row", card)?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
   });
 };
 
@@ -11263,7 +11263,7 @@ function duariQuestionHistorySeed() {
         sent: "네가 괜찮다고 말해줄 때 마음이 놓여. 그 말이 요즘 나한테 큰 힘이 돼.",
         method: "AI 다듬음",
         status: "읽음",
-        date: "5월 2일"
+        date: "2026.05.02"
       },
       {
         question: "최근에 고마웠던 순간은 언제야?",
@@ -11271,7 +11271,7 @@ function duariQuestionHistorySeed() {
         sent: "늦게까지 기다려준 게 고마웠어.",
         method: "원문",
         status: "전달됨",
-        date: "5월 1일"
+        date: "2026.05.01"
       },
       {
         question: "우리의 작은 습관 중 좋아하는 건?",
@@ -11279,7 +11279,7 @@ function duariQuestionHistorySeed() {
         sent: "걷다가 자연스럽게 손 잡는 순간이 좋아.",
         method: "AI 다듬음",
         status: "읽음",
-        date: "4월 29일"
+        date: "2026.04.29"
       },
       {
         question: "요즘 가장 자주 떠오르는 감정은 뭐야?",
@@ -11287,7 +11287,7 @@ function duariQuestionHistorySeed() {
         sent: "요즘은 기대감이 커. 앞으로 같이 할 것들이 자주 떠올라.",
         method: "AI 다듬음",
         status: "전달됨",
-        date: "4월 27일"
+        date: "2026.04.27"
       }
     ];
   }
@@ -11304,13 +11304,13 @@ function duariAddQuestionHistory({ method = "원문" } = {}) {
     sent: body,
     method,
     status: "전달됨",
-    date: "오늘"
+    date: duariTodayDiaryDate()
   });
 }
 
 function duariQuestionHistoryCard(item, index) {
   return `
-    <article class="question-history-card" role="button" tabindex="0" data-question-history-index="${index}">
+    <article class="question-history-card">
       <div class="between">
         <h3>${duariEscapeHtml(item.question)}</h3>
         <span class="linked-diary-type">${duariEscapeHtml(item.status)}</span>
