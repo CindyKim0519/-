@@ -359,6 +359,15 @@ h3 {
   transform: translateY(1px);
 }
 
+.primary-btn:disabled,
+.ghost-btn:disabled {
+  background: var(--color-gray-200);
+  border-color: var(--color-gray-200);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
 .primary-btn,
 .ghost-btn {
   align-items: center;

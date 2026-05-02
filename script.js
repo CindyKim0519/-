@@ -2335,21 +2335,28 @@ function openPinResetPage() {
       <div class="section-stack">
         <section class="card">
           <h3>본인 확인</h3>
-          <p>계정 이메일로 본인 확인을 진행한 뒤 새 6자리 PIN을 설정합니다.</p>
+          <p>계정 이메일로 받은 인증코드를 입력하면 새 PIN을 설정할 수 있어요.</p>
           <div class="form-field">
             <label>계정 이메일</label>
             <input value="harin@duari.app" readonly />
           </div>
+          <button class="ghost-btn full" type="button" data-pin-send-code>인증 메일 보내기</button>
+          <div class="form-field">
+            <label>인증코드</label>
+            <input data-pin-code-input inputmode="numeric" maxlength="6" placeholder="6자리 인증코드" disabled />
+          </div>
+          <button class="primary-btn full" type="button" data-pin-verify-code disabled>인증코드 확인</button>
+          <p class="tiny-note" data-pin-auth-status>본인 확인 후 새 PIN 입력이 활성화됩니다.</p>
         </section>
         <section class="card">
           <h3>새 PIN</h3>
           <div class="form-field">
             <label>새 PIN 6자리</label>
-            <input type="password" inputmode="numeric" maxlength="6" placeholder="숫자 6자리" />
+            <input data-new-pin type="password" inputmode="numeric" maxlength="6" placeholder="숫자 6자리" disabled />
           </div>
           <div class="form-field">
             <label>새 PIN 확인</label>
-            <input type="password" inputmode="numeric" maxlength="6" placeholder="한 번 더 입력" />
+            <input data-confirm-pin type="password" inputmode="numeric" maxlength="6" placeholder="한 번 더 입력" disabled />
           </div>
         </section>
         <section class="card notification-setting-card">
@@ -2364,12 +2371,74 @@ function openPinResetPage() {
             </button>
           </div>
         </section>
-        <button class="primary-btn full" data-action="pin-reset-complete">PIN 재설정 완료</button>
+        <button class="primary-btn full" type="button" data-pin-reset-complete disabled>PIN 재설정 완료</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  bindPinResetPage(sheet);
+}
+
+function bindPinResetPage(sheet) {
+  const sendCodeButton = qs("[data-pin-send-code]", sheet);
+  const codeInput = qs("[data-pin-code-input]", sheet);
+  const verifyButton = qs("[data-pin-verify-code]", sheet);
+  const status = qs("[data-pin-auth-status]", sheet);
+  const newPinInput = qs("[data-new-pin]", sheet);
+  const confirmPinInput = qs("[data-confirm-pin]", sheet);
+  const completeButton = qs("[data-pin-reset-complete]", sheet);
+  const verificationCode = "123456";
+
+  const updateCompleteState = () => {
+    const isReady = !newPinInput.disabled && newPinInput.value.length === 6 && confirmPinInput.value.length === 6;
+    completeButton.disabled = !isReady;
+  };
+
+  sendCodeButton.addEventListener("click", () => {
+    codeInput.disabled = false;
+    verifyButton.disabled = false;
+    codeInput.focus();
+    status.textContent = "인증 메일을 보냈어요. 프로토타입 인증코드는 123456입니다.";
+    showToast("인증 메일을 보냈어요.");
+  });
+
+  verifyButton.addEventListener("click", () => {
+    if (codeInput.value.trim() !== verificationCode) {
+      status.textContent = "인증코드가 맞지 않아요. 다시 확인해 주세요.";
+      showToast("인증코드를 확인해 주세요.");
+      return;
+    }
+    codeInput.disabled = true;
+    verifyButton.disabled = true;
+    sendCodeButton.disabled = true;
+    newPinInput.disabled = false;
+    confirmPinInput.disabled = false;
+    newPinInput.focus();
+    status.textContent = "본인 확인이 완료됐어요. 새 PIN을 입력해 주세요.";
+    showToast("본인 확인이 완료됐어요.");
+  });
+
+  [newPinInput, confirmPinInput].forEach((input) => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "").slice(0, 6);
+      updateCompleteState();
+    });
+  });
+
+  completeButton.addEventListener("click", () => {
+    if (newPinInput.value.length !== 6 || confirmPinInput.value.length !== 6) {
+      showToast("새 PIN 6자리를 입력해 주세요.");
+      return;
+    }
+    if (newPinInput.value !== confirmPinInput.value) {
+      showToast("새 PIN이 서로 달라요.");
+      return;
+    }
+    showToast("PIN 재설정이 완료됐어요.");
+    closeModal();
+  });
 }
 
 function openAccountModal() {
