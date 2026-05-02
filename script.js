@@ -1831,6 +1831,7 @@ function handleAction(action, element) {
     security: openSecurityModal,
     support: openSupportModal,
     account: openAccountModal,
+    "password-change": openPasswordChangePage,
     "previous-archive": () => openPinGate("이전 커플 보관함", openArchiveModal),
     "danger-disconnect": () => openPinGate("관계 연결 해제", () => showToast("연결 해제 확인 화면입니다. 실제 삭제는 일어나지 않아요.")),
     "danger-delete-archive": () => openPinGate("이전 관계 전체 삭제", () => showToast("전체 삭제는 PIN 확인 후 최종 확인이 필요합니다.")),
@@ -2703,7 +2704,7 @@ function openAccountModal() {
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
           <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
           <div class="my-info-row"><span>가입일</span><strong>2026.05.02</strong></div>
-          <button class="ghost-btn full" type="button" data-action="settings-toggle">비밀번호 변경</button>
+          <button class="ghost-btn full" type="button" data-action="password-change">비밀번호 변경</button>
         </section>
         <section class="card my-info-readonly-card">
           <h3>관계 정보</h3>
@@ -2717,6 +2718,52 @@ function openAccountModal() {
   `);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
+}
+
+function openPasswordChangePage() {
+  openModal(`
+    <div class="modal-sheet notification-page password-change-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-password-back aria-label="뒤로가기">←</button>
+        <h3>비밀번호 변경</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card password-change-card">
+          <div class="form-field">
+            <label for="currentPassword">현재 비밀번호</label>
+            <input id="currentPassword" type="password" autocomplete="current-password" />
+          </div>
+          <div class="form-field">
+            <label for="newPassword">새 비밀번호</label>
+            <input id="newPassword" type="password" autocomplete="new-password" />
+          </div>
+          <div class="form-field">
+            <label for="confirmPassword">새 비밀번호 확인</label>
+            <input id="confirmPassword" type="password" autocomplete="new-password" />
+          </div>
+        </section>
+        <section class="card password-rule-card">
+          <h3>비밀번호 조건</h3>
+          <ul class="password-rule-list">
+            <li>8자 이상</li>
+            <li>영문과 숫자 포함</li>
+            <li>현재 비밀번호와 다르게 설정</li>
+          </ul>
+        </section>
+        <div class="inline-action-pair">
+          <button class="ghost-btn" type="button" data-password-back>취소</button>
+          <button class="primary-btn" type="button" data-password-save>변경하기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qsa("[data-password-back]").forEach((button) => button.addEventListener("click", openAccountModal));
+  qs("[data-password-save]")?.addEventListener("click", () => {
+    showToast("비밀번호 변경 확인 흐름을 완료했어요.");
+    openAccountModal();
+  });
 }
 
 function openArchiveModal() {

@@ -1000,6 +1000,24 @@ h3 {
   white-space: nowrap;
 }
 
+.password-change-card {
+  display: grid;
+  gap: 12px;
+}
+
+.password-rule-card {
+  display: grid;
+  gap: 8px;
+}
+
+.password-rule-list {
+  color: var(--text-body);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  margin: 0;
+  padding-left: 18px;
+}
+
 .card .question-history-card {
   background: var(--color-white);
   border-color: var(--border-default);
