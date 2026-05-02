@@ -1819,7 +1819,8 @@ function handleAction(action, element) {
     "send-ai-result": () => (state.connected ? showToast("최종 메시지만 상대에게 보냈어요.") : openConnectModal()),
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": openConnectModal,
-    "add-anniversary": addCustomAnniversary,
+    "add-anniversary": openAddAnniversaryPage,
+    "save-anniversary": addCustomAnniversary,
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
@@ -2284,6 +2285,48 @@ function addCustomAnniversary(element) {
   showToast("추가한 기념일을 목록 상단에 넣었어요.");
 }
 
+function openAddAnniversaryPage() {
+  openModal(`
+    <div class="modal-sheet notification-page anniversary-settings-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-anniversary-add-back aria-label="뒤로가기">←</button>
+        <h3>기념일 추가</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>기념일 정보</h3>
+          <div class="form-field">
+            <label>이름</label>
+            <input data-anniversary-name placeholder="예: 처음 여행 간 날" />
+          </div>
+          <div class="form-field">
+            <label>날짜</label>
+            <input data-anniversary-date type="date" value="2026-05-20" />
+          </div>
+          <div class="section-stack compact-stack">
+            <div class="between anniversary-setting-row">
+              <strong>매년 반복</strong>
+              <button class="setting-switch active" type="button" aria-pressed="true" data-anniversary-repeat>
+                <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
+                <span class="setting-switch-label">켬</span>
+              </button>
+            </div>
+          </div>
+          <button class="primary-btn full" data-action="save-anniversary">기념일 추가</button>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qs("[data-anniversary-add-back]", sheet)?.addEventListener("click", openAnniversarySettingsPage);
+  qsa(".setting-switch", sheet).forEach((button) => {
+    button.addEventListener("click", () => toggleSettingSwitch(button));
+  });
+}
+
 function openAnniversarySettingsPage() {
   openModal(`
     <div class="modal-sheet notification-page anniversary-settings-page">
@@ -2308,28 +2351,6 @@ function openAnniversarySettingsPage() {
                 </div>
                 <p>${item.repeat ? "매년 반복" : "반복 없음"} · ${item.alert ? "알림 켬" : "알림 끔"}</p>
               </article>
-            `).join("")}
-          </div>
-        </section>
-        <section class="card">
-          <h3>기념일 추가</h3>
-          <div class="form-field">
-            <label>이름</label>
-            <input data-anniversary-name placeholder="예: 처음 여행 간 날" />
-          </div>
-          <div class="form-field">
-            <label>날짜</label>
-            <input data-anniversary-date type="date" value="2026-05-20" />
-          </div>
-          <div class="section-stack compact-stack">
-            ${["매년 반복"].map((item) => `
-              <div class="between anniversary-setting-row">
-                <strong>${item}</strong>
-                <button class="setting-switch active" type="button" aria-pressed="true" data-anniversary-repeat>
-                  <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
-                  <span class="setting-switch-label">켬</span>
-                </button>
-              </div>
             `).join("")}
           </div>
           <button class="primary-btn full" data-action="add-anniversary">기념일 추가</button>
