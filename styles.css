@@ -1430,6 +1430,20 @@ h3 {
   gap: 10px;
 }
 
+.modal-sheet .relation-kebab {
+  background: transparent;
+  border-color: var(--border-default);
+}
+
+.relation-dropdown {
+  min-width: 124px;
+}
+
+.relation-dropdown button {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);

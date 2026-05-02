@@ -3406,7 +3406,72 @@ function openConnectModal() {
   bindActions(qs(".modal-sheet"));
 }
 
+function currentRelationInfo() {
+  if (!state.currentRelation) state.currentRelation = { name: "봄이 & 하린", date: "2025.03.05", status: "연결됨" };
+  return state.currentRelation;
+}
+
+function relationSwitchOptions() {
+  if (!state.relationOptions) {
+    state.relationOptions = [
+      { name: "지우 & 하린", date: "2024.08.12", status: "연결됨" },
+      { name: "민서 & 하린", date: "2023.11.20", status: "연결 해제됨" },
+    ];
+  }
+  return state.relationOptions;
+}
+
+function switchRelation(option) {
+  const previous = currentRelationInfo();
+  const completeSwitch = () => {
+    state.currentRelation = { ...option };
+    state.relationOptions = relationSwitchOptions().filter((item) => item.name !== option.name);
+    state.relationOptions.unshift(previous);
+    closeModal();
+    setTab("home");
+    renderHome();
+    showToast(`${option.name} 관계로 전환했어요.`);
+  };
+  if (state.switchPinEnabled) openPinGate("관계 전환", completeSwitch);
+  else completeSwitch();
+}
+
+function openRelationDeleteConfirm(option) {
+  const modal = qs("#modal");
+  qs(".support-submit-overlay", modal)?.remove();
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="support-submit-overlay" role="dialog" aria-modal="true">
+      <div class="support-submit-sheet">
+        <h3>${option.name} 관계를 삭제할까요?</h3>
+        <p>관계 계정 제목을 입력하면 삭제할 수 있어요. 기록된 모든 기록, 일기, 사진 등이 영구적으로 사라집니다.</p>
+        <div class="form-field">
+          <label>관계 계정 제목</label>
+          <input data-relation-delete-title placeholder="${option.name}" />
+        </div>
+        <div class="support-submit-actions">
+          <button class="ghost-btn" type="button" data-relation-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-relation-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-relation-delete-cancel]", modal)?.addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
+  qs("[data-relation-delete-confirm]", modal)?.addEventListener("click", () => {
+    const typedTitle = qs("[data-relation-delete-title]", modal)?.value.trim();
+    if (typedTitle !== option.name) {
+      showToast("관계 계정 제목을 정확히 입력해 주세요.");
+      return;
+    }
+    state.relationOptions = relationSwitchOptions().filter((item) => item.name !== option.name);
+    qs(".support-submit-overlay", modal)?.remove();
+    openRelationManagementModal();
+    showToast("관계를 삭제했어요.");
+  });
+}
+
 function openRelationManagementModal() {
+  const current = currentRelationInfo();
+  const options = relationSwitchOptions();
   openModal(`
     <div class="modal-sheet notification-page relation-management-page">
       <header class="notification-header">
@@ -3418,8 +3483,8 @@ function openRelationManagementModal() {
         <section class="card">
           <div class="between">
             <div>
-              <h3>봄이 & 하린</h3>
-              <p class="meta">2025.03.05부터 · 연결됨</p>
+              <h3>${current.name}</h3>
+              <p class="meta">${current.date}부터 · ${current.status}</p>
             </div>
             <span class="chip-btn active relation-current-badge">현재 사용 중</span>
           </div>
@@ -3427,24 +3492,27 @@ function openRelationManagementModal() {
         <section class="card relation-switch-card">
           <h3>관계 전환</h3>
           <div class="list">
-            <article class="card inner-card">
+            ${options.map((option, index) => `
+            <article class="card inner-card relation-option-card">
               <div class="between">
                 <div>
-                  <strong>지우 & 하린</strong>
-                  <p class="meta">2024.08.12부터 · 연결됨</p>
+                  <strong>${option.name}</strong>
+                  <p class="meta">${option.date}부터 · ${option.status}</p>
                 </div>
-                <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
+                <div class="anniversary-menu-wrap">
+                  <button class="icon-btn anniversary-kebab relation-kebab" type="button" data-relation-menu aria-label="더보기" title="더보기">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                  </button>
+                  <div class="anniversary-dropdown relation-dropdown" data-relation-dropdown hidden>
+                    <button type="button" data-relation-switch="${index}">전환</button>
+                    <button type="button" data-relation-delete="${index}">삭제</button>
+                  </div>
+                </div>
               </div>
             </article>
-            <article class="card inner-card">
-              <div class="between">
-                <div>
-                  <strong>민서 & 하린</strong>
-                  <p class="meta">2023.11.20부터 · 연결 해제됨</p>
-                </div>
-                <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
-              </div>
-            </article>
+            `).join("")}
           </div>
           <button class="primary-btn full" type="button" data-action="relation-add">관계 추가</button>
         </section>
@@ -3452,7 +3520,40 @@ function openRelationManagementModal() {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  sheet.addEventListener("click", (event) => {
+    const menuButton = event.target.closest("[data-relation-menu]");
+    if (menuButton) {
+      const menu = menuButton.closest(".anniversary-menu-wrap")?.querySelector("[data-relation-dropdown]");
+      const willOpen = menu?.hidden;
+      qsa("[data-relation-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-relation-menu]", sheet).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        menuButton.classList.add("active");
+      }
+      return;
+    }
+    const switchButton = event.target.closest("[data-relation-switch]");
+    if (switchButton) {
+      const option = relationSwitchOptions()[Number(switchButton.dataset.relationSwitch)];
+      if (option) switchRelation(option);
+      return;
+    }
+    const deleteButton = event.target.closest("[data-relation-delete]");
+    if (deleteButton) {
+      qsa("[data-relation-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-relation-menu]", sheet).forEach((item) => item.classList.remove("active"));
+      const option = relationSwitchOptions()[Number(deleteButton.dataset.relationDelete)];
+      if (option) openRelationDeleteConfirm(option);
+      return;
+    }
+    if (!event.target.closest(".anniversary-menu-wrap")) {
+      qsa("[data-relation-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-relation-menu]", sheet).forEach((item) => item.classList.remove("active"));
+    }
+  });
 }
 
 function openAnniversariesModal() {
@@ -11063,12 +11164,13 @@ function renderHome() {
         </article>
       `).join("")
     : `<p>아직 최근 일기가 없어요.</p>`;
+  const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린" };
   home.innerHTML = `
     <div class="section-stack">
       <section class="hero-card home-hero">
         <div class="between">
           <div>
-            <p class="relationship-name">봄이 & 하린</p>
+            <p class="relationship-name">${currentRelation.name}</p>
             <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">421</strong><span>일</span></h3>
           </div>
           <span class="anniversary-pill">D-7 여행 1주년</span>
