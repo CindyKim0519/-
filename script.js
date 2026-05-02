@@ -5545,11 +5545,17 @@ function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null) {
   }).join("")}</div><button class="ghost-btn full" data-diary-record-picker>기록 연결 추가</button></section>`;
 }
 
-function bindLinkedRecordDetailNavigation(root = document) {
+function bindLinkedRecordDetailNavigation(root = document, backAction = null) {
   qsa("[data-linked-record-detail]", root).forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.linkedRecordDetail || 0);
-      openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0);
+      openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, backAction || undefined);
+    });
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      const index = Number(button.dataset.linkedRecordDetail || 0);
+      openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, backAction || undefined);
     });
   });
 }
@@ -6484,7 +6490,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
       menuButton.classList.toggle("active", shouldOpen);
     }
   });
-  bindLinkedRecordDetailNavigation(sheet);
+  bindLinkedRecordDetailNavigation(sheet, () => renderDiaryDetailReadOnly(detail, resolvedBackAction));
   const editButton = qs("[data-diary-edit]");
   if (editButton) editButton.addEventListener("click", () => openLinkedDiaryEditLatest(detail, () => renderDiaryDetailReadOnly(detail, resolvedBackAction)));
   const unlinkButton = qs("[data-diary-unlink-record]");
@@ -7740,7 +7746,7 @@ function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null, options 
     <section class="card linked-record-card">
       <div class="between"><h3>관련 기록 연결</h3><span class="meta">1개</span></div>
       <div class="linked-record-list">
-        <article class="linked-record-pill">
+        <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
           <div class="linked-record-title-row title-between">
             <span class="linked-record-title-text">${record.title}</span>
             <div class="linked-record-right-tools">
@@ -8272,7 +8278,7 @@ function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null, options 
     <section class="card linked-record-card">
       <div class="between"><h3>관련 기록 연결</h3><span class="meta">1개</span></div>
       <div class="linked-record-list">
-        <article class="linked-record-pill">
+        <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
           <div class="linked-record-title-row title-between">
             <span class="linked-record-title-text">${record.title}</span>
             <div class="linked-record-right-tools">
@@ -8553,7 +8559,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   qs("[data-diary-detail-back]").addEventListener("click", () => runFlowBack(resolvedBackAction));
-  bindLinkedRecordDetailNavigation(sheet);
+  bindLinkedRecordDetailNavigation(sheet, () => renderDiaryDetailReadOnly(detail, resolvedBackAction));
   const editButton = qs("[data-diary-edit]");
   if (editButton) editButton.addEventListener("click", () => openLinkedDiaryEditLatest(detail, () => renderDiaryDetailReadOnly(detail, resolvedBackAction)));
   bindActions(sheet);
@@ -9234,7 +9240,7 @@ function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null, options 
     <section class="card linked-record-card">
       <div class="between"><h3>연결된 기록</h3><span class="meta">1개</span></div>
       <div class="linked-record-list">
-        <article class="linked-record-pill">
+        <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
           <div class="linked-record-title-row title-between">
             <span class="linked-record-title-text">${record.title}</span>
             <div class="linked-record-right-tools">
@@ -10642,6 +10648,11 @@ function duariBindDiaryEditor(args = {}) {
     renderDiary();
     showToast("일기를 저장했어요.");
   }, { capture: true });
+  qs("[data-save-draft-diary]", sheet)?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    saveDiaryFromEditor(args.heading || "일기 추가", "관련 기록 없음", "일기를 임시 저장했어요.");
+  }, { capture: true });
 }
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
@@ -10685,7 +10696,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         ${duariLinkedRecordEditorHtml(linkedTitle, args.linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
           <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 정리하기</button>
-          ${isEditMode ? `<button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button>`}
+          ${isEditMode ? `<button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
         </div>
       </div>
     </div>
