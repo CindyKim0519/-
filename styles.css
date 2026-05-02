@@ -1356,6 +1356,12 @@ h3 {
   text-align: left;
 }
 
+.setting-switch-track,
+.setting-switch-knob,
+.setting-switch-label {
+  pointer-events: none;
+}
+
 .chip-btn.is-disabled {
   background: var(--color-gray-100);
   color: var(--text-secondary);

@@ -1728,6 +1728,14 @@ function bindActions(root) {
   root.querySelectorAll("[data-action]").forEach((element) => element.addEventListener("click", () => handleAction(element.dataset.action, element)));
 }
 
+function toggleSettingSwitch(element) {
+  const isActive = !element.classList.contains("active");
+  element.classList.toggle("active", isActive);
+  element.setAttribute("aria-pressed", String(isActive));
+  const label = element.querySelector(".setting-switch-label");
+  if (label) label.textContent = isActive ? "켬" : "끔";
+}
+
 function handleAction(action, element) {
   const actions = {
     connect: openConnectModal,
@@ -1813,11 +1821,7 @@ function handleAction(action, element) {
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
       if (element.classList.contains("setting-switch")) {
-        const isActive = !element.classList.contains("active");
-        element.classList.toggle("active", isActive);
-        element.setAttribute("aria-pressed", String(isActive));
-        const label = element.querySelector(".setting-switch-label");
-        if (label) label.textContent = isActive ? "켬" : "끔";
+        toggleSettingSwitch(element);
         return;
       }
       if (!element.classList.contains("chip-btn")) {
@@ -2284,7 +2288,7 @@ function openNotificationSettingsModal() {
           <section class="card notification-setting-card">
             <div class="between">
               <strong>${item}</strong>
-              <button class="setting-switch active" type="button" data-action="settings-toggle" aria-pressed="true">
+              <button class="setting-switch active" type="button" aria-pressed="true">
                 <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
                 <span class="setting-switch-label">켬</span>
               </button>
@@ -2295,7 +2299,11 @@ function openNotificationSettingsModal() {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qsa(".setting-switch", sheet).forEach((button) => {
+    button.addEventListener("click", () => toggleSettingSwitch(button));
+  });
 }
 
 function openRelationshipNotificationSettingsModal() {
