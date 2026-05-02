@@ -10982,12 +10982,12 @@ function renderHome() {
           </section>
         `}
         <section class="card home-records-card">
-          <h3>최근 우리 기록</h3>
+          <h3>최근 기록</h3>
           <button class="primary-btn full" data-action="new-memory">기록 추가</button>
         </section>
         <section class="diary-card">
-          <h3>최근 공유 일기</h3>
-          <p>연결 전에는 공유 일기를 사용할 수 없어요.</p>
+          <h3>최근 일기</h3>
+          <p>아직 최근 일기가 없어요.</p>
           <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
         </section>
         <section class="question-card">
@@ -11004,21 +11004,21 @@ function renderHome() {
     return;
   }
 
-  const sharedDiaries = state.diaries
-    .filter((diary) => normalizeDiaryScopeValue(diary.scope) === "공유")
-    .slice(0, 2);
+  const sharedDiaries = typeof duariHomeSharedDiaries === "function"
+    ? duariHomeSharedDiaries()
+    : (state.diaries || []).slice(0, 3);
   const homeSharedDiaryCards = sharedDiaries.length
     ? sharedDiaries.map((diary, index) => `
         <article class="linked-diary-card home-shared-diary-card" role="button" tabindex="0" data-home-shared-diary-index="${index}">
           <div class="between">
             <strong>${diary.title || "제목 없는 일기"}</strong>
-            <span class="linked-diary-type">내 공유</span>
+            <span class="linked-diary-type">${diaryScopeLabel(diary.scope)}</span>
           </div>
           <p>${diary.body || "작성된 내용이 없습니다."}</p>
           <div class="tag-row">${(diary.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}</div>
         </article>
       `).join("")
-    : `<p>아직 공유 일기가 없어요.</p>`;
+    : `<p>아직 최근 일기가 없어요.</p>`;
   home.innerHTML = `
     <div class="section-stack">
       <section class="hero-card home-hero">
@@ -11032,7 +11032,7 @@ function renderHome() {
       </section>
       <section class="card home-records-card">
         <div class="between">
-          <h3>최근 우리 기록</h3>
+          <h3>최근 기록</h3>
           <button class="chip-btn" data-tab-go="album">더보기</button>
         </div>
         <div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div>
@@ -11040,7 +11040,7 @@ function renderHome() {
       </section>
       <section class="diary-card home-shared-diary-section">
         <div class="between">
-          <h3>최근 공유 일기</h3>
+          <h3>최근 일기</h3>
           <button class="chip-btn" data-tab-go="diary">더보기</button>
         </div>
         <div class="linked-diary-list">${homeSharedDiaryCards}</div>
@@ -11734,9 +11734,10 @@ function linkedDiariesLatest() {
 window.linkedDiariesLatest = linkedDiariesLatest;
 
 function duariHomeSharedDiaries() {
-  return state.diaries
-    .filter((diary) => normalizeDiaryScopeValue(diary.scope) === "공유")
-    .slice(0, 2);
+  const source = state.diaries || [];
+  return ["공유", "개인", "draft"]
+    .map((scope) => source.find((diary) => normalizeDiaryScopeValue(diary.scope) === scope))
+    .filter(Boolean);
 }
 
 function openHomeSharedDiaryDetail(index = 0) {
