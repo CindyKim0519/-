@@ -11737,7 +11737,8 @@ function duariHomeSharedDiaries() {
   const source = state.diaries || [];
   return ["공유", "개인", "draft"]
     .map((scope) => source.find((diary) => normalizeDiaryScopeValue(diary.scope) === scope))
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 2);
 }
 
 function openHomeSharedDiaryDetail(index = 0) {

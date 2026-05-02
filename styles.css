@@ -313,6 +313,10 @@ h3 {
   margin-top: 8px;
 }
 
+.home-shared-diary-card .diary-date-meta {
+  margin-top: 0;
+}
+
 .dots {
   align-items: center;
   display: flex;
