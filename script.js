@@ -2708,7 +2708,7 @@ function openAccountModal() {
         </section>
         <section class="card my-info-readonly-card">
           <h3>관계 정보</h3>
-          <div class="my-info-row"><span>우리의 시작 날짜</span><strong>2025.03.05</strong></div>
+          <div class="my-info-row"><span>우리의 시작일</span><strong>2025.03.05</strong></div>
           <div class="my-info-row"><span>연결된 상대</span><strong>봄이</strong></div>
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>연결됨</strong></div>
