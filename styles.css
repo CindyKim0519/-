@@ -819,6 +819,18 @@ h3 {
   margin: -2px 0 0;
 }
 
+.diary-list-toolbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.diary-list-toolbar .primary-btn {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
 .question-history-card {
   background: var(--color-white);
   border: 1px solid var(--border-default);

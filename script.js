@@ -11164,8 +11164,10 @@ renderDiary = function renderDiary() {
         <button class="chip-btn ${state.diaryView === "private" ? "active" : ""}" data-diary-view="private">나만보기</button>
         <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
       </div>
-      <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
-      <p class="meta diary-list-count">총 ${entries.length}개</p>
+      <div class="diary-list-toolbar">
+        <p class="meta diary-list-count">총 ${entries.length}개</p>
+        <button class="primary-btn" data-action="diary-scope-first">일기 추가</button>
+      </div>
       <div class="list">
         ${visibleEntries.map((entry, index) => `
           <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
@@ -11792,7 +11794,7 @@ function renderAlbum() {
       <div class="album-record-toolbar">
         <div class="between">
           <span class="meta" data-record-count>총 ${state.memories.length}개</span>
-          <button class="primary-btn" type="button" data-action="new-memory">새 기록 추가</button>
+          <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
         </div>
       </div>
       <div class="list album-record-list" data-album-record-list>${recordList.html}</div>
