@@ -1711,7 +1711,7 @@ function renderMy() {
       </section>
       <div class="list">${[
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
-        ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
+        ["기념일 설정", "자동 기념일, 추가한 기념일", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
         ["FAQ", "자주 묻는 질문", "support"],
