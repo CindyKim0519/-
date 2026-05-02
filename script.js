@@ -3770,7 +3770,10 @@ function openAccountModal() {
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
           <div class="my-info-row"><span>닉네임 변경</span><strong>변경 불가</strong></div>
         </section>
-        <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
+        <div class="account-danger-actions">
+          <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
+          <button class="ghost-btn danger-outline full" type="button" data-action="danger-withdraw">회원 탈퇴</button>
+        </div>
       </div>
     </div>
   `);

@@ -938,6 +938,17 @@ h3 {
   white-space: nowrap;
 }
 
+.account-danger-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.danger-outline {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
 .password-change-card {
   display: grid;
   gap: 12px;
