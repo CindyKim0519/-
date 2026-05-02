@@ -1307,6 +1307,7 @@ h3 {
 }
 
 .anniversary-list-header {
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
 }
