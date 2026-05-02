@@ -11366,13 +11366,32 @@ function renderQuestions() {
   qs("[data-question-history-all]", questions)?.addEventListener("click", openQuestionHistoryPage);
 }
 
-function openQuestionHistoryPage(filter = "전체") {
-  const history = duariQuestionHistorySeed();
-  const filtered = history.filter((item) => {
+function duariNormalizeQuestionHistoryDate(value = "") {
+  return String(value || "").trim().replaceAll("-", ".");
+}
+
+function duariFilterQuestionHistory(history, filter = "전체", query = "", date = "") {
+  const normalizedQuery = String(query || "").trim().toLowerCase();
+  const normalizedDate = duariNormalizeQuestionHistoryDate(date);
+  return history.filter((item) => {
     if (filter === "읽음") return item.status === "읽음";
     if (filter === "전달됨") return item.status === "전달됨";
     return true;
+  }).filter((item) => {
+    const searchTarget = [item.question, item.original, item.sent, item.status, item.date].join(" ").toLowerCase();
+    const matchesQuery = !normalizedQuery || searchTarget.includes(normalizedQuery);
+    const matchesDate = !normalizedDate || item.date === normalizedDate;
+    return matchesQuery && matchesDate;
   });
+}
+
+function duariQuestionHistoryListHtml(history, filtered) {
+  return filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">전달한 질문이 없습니다.</p>`;
+}
+
+function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
+  const history = duariQuestionHistorySeed();
+  const filtered = duariFilterQuestionHistory(history, filter, query, date);
   openModal(`
     <div class="modal-sheet notification-page question-history-page">
       <header class="notification-header">
@@ -11384,8 +11403,18 @@ function openQuestionHistoryPage(filter = "전체") {
         <div class="chip-row question-history-filters">
           ${["전체", "읽음", "전달됨"].map((item) => `<button class="chip-btn ${item === filter ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
         </div>
-        <div class="question-history-list">
-          ${filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">전달한 질문이 없습니다.</p>`}
+        <div class="question-history-search-grid">
+          <div class="form-field">
+            <label for="questionHistorySearch">질문 검색</label>
+            <input id="questionHistorySearch" value="${duariEscapeHtml(query)}" placeholder="질문이나 답변 검색" />
+          </div>
+          <div class="form-field">
+            <label for="questionHistoryDate">날짜</label>
+            <input id="questionHistoryDate" type="date" value="${String(date || "").replaceAll(".", "-")}" />
+          </div>
+        </div>
+        <div class="question-history-list" data-question-history-list>
+          ${duariQuestionHistoryListHtml(history, filtered)}
         </div>
       </div>
     </div>
@@ -11397,9 +11426,28 @@ function openQuestionHistoryPage(filter = "전체") {
     setTab("questions");
   });
   qsa("[data-question-history-filter]", sheet).forEach((button) => {
-    button.addEventListener("click", () => openQuestionHistoryPage(button.dataset.questionHistoryFilter || "전체"));
+    button.addEventListener("click", () => openQuestionHistoryPage(
+      button.dataset.questionHistoryFilter || "전체",
+      qs("#questionHistorySearch", sheet)?.value || "",
+      qs("#questionHistoryDate", sheet)?.value || ""
+    ));
   });
-  bindQuestionHistoryCards(sheet, () => openQuestionHistoryPage(filter));
+  const searchInput = qs("#questionHistorySearch", sheet);
+  const dateInput = qs("#questionHistoryDate", sheet);
+  const applyQuestionHistoryFilters = () => {
+    const nextFiltered = duariFilterQuestionHistory(
+      history,
+      filter,
+      searchInput?.value || "",
+      dateInput?.value || ""
+    );
+    const list = qs("[data-question-history-list]", sheet);
+    if (list) list.innerHTML = duariQuestionHistoryListHtml(history, nextFiltered);
+  };
+  searchInput?.addEventListener("input", applyQuestionHistoryFilters);
+  dateInput?.addEventListener("input", applyQuestionHistoryFilters);
+  dateInput?.addEventListener("change", applyQuestionHistoryFilters);
+  bindQuestionHistoryCards(sheet, () => openQuestionHistoryPage(filter, query, date));
 }
 
 function openQuestionHistoryDetail(index = 0, backAction = null) {
