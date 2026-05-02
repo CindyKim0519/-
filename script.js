@@ -3419,7 +3419,7 @@ function openRelationManagementModal() {
           <div class="between">
             <div>
               <h3>봄이 & 하린</h3>
-              <p class="meta">2025.03.05부터</p>
+              <p class="meta">2025.03.05부터 · 연결됨</p>
             </div>
             <span class="chip-btn active relation-current-badge">현재 사용 중</span>
           </div>
@@ -3431,7 +3431,7 @@ function openRelationManagementModal() {
               <div class="between">
                 <div>
                   <strong>지우 & 하린</strong>
-                  <p class="meta">2024.08.12부터</p>
+                  <p class="meta">2024.08.12부터 · 연결됨</p>
                 </div>
                 <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
               </div>
@@ -3440,7 +3440,7 @@ function openRelationManagementModal() {
               <div class="between">
                 <div>
                   <strong>민서 & 하린</strong>
-                  <p class="meta">2023.11.20부터</p>
+                  <p class="meta">2023.11.20부터 · 연결 해제됨</p>
                 </div>
                 <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
               </div>
