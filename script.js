@@ -1812,6 +1812,14 @@ function handleAction(action, element) {
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
+      if (element.classList.contains("setting-switch")) {
+        const isActive = !element.classList.contains("active");
+        element.classList.toggle("active", isActive);
+        element.setAttribute("aria-pressed", String(isActive));
+        const label = element.querySelector(".setting-switch-label");
+        if (label) label.textContent = isActive ? "켬" : "끔";
+        return;
+      }
       if (!element.classList.contains("chip-btn")) {
         showToast(`${element.textContent.trim()} 흐름을 확인했어요.`);
         return;
@@ -2272,9 +2280,15 @@ function openNotificationSettingsModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        ${["휴대폰 알림", "기념일 알림"].map((item) => `
+        ${["알림", "기념일 알림"].map((item) => `
           <section class="card notification-setting-card">
-            <div class="between"><strong>${item}</strong><button class="chip-btn active" data-action="settings-toggle">켬</button></div>
+            <div class="between">
+              <strong>${item}</strong>
+              <button class="setting-switch active" type="button" data-action="settings-toggle" aria-pressed="true">
+                <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
+                <span class="setting-switch-label">켬</span>
+              </button>
+            </div>
           </section>
         `).join("")}
       </div>
