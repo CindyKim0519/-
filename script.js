@@ -2700,8 +2700,8 @@ function openAccountModal() {
           <h3>계정 정보</h3>
           <div class="my-info-row"><span>닉네임</span><strong>하린</strong></div>
           <div class="my-info-row"><span>생년월일</span><strong>1998.08.14</strong></div>
-          <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
+          <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
           <div class="my-info-row"><span>가입일</span><strong>2026.05.02</strong></div>
           <button class="ghost-btn full" type="button" data-action="settings-toggle">비밀번호 변경</button>
         </section>
