@@ -3407,7 +3407,61 @@ function openConnectModal() {
 }
 
 function openRelationManagementModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>관계 관리</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><div class="between"><strong>봄이</strong><span class="chip-btn active">현재 사용 중</span></div><p>전환 후 홈으로 이동합니다.</p></section><section class="card"><div class="between"><strong>이전 관계</strong><span class="meta">보관됨</span></div><p>현재 관계와 완전히 분리됩니다.</p></section><button class="ghost-btn" data-action="relation-add">관계 추가</button><button class="ghost-btn" data-action="previous-archive">이전 커플 보관함</button></div></div>`);
+  openModal(`
+    <div class="modal-sheet notification-page relation-management-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>관계 관리</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <div class="between">
+            <div>
+              <h3>현재 관계</h3>
+              <p class="meta">봄이 & 하린</p>
+            </div>
+            <span class="chip-btn active">현재 사용 중</span>
+          </div>
+          <p>홈, 기록, 일기, 질문은 현재 선택된 관계 기준으로 보여줍니다.</p>
+        </section>
+        <section class="card">
+          <h3>관계 전환</h3>
+          <div class="list">
+            <article class="card inner-card">
+              <div class="between">
+                <div>
+                  <strong>봄이 & 하린</strong>
+                  <p class="meta">2025.03.05부터</p>
+                </div>
+                <span class="chip-btn active">현재</span>
+              </div>
+            </article>
+            <article class="card inner-card">
+              <div class="between">
+                <div>
+                  <strong>이전 관계</strong>
+                  <p class="meta">보관됨 · 조회 전용</p>
+                </div>
+                <button class="chip-btn" type="button" data-action="previous-archive">보관함</button>
+              </div>
+            </article>
+          </div>
+        </section>
+        <section class="card">
+          <h3>관계 추가</h3>
+          <p>새 관계를 추가하면 기존 관계와 기록은 분리해서 관리됩니다.</p>
+          <button class="primary-btn full" type="button" data-action="relation-add">관계 추가</button>
+        </section>
+        <section class="card">
+          <h3>이전 커플 보관함</h3>
+          <p>이전 관계 데이터는 현재 관계와 분리되며, 접근 시 PIN 확인이 필요합니다.</p>
+          <button class="ghost-btn full" type="button" data-action="previous-archive">이전 커플 보관함</button>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
 
