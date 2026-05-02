@@ -2713,6 +2713,7 @@ function openAccountModal() {
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>연결됨</strong></div>
         </section>
+        <button class="ghost-btn full" type="button" data-action="settings-toggle">로그아웃</button>
       </div>
     </div>
   `);
