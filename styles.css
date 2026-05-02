@@ -879,6 +879,10 @@ h3 {
   padding: 0 14px;
 }
 
+.album-record-load-more[hidden] {
+  display: none !important;
+}
+
 .album-record-list .memory-card {
   align-items: center;
 }
