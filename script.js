@@ -1819,8 +1819,6 @@ function handleAction(action, element) {
     "send-ai-result": () => (state.connected ? showToast("최종 메시지만 상대에게 보냈어요.") : openConnectModal()),
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": openConnectModal,
-    "add-anniversary": openAddAnniversaryPage,
-    "save-anniversary": addCustomAnniversary,
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
@@ -2314,7 +2312,7 @@ function openAddAnniversaryPage() {
               </button>
             </div>
           </div>
-          <button class="primary-btn full" data-action="save-anniversary">기념일 추가</button>
+          <button class="primary-btn full" type="button" data-save-anniversary>기념일 추가</button>
         </section>
       </div>
     </div>
@@ -2323,6 +2321,7 @@ function openAddAnniversaryPage() {
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
   qs("[data-anniversary-add-back]", sheet)?.addEventListener("click", openAnniversarySettingsPage);
+  qs("[data-save-anniversary]", sheet)?.addEventListener("click", (event) => addCustomAnniversary(event.currentTarget));
   qsa(".setting-switch", sheet).forEach((button) => {
     button.addEventListener("click", () => toggleSettingSwitch(button));
   });
@@ -2351,7 +2350,7 @@ function openAnniversarySettingsPage() {
               <h3>추가한 기념일</h3>
               <span class="meta">${state.anniversaries.length}개</span>
             </div>
-            <button class="chip-btn active" type="button" data-action="add-anniversary">기념일 추가</button>
+            <button class="chip-btn active" type="button" data-open-add-anniversary>기념일 추가</button>
           </div>
           <div class="list">
             ${state.anniversaries.map((item) => `
@@ -2371,6 +2370,7 @@ function openAnniversarySettingsPage() {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  qs("[data-open-add-anniversary]", sheet)?.addEventListener("click", openAddAnniversaryPage);
   qsa(".setting-switch", sheet).forEach((button) => {
     button.addEventListener("click", () => toggleSettingSwitch(button));
   });
