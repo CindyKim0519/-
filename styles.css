@@ -1399,6 +1399,34 @@ h3 {
   margin: 0;
 }
 
+.support-submit-overlay {
+  align-items: center;
+  background: rgba(48, 48, 48, 0.32);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 30;
+}
+
+.support-submit-sheet {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  gap: 12px;
+  max-width: 335px;
+  padding: 18px;
+  text-align: center;
+  width: 100%;
+}
+
+.support-submit-sheet h3,
+.support-submit-sheet p {
+  margin: 0;
+}
+
 .setting-switch-track,
 .setting-switch-knob,
 .setting-switch-label {

@@ -1846,7 +1846,7 @@ function handleAction(action, element) {
     security: openSecurityModal,
     support: openSupportModal,
     "support-contact": openSupportContactPage,
-    "support-submit": () => showToast("문의가 접수됐어요."),
+    "support-submit": (element) => openSupportSubmitNotice(element.closest(".modal-sheet")),
     account: openAccountModal,
     "password-change": openPasswordChangePage,
     "previous-archive": () => openPinGate("이전 커플 보관함", openArchiveModal),
@@ -2525,8 +2525,8 @@ function openAccountModal() {
   bindActions(qs(".modal-sheet"));
 }
 
-function openSupportModal() {
-  const faqItems = [
+function getSupportFaqItems() {
+  return [
     ["시작", "커플 연결 없이 혼자 먼저 사용할 수 있나요?", "네, 나만 보기 기록, 개인 일기, 비공개 답변, 전할 말 초안을 먼저 사용할 수 있어요."],
     ["시작", "상대와 연결하면 어떤 기능이 열리나요?", "공유 일기, 우리 둘이 보기 기록, 상대 반응, 메시지 전달 같은 함께 쓰는 기능을 사용할 수 있어요."],
     ["시작", "초대 코드는 얼마나 유지되나요?", "초대 코드는 7일 동안 사용할 수 있고, 만료되면 새로 초대하면 됩니다."],
@@ -2547,6 +2547,53 @@ function openSupportModal() {
     ["AI", "AI가 내 비공개 일기도 참고하나요?", "아니요. 기록 상세에서는 기록 정보와 내가 입력한 원문만 참고하고 비공개 일기는 참고하지 않아요."],
     ["계정", "PIN은 어디에 사용되나요?", "이전 커플 보관함 접근, 관계 연결 해제, 이전 관계 전체 삭제, 회원 탈퇴 같은 중요한 동작에 사용됩니다."],
   ];
+}
+
+function renderSupportFaqGroups(items, types) {
+  return types.map((type) => {
+    const typeItems = items.filter(([category]) => category === type);
+    if (!typeItems.length) return "";
+    return `
+      <div class="faq-type-group">
+        <p class="faq-type-label">${type}</p>
+        <div class="list">
+          ${typeItems.map(([, question, answer]) => `
+            <article class="card inner-card">
+              <strong>${question}</strong>
+              <p>${answer}</p>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function bindSupportFaqFilters(sheet, faqItems, faqTypes) {
+  const searchInput = qs("[data-faq-search]", sheet);
+  const typeSelect = qs("[data-faq-type]", sheet);
+  const count = qs("[data-faq-count]", sheet);
+  const list = qs("[data-faq-list]", sheet);
+  const render = () => {
+    const keyword = searchInput.value.trim().toLowerCase();
+    const selectedType = typeSelect.value;
+    const filtered = faqItems.filter(([category, question, answer]) => {
+      const matchesType = selectedType === "전체" || category === selectedType;
+      const matchesKeyword = !keyword || `${category} ${question} ${answer}`.toLowerCase().includes(keyword);
+      return matchesType && matchesKeyword;
+    });
+    const visibleTypes = selectedType === "전체" ? faqTypes : [selectedType];
+    count.textContent = `${filtered.length}개`;
+    list.innerHTML = filtered.length
+      ? renderSupportFaqGroups(filtered, visibleTypes)
+      : `<p class="tiny-note">검색 결과가 없어요. 문의하기로 알려주시면 확인해볼게요.</p>`;
+  };
+  searchInput.addEventListener("input", render);
+  typeSelect.addEventListener("change", render);
+}
+
+function openSupportModal() {
+  const faqItems = getSupportFaqItems();
   const faqTypes = ["시작", "기록", "사진", "저장", "일기", "질문", "AI", "계정"];
   openModal(`
     <div class="modal-sheet notification-page faq-page">
@@ -2558,39 +2605,25 @@ function openSupportModal() {
       <div class="section-stack">
         <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
         <section class="card">
-          <div class="form-field"><label>FAQ 검색</label><input placeholder="궁금한 내용을 입력해보세요." /></div>
+          <div class="form-field"><label>FAQ 검색</label><input data-faq-search placeholder="궁금한 내용을 입력해보세요." /></div>
           <div class="form-field">
             <label>FAQ 유형</label>
-            <select>
+            <select data-faq-type>
               ${["전체", ...faqTypes].map((item) => `<option>${item}</option>`).join("")}
             </select>
           </div>
         </section>
         <section class="card">
-          <div class="between"><h3>자주 묻는 질문</h3><span class="meta">${faqItems.length}개</span></div>
-          ${faqTypes.map((type) => {
-            const items = faqItems.filter(([category]) => category === type);
-            if (!items.length) return "";
-            return `
-              <div class="faq-type-group">
-                <p class="faq-type-label">${type}</p>
-                <div class="list">
-                  ${items.map(([, question, answer]) => `
-                    <article class="card inner-card">
-                      <strong>${question}</strong>
-                      <p>${answer}</p>
-                    </article>
-                  `).join("")}
-                </div>
-              </div>
-            `;
-          }).join("")}
+          <div class="between"><h3>자주 묻는 질문</h3><span class="meta" data-faq-count>${faqItems.length}개</span></div>
+          <div data-faq-list>${renderSupportFaqGroups(faqItems, faqTypes)}</div>
         </section>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  bindSupportFaqFilters(sheet, faqItems, faqTypes);
 }
 
 function openSupportContactPage() {
@@ -2606,10 +2639,13 @@ function openSupportContactPage() {
           <div class="form-field">
             <label>문의 유형</label>
             <select>
-              <option>기록/사진</option>
+              <option>기록</option>
+              <option>사진</option>
               <option>일기</option>
-              <option>질문/메시지</option>
-              <option>계정/PIN</option>
+              <option>질문</option>
+              <option>메시지</option>
+              <option>계정</option>
+              <option>PIN</option>
               <option>기타</option>
             </select>
           </div>
@@ -2622,16 +2658,28 @@ function openSupportContactPage() {
             <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
           </div>
         </section>
-        <section class="card">
-          <h3>답변 안내</h3>
-          <p>문의 내용은 앱 안에서 확인할 수 있고, 필요한 경우 이메일로도 안내됩니다.</p>
-        </section>
         <button class="primary-btn full" type="button" data-action="support-submit">문의 보내기</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
+}
+
+function openSupportSubmitNotice(sheet) {
+  if (!sheet) return;
+  const existing = qs(".support-submit-overlay", sheet);
+  if (existing) existing.remove();
+  sheet.insertAdjacentHTML("beforeend", `
+    <div class="support-submit-overlay" role="dialog" aria-modal="true">
+      <div class="support-submit-sheet">
+        <h3>문의가 접수됐어요</h3>
+        <p>문의 답변은 알림으로 앱 안에서 확인할 수 있어요.</p>
+        <button class="primary-btn full" type="button" data-support-submit-confirm>확인</button>
+      </div>
+    </div>
+  `);
+  qs("[data-support-submit-confirm]", sheet).addEventListener("click", () => openSupportModal());
 }
 
 function openTermsModal() {
