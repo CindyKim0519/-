@@ -11057,6 +11057,138 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
   });
 }
 
+// Final diary date display across every diary card/detail surface.
+function duariTodayDiaryDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day}`;
+}
+
+function duariDiaryDateLabel(diary = {}) {
+  if (diary.date) return diary.date;
+  if (diary.createdAt) return diary.createdAt;
+  if (diary.linked && typeof state !== "undefined") {
+    const linkedMemory = state.memories?.find((memory) => memory.title === diary.linked);
+    if (linkedMemory?.date) return linkedMemory.date;
+  }
+  return duariTodayDiaryDate();
+}
+
+function duariDiaryDateMeta(diary = {}) {
+  return `<p class="meta diary-date-meta">작성일 ${duariEscapeHtml(duariDiaryDateLabel(diary))}</p>`;
+}
+
+if (Array.isArray(state.diaries)) {
+  state.diaries.forEach((diary) => {
+    if (!diary.date) diary.date = duariDiaryDateLabel(diary);
+  });
+}
+
+const duariNormalizeDiaryForDetailWithDateBase = normalizeDiaryForDetail;
+normalizeDiaryForDetail = function normalizeDiaryForDetail(diary, fallbackIndex = 0) {
+  const detail = duariNormalizeDiaryForDetailWithDateBase(diary, fallbackIndex);
+  return {
+    ...detail,
+    date: duariDiaryDateLabel(diary || detail)
+  };
+};
+
+const duariSaveDiaryDraftWithDateBase = saveDiaryDraftAndReturn;
+if (typeof duariSaveDiaryDraftWithDateBase === "function") {
+  saveDiaryDraftAndReturn = function saveDiaryDraftAndReturn(draft, toastMessage) {
+    return duariSaveDiaryDraftWithDateBase({ ...draft, date: draft.date || duariTodayDiaryDate() }, toastMessage);
+  };
+}
+
+const duariLinkedDiaryCardsWithDateBase = linkedDiaryCardsLatest;
+linkedDiaryCardsLatest = function linkedDiaryCardsLatest() {
+  return linkedDiariesLatest().map((diary, index) => `
+    <article class="linked-diary-card" role="button" tabindex="0" data-linked-diary-index="${index}">
+      <div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div>
+      ${duariDiaryDateMeta(diary)}
+      <p>${diary.body}</p>
+      ${linkedDiaryEmotionRow(diary)}
+    </article>
+  `).join("");
+};
+
+const duariRenderDiaryWithDateBase = renderDiary;
+renderDiary = function renderDiary() {
+  normalizeDiaryView();
+  const diary = qs("#diary");
+  const entries = diaryEntriesForCurrentView();
+  diary.innerHTML = `
+    <div class="section-stack">
+      <div class="tabs diary-tabs">
+        <button class="chip-btn ${state.diaryView === "mineShared" ? "active" : ""}" data-diary-view="mineShared">내 공유</button>
+        <button class="chip-btn ${state.diaryView === "private" ? "active" : ""}" data-diary-view="private">나만보기</button>
+        <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
+      </div>
+      <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
+      <div class="list">
+        ${entries.map((entry, index) => `
+          <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
+            <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
+            ${duariDiaryDateMeta(entry)}
+            <p>${entry.body}</p>
+            <div class="tag-row" style="margin-top:10px">
+              ${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    </div>
+  `;
+  qsa("[data-diary-view]", diary).forEach((button) => {
+    button.addEventListener("click", () => {
+      state.diaryView = button.dataset.diaryView;
+      renderDiary();
+    });
+  });
+  qsa("[data-diary-entry-index]", diary).forEach((card) => {
+    const openEntry = () => {
+      const entry = entries[Number(card.dataset.diaryEntryIndex)] || entries[0];
+      renderDiaryDetailReadOnly(entry, () => renderDiary());
+    };
+    card.addEventListener("click", openEntry);
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openEntry();
+      }
+    });
+  });
+  bindActions(diary);
+};
+
+const duariRenderDiaryDetailWithDateBase = renderDiaryDetailReadOnly;
+renderDiaryDetailReadOnly = function renderDiaryDetailReadOnly(diary, backAction = null) {
+  duariRenderDiaryDetailWithDateBase(diary, backAction);
+  const summary = qs(".diary-detail-page .diary-detail-summary");
+  if (!summary || qs(".diary-date-meta", summary)) return;
+  qs(".diary-detail-summary .between")?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
+};
+
+const duariRenderHomeWithDiaryDateBase = renderHome;
+renderHome = function renderHome() {
+  duariRenderHomeWithDiaryDateBase();
+  const cards = qsa("[data-home-shared-diary-index]");
+  const diaries = typeof duariHomeSharedDiaries === "function" ? duariHomeSharedDiaries() : [];
+  cards.forEach((card) => {
+    if (qs(".diary-date-meta", card)) return;
+    const diary = diaries[Number(card.dataset.homeSharedDiaryIndex)] || diaries[0] || {};
+    qs(".between", card)?.insertAdjacentHTML("afterend", duariDiaryDateMeta(diary));
+  });
+};
+
+window.setTimeout(() => {
+  const active = qs(".screen.active")?.id || state.tab;
+  if (active === "diary") renderDiary();
+  if (active === "home") renderHome();
+}, 0);
+
 // Final question history send/AI hooks. These run after older duplicated question flows.
 function openQuestionSendConfirmOverlay() {
   const page = qs(".question-answer-page");
