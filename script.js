@@ -2366,7 +2366,7 @@ function openPinResetPage() {
               <strong>관계 전환 시 PIN 확인</strong>
               <p>마이 > 관계 관리에서 다른 관계로 전환할 때 PIN을 확인합니다.</p>
             </div>
-            <button class="setting-switch ${switchActive}" type="button" data-action="settings-toggle" data-state-key="switchPinEnabled" aria-pressed="${switchPressed}">
+            <button class="setting-switch ${switchActive}" type="button" data-state-key="switchPinEnabled" aria-pressed="${switchPressed}">
               <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
               <span class="setting-switch-label">${switchLabel}</span>
             </button>
@@ -2382,6 +2382,10 @@ function openPinResetPage() {
 }
 
 function bindPinResetPage(sheet) {
+  qsa(".setting-switch", sheet).forEach((button) => {
+    button.addEventListener("click", () => toggleSettingSwitch(button));
+  });
+
   const sendCodeButton = qs("[data-pin-send-code]", sheet);
   const codeInput = qs("[data-pin-code-input]", sheet);
   const verifyButton = qs("[data-pin-verify-code]", sheet);
