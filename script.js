@@ -1818,7 +1818,7 @@ function handleAction(action, element) {
     "save-draft": () => showToast("초안을 저장했어요. 출처 상세 하단에 보관됩니다."),
     "send-ai-result": () => (state.connected ? showToast("최종 메시지만 상대에게 보냈어요.") : openConnectModal()),
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
-    "relation-add": openConnectModal,
+    "relation-add": () => openRelationAddPage(1),
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
@@ -3467,6 +3467,170 @@ function openRelationDeleteConfirm(option) {
     openRelationManagementModal();
     showToast("관계를 삭제했어요.");
   });
+}
+
+function relationAddDraftDefaults(draft = {}) {
+  return {
+    method: draft.method || "link",
+    code: draft.code || "DUARI-0520",
+    partnerName: draft.partnerName || "봄이",
+    myName: draft.myName || "하린",
+    startDate: draft.startDate || "2026-05-02",
+  };
+}
+
+function relationAddPageShell(step, bodyHtml) {
+  const progressItems = ["방식", "확인", "시작일", "완료"];
+  return `
+    <div class="modal-sheet notification-page relation-add-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" type="button" data-relation-add-back aria-label="뒤로가기">←</button>
+        <h3>관계 추가</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="relation-add-progress" aria-label="관계 추가 단계">
+        ${progressItems.map((item, index) => `<span class="${index + 1 <= step ? "active" : ""}">${item}</span>`).join("")}
+      </div>
+      <div class="section-stack">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function collectRelationAddDraft(sheet, draft = {}) {
+  const selectedMethod = qs("[data-relation-method].active", sheet)?.dataset.relationMethod || draft.method;
+  return relationAddDraftDefaults({
+    ...draft,
+    method: selectedMethod,
+    code: qs("[data-relation-add-code]", sheet)?.value.trim() || draft.code,
+    partnerName: qs("[data-relation-add-partner]", sheet)?.value.trim() || draft.partnerName,
+    myName: qs("[data-relation-add-my-name]", sheet)?.value.trim() || draft.myName,
+    startDate: qs("[data-relation-add-start]", sheet)?.value || draft.startDate,
+  });
+}
+
+function openRelationAddPage(step = 1, draft = {}) {
+  const data = relationAddDraftDefaults(draft);
+  const stepBodies = {
+    1: `
+      <section class="card relation-add-card">
+        <h3>연결 방식을 선택해 주세요</h3>
+        <p>초대 링크를 보내거나, 상대에게 받은 초대 코드를 입력해서 새 관계를 추가할 수 있어요.</p>
+        <div class="relation-method-grid">
+          <button class="card inner-card relation-method-card ${data.method === "link" ? "active" : ""}" type="button" data-relation-method="link">
+            <strong>초대 링크 공유</strong>
+            <span class="meta">7일 동안 유효한 링크를 만들어요.</span>
+          </button>
+          <button class="card inner-card relation-method-card ${data.method === "code" ? "active" : ""}" type="button" data-relation-method="code">
+            <strong>초대 코드 입력</strong>
+            <span class="meta">상대가 보낸 코드를 입력해요.</span>
+          </button>
+        </div>
+      </section>
+      <div class="form-field">
+        <label>초대 코드</label>
+        <input data-relation-add-code value="${data.code}" placeholder="예: DUARI-0520" />
+      </div>
+      <div class="button-row two">
+        <button class="ghost-btn" type="button" data-relation-link-copy>링크 만들기</button>
+        <button class="primary-btn" type="button" data-relation-add-next>다음</button>
+      </div>
+    `,
+    2: `
+      <section class="card relation-add-card">
+        <h3>상대 프로필 확인</h3>
+        <div class="relation-preview-profile">
+          <span class="avatar-mini" aria-hidden="true">♡</span>
+          <div>
+            <strong>봄이</strong>
+            <p class="meta">초대 코드가 확인된 상대입니다.</p>
+          </div>
+        </div>
+      </section>
+      <div class="form-field">
+        <label>상대 이름</label>
+        <input data-relation-add-partner value="${data.partnerName}" placeholder="상대방 닉네임" />
+      </div>
+      <div class="form-field">
+        <label>내 닉네임</label>
+        <input data-relation-add-my-name value="${data.myName}" placeholder="내 닉네임" />
+      </div>
+      <section class="card relation-add-card">
+        <div class="between">
+          <h3>내 프로필 사진</h3>
+          <span class="optional-badge">선택</span>
+        </div>
+        <div class="profile-photo-actions">
+          <button class="camera-icon-btn" type="button" data-relation-photo-camera aria-label="사진 촬영">⌾</button>
+          <button class="ghost-btn" type="button" data-relation-photo-album>앨범 보기</button>
+        </div>
+      </section>
+      <button class="primary-btn full" type="button" data-relation-add-next>다음</button>
+    `,
+    3: `
+      <section class="card relation-add-card">
+        <h3>우리 시작일을 입력해 주세요</h3>
+        <p>홈의 함께한 날 수와 자동 기념일 계산에 사용돼요.</p>
+      </section>
+      <div class="form-field">
+        <label>우리 시작일</label>
+        <input type="date" data-relation-add-start value="${data.startDate}" />
+      </div>
+      <section class="card inner-card relation-add-summary">
+        <div class="between"><span>관계 이름</span><strong>${data.myName} & ${data.partnerName}</strong></div>
+        <div class="between"><span>연결 방식</span><strong>${data.method === "link" ? "초대 링크" : "초대 코드"}</strong></div>
+      </section>
+      <button class="primary-btn full" type="button" data-relation-add-complete>연결하기</button>
+    `,
+    4: `
+      <section class="card relation-add-complete-card">
+        <h3>새 관계가 추가됐어요</h3>
+        <p>${data.myName} & ${data.partnerName} 관계가 현재 사용 중으로 전환됐어요.</p>
+      </section>
+      <div class="button-row two">
+        <button class="ghost-btn" type="button" data-relation-add-manage>관계 관리</button>
+        <button class="primary-btn" type="button" data-relation-add-home>홈으로 이동</button>
+      </div>
+    `,
+  };
+  openModal(relationAddPageShell(step, stepBodies[step] || stepBodies[1]));
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".relation-add-page");
+  const backTarget = () => {
+    if (step <= 1) openRelationManagementModal();
+    else if (step >= 4) openRelationManagementModal();
+    else openRelationAddPage(step - 1, collectRelationAddDraft(sheet, data));
+  };
+  qs("[data-relation-add-back]", sheet)?.addEventListener("click", backTarget);
+  qsa("[data-relation-method]", sheet).forEach((button) => {
+    button.addEventListener("click", () => {
+      qsa("[data-relation-method]", sheet).forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+    });
+  });
+  qs("[data-relation-link-copy]", sheet)?.addEventListener("click", () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."));
+  qs("[data-relation-photo-camera]", sheet)?.addEventListener("click", () => showToast("사진 촬영 권한을 확인해요."));
+  qs("[data-relation-photo-album]", sheet)?.addEventListener("click", () => showToast("앨범에서 프로필 사진을 선택해요."));
+  qs("[data-relation-add-next]", sheet)?.addEventListener("click", () => openRelationAddPage(step + 1, collectRelationAddDraft(sheet, data)));
+  qs("[data-relation-add-complete]", sheet)?.addEventListener("click", () => {
+    const nextData = collectRelationAddDraft(sheet, data);
+    const previous = currentRelationInfo();
+    state.relationOptions = relationSwitchOptions().filter((item) => item.name !== previous.name);
+    state.relationOptions.unshift(previous);
+    state.currentRelation = {
+      name: `${nextData.myName} & ${nextData.partnerName}`,
+      date: nextData.startDate.replaceAll("-", "."),
+      status: "연결됨",
+    };
+    state.connected = true;
+    openRelationAddPage(4, nextData);
+  });
+  qs("[data-relation-add-home]", sheet)?.addEventListener("click", () => {
+    closeModal();
+    setTab("home");
+    renderHome();
+    showToast("새 관계 홈으로 이동했어요.");
+  });
+  qs("[data-relation-add-manage]", sheet)?.addEventListener("click", openRelationManagementModal);
 }
 
 function openRelationManagementModal() {

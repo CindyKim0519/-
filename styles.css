@@ -1444,6 +1444,104 @@ h3 {
   padding: 0 14px;
 }
 
+.relation-add-page {
+  background: var(--color-white);
+}
+
+.button-row.two {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.relation-add-progress {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 6px 0 16px;
+}
+
+.relation-add-progress span {
+  align-items: center;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  height: 28px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.relation-add-progress span.active {
+  background: var(--color-pink-50);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.relation-method-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.relation-method-card {
+  background: var(--color-white);
+  box-shadow: none;
+  gap: 4px;
+  text-align: left;
+}
+
+.relation-method-card.active {
+  border-color: var(--accent-primary);
+}
+
+.relation-preview-profile {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.avatar-mini {
+  align-items: center;
+  background: var(--color-pink-50);
+  border-radius: 50%;
+  color: var(--accent-primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-weight: 800;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.optional-badge {
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  height: 24px;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.relation-add-summary {
+  background: var(--color-white);
+  box-shadow: none;
+  gap: 10px;
+}
+
+.relation-add-summary .between {
+  min-height: 28px;
+}
+
+.relation-add-complete-card {
+  text-align: center;
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);
