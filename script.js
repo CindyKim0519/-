@@ -2810,7 +2810,7 @@ function openSupportSubmitNotice() {
     <div class="support-submit-overlay" role="dialog" aria-modal="true">
       <div class="support-submit-sheet">
         <h3>문의 내용을 보낼까요?</h3>
-        <p>문의 답변은 알림으로 앱 안에서 확인할 수 있어요.</p>
+        <p>문의 답변은 문의하기 &gt; 문의내역 탭에서 확인할 수 있어요.</p>
         <div class="support-submit-actions">
           <button class="ghost-btn" type="button" data-support-submit-cancel>취소</button>
           <button class="primary-btn" type="button" data-support-submit-confirm>보내기</button>
