@@ -2681,7 +2681,38 @@ function openSecurityModal() {
 }
 
 function openAccountModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>계정</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>닉네임</label><input value="하린" /></div><button class="ghost-btn" data-action="settings-toggle">프로필 사진 변경</button><button class="ghost-btn" data-action="settings-toggle">프로필 사진 삭제</button><button class="ghost-btn" data-action="settings-toggle">로그아웃</button><button class="primary-btn" data-action="danger-withdraw">회원 탈퇴</button></div></div>`);
+  openModal(`
+    <div class="modal-sheet notification-page my-info-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>내 정보</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card my-info-profile-card">
+          <div class="my-info-photo">하</div>
+          <div class="my-info-photo-actions">
+            <button class="ghost-btn" type="button" data-action="settings-toggle">사진 변경</button>
+            <button class="ghost-btn" type="button" data-action="settings-toggle">사진 삭제</button>
+          </div>
+        </section>
+        <section class="card my-info-readonly-card">
+          <h3>계정 정보</h3>
+          <div class="my-info-row"><span>닉네임</span><strong>하린</strong></div>
+          <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
+          <div class="my-info-row"><span>가입일</span><strong>2026.05.02</strong></div>
+          <button class="ghost-btn full" type="button" data-action="settings-toggle">비밀번호 변경</button>
+        </section>
+        <section class="card my-info-readonly-card">
+          <h3>관계 정보</h3>
+          <div class="my-info-row"><span>우리의 시작 날짜</span><strong>2025.03.05</strong></div>
+          <div class="my-info-row"><span>연결된 상대</span><strong>봄이</strong></div>
+          <div class="my-info-row"><span>상태</span><strong>연결됨</strong></div>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
 

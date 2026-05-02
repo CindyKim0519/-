@@ -899,6 +899,67 @@ h3 {
   padding: 6px 12px;
 }
 
+.my-info-profile-card {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.my-info-photo {
+  align-items: center;
+  background: var(--color-pink-50);
+  border: 1px solid var(--color-pink-100);
+  border-radius: 50%;
+  color: var(--accent-primary);
+  display: flex;
+  font-size: 24px;
+  font-weight: 800;
+  height: 84px;
+  justify-content: center;
+  width: 84px;
+}
+
+.my-info-photo-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+
+.my-info-readonly-card {
+  display: grid;
+  gap: 12px;
+}
+
+.my-info-row {
+  align-items: center;
+  border-bottom: 1px solid var(--color-gray-100);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 34px;
+}
+
+.my-info-row:last-of-type {
+  border-bottom: 0;
+}
+
+.my-info-row span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.my-info-row strong {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .card .question-history-card {
   background: var(--color-white);
   border-color: var(--border-default);
