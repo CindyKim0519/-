@@ -3547,23 +3547,9 @@ function openRelationAddPage(step = 1, draft = {}) {
         </div>
       </section>
       <div class="form-field">
-        <label>상대 이름</label>
-        <input data-relation-add-partner value="${data.partnerName}" placeholder="상대방 닉네임" />
-      </div>
-      <div class="form-field">
         <label>내 닉네임</label>
         <input data-relation-add-my-name value="${data.myName}" placeholder="내 닉네임" />
       </div>
-      <section class="card relation-add-card">
-        <div class="between">
-          <h3>내 프로필 사진</h3>
-          <span class="optional-badge">선택</span>
-        </div>
-        <div class="profile-photo-actions">
-          <button class="camera-icon-btn" type="button" data-relation-photo-camera aria-label="사진 촬영">⌾</button>
-          <button class="ghost-btn" type="button" data-relation-photo-album>앨범 보기</button>
-        </div>
-      </section>
       <button class="primary-btn full" type="button" data-relation-add-next>다음</button>
     `,
     3: `
@@ -3575,10 +3561,6 @@ function openRelationAddPage(step = 1, draft = {}) {
         <label>우리 시작일</label>
         <input type="date" data-relation-add-start value="${data.startDate}" />
       </div>
-      <section class="card inner-card relation-add-summary">
-        <div class="between"><span>관계 이름</span><strong>${data.myName} & ${data.partnerName}</strong></div>
-        <div class="between"><span>연결 방식</span><strong>${data.method === "link" ? "초대 링크" : "초대 코드"}</strong></div>
-      </section>
       <button class="primary-btn full" type="button" data-relation-add-complete>연결하기</button>
     `,
     4: `
@@ -3608,8 +3590,6 @@ function openRelationAddPage(step = 1, draft = {}) {
     });
   });
   qs("[data-relation-link-copy]", sheet)?.addEventListener("click", () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."));
-  qs("[data-relation-photo-camera]", sheet)?.addEventListener("click", () => showToast("사진 촬영 권한을 확인해요."));
-  qs("[data-relation-photo-album]", sheet)?.addEventListener("click", () => showToast("앨범에서 프로필 사진을 선택해요."));
   qs("[data-relation-add-next]", sheet)?.addEventListener("click", () => openRelationAddPage(step + 1, collectRelationAddDraft(sheet, data)));
   qs("[data-relation-add-complete]", sheet)?.addEventListener("click", () => {
     const nextData = collectRelationAddDraft(sheet, data);

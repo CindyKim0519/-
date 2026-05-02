@@ -1516,28 +1516,6 @@ h3 {
   width: 44px;
 }
 
-.optional-badge {
-  align-items: center;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-pill);
-  color: var(--text-secondary);
-  display: inline-flex;
-  font-size: var(--font-size-xs);
-  height: 24px;
-  justify-content: center;
-  padding: 0 8px;
-}
-
-.relation-add-summary {
-  background: var(--color-white);
-  box-shadow: none;
-  gap: 10px;
-}
-
-.relation-add-summary .between {
-  min-height: 28px;
-}
-
 .relation-add-complete-card {
   text-align: center;
 }
