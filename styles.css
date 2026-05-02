@@ -1525,6 +1525,26 @@ h3 {
   margin: 0;
 }
 
+.policy-content {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 24px;
+}
+
+.policy-content h4 {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-md);
+  margin: 8px 0 0;
+}
+
+.policy-content p {
+  color: var(--text-body);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-md);
+  margin: 0;
+}
+
 .setting-switch-track,
 .setting-switch-knob,
 .setting-switch-label {

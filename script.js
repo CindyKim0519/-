@@ -1717,7 +1717,7 @@ function renderMy() {
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
         ["FAQ", "자주 묻는 질문", "support"],
         ["문의하기", "문의 접수와 문의내역", "support-contact"],
-        ["약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
+        ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
       <p class="tiny-note">Duari v0.1.0</p>
@@ -2884,11 +2884,51 @@ function openSupportSubmitNotice() {
 }
 
 function openTermsModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>이용약관</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>회원가입 동의</h3><p>회원가입 화면에서 필수 약관에 동의합니다.</p></section><section class="card"><h3>마이 하단 확인</h3><p>가입 후에도 마이 탭에서 언제든 확인할 수 있습니다.</p></section></div></div>`);
+  openModal(`
+    <div class="modal-sheet notification-page policy-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>이용약관</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="policy-content">
+        <h4>서비스 이용</h4>
+        <p>듀아리는 함께한 순간과 마음을 기록하는 관계 기록 앱입니다. 사용자는 개인 기록과 공유 기록을 목적에 맞게 작성하고 관리할 수 있습니다.</p>
+        <h4>회원가입과 동의</h4>
+        <p>회원가입 시 필수 약관에 동의해야 하며, 가입 후에도 마이 탭에서 이용약관을 다시 확인할 수 있습니다.</p>
+        <h4>기록과 공유</h4>
+        <p>나만 보기 기록은 본인에게만 보이고, 우리 둘이 보기 기록과 공유 일기는 연결된 상대에게 표시될 수 있습니다. 상대 콘텐츠가 포함된 외부 공유에는 별도 동의가 필요합니다.</p>
+        <h4>안전한 사용</h4>
+        <p>이전 커플 보관함 접근, 관계 연결 해제, 회원 탈퇴 등 중요한 동작에는 PIN 확인을 사용할 수 있습니다.</p>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  bindActions(qs(".modal-sheet"));
 }
 
 function openPrivacyPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>개인정보처리방침</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>개인 데이터</h3><p>개인 일기, 개인 초안, 나만 보기 기록은 상대에게 노출되지 않습니다.</p></section><section class="card"><h3>탈퇴 시</h3><p>계정 정보와 개인 데이터는 삭제되고, 공유 공간 데이터는 탈퇴한 사용자로 남을 수 있습니다.</p></section></div></div>`);
+  openModal(`
+    <div class="modal-sheet notification-page policy-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>개인정보처리방침</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="policy-content">
+        <h4>수집하는 정보</h4>
+        <p>계정 이메일, 닉네임, 프로필 사진, 관계 기록, 일기, 질문 답변, 알림 설정처럼 서비스 이용에 필요한 정보를 다룹니다.</p>
+        <h4>개인 기록 보호</h4>
+        <p>개인 일기, 개인 초안, 나만 보기 기록은 상대에게 존재 자체가 노출되지 않도록 분리합니다.</p>
+        <h4>공유 공간 데이터</h4>
+        <p>공유 기록, 공유 사진, 공유 일기, 보낸 메시지와 반응은 연결된 관계 공간에서 함께 확인될 수 있습니다.</p>
+        <h4>회원 탈퇴</h4>
+        <p>탈퇴 시 계정 정보와 개인 데이터는 삭제되며, 상대 공간에 남는 공유 데이터는 탈퇴한 사용자로 표시될 수 있습니다.</p>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  bindActions(qs(".modal-sheet"));
 }
 
 function openArchiveModal() {
