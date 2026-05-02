@@ -2300,6 +2300,28 @@ function deleteAnniversary(index) {
   showToast("기념일을 삭제했어요.");
 }
 
+function openAnniversaryDeleteConfirm(index) {
+  const modal = qs("#modal");
+  qs(".support-submit-overlay", modal)?.remove();
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="support-submit-overlay" role="dialog" aria-modal="true">
+      <div class="support-submit-sheet">
+        <h3>기념일을 삭제할까요?</h3>
+        <p>삭제한 기념일은 목록에서 사라지고 다시 복구할 수 없어요.</p>
+        <div class="support-submit-actions">
+          <button class="ghost-btn" type="button" data-anniversary-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-anniversary-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-anniversary-delete-cancel]", modal)?.addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
+  qs("[data-anniversary-delete-confirm]", modal)?.addEventListener("click", () => {
+    qs(".support-submit-overlay", modal)?.remove();
+    deleteAnniversary(index);
+  });
+}
+
 function openAddAnniversaryPage(editIndex = null) {
   const isEdit = Number.isInteger(editIndex);
   const editing = isEdit ? state.anniversaries[editIndex] : null;
@@ -2424,7 +2446,9 @@ function openAnniversarySettingsPage() {
     }
     const deleteButton = event.target.closest("[data-delete-anniversary]");
     if (deleteButton) {
-      deleteAnniversary(Number(deleteButton.dataset.deleteAnniversary));
+      qsa("[data-anniversary-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-anniversary-menu]", sheet).forEach((item) => item.classList.remove("active"));
+      openAnniversaryDeleteConfirm(Number(deleteButton.dataset.deleteAnniversary));
       return;
     }
     if (!event.target.closest(".anniversary-menu-wrap")) {
