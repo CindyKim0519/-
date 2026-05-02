@@ -2280,9 +2280,10 @@ function addCustomAnniversary(element) {
   const name = qs("[data-anniversary-name]", sheet)?.value.trim() || "새 기념일";
   const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
   const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
-  state.anniversaries.unshift({ name, date: date.replaceAll("-", "."), repeat, alert: true });
+  const newAnniversary = { name, date: date.replaceAll("-", "."), repeat, alert: true };
+  state.anniversaries = [newAnniversary, ...state.anniversaries];
   openAnniversarySettingsPage();
-  showToast("추가한 기념일을 목록 상단에 넣었어요.");
+  showToast("기념일 설정에 추가했어요.");
 }
 
 function openAddAnniversaryPage() {
