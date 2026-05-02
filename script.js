@@ -2382,17 +2382,12 @@ function openAnniversarySettingsPage() {
         <section class="card">
           <h3>자동 기념일</h3>
           <p>우리의 시작일을 기준으로 100일 단위와 주년을 자동으로 보여줍니다.</p>
-        </section>
-        <section class="card">
-          <h3>알림 기준</h3>
           <p>D-7과 D-day에 알려주고, 홈에는 가장 가까운 기념일 1개만 표시합니다.</p>
         </section>
         <section class="card">
+          <h3>추가한 기념일</h3>
           <div class="between anniversary-list-header">
-            <div>
-              <h3>추가한 기념일</h3>
-              <span class="meta">${state.anniversaries.length}개</span>
-            </div>
+            <span class="meta">${state.anniversaries.length}개</span>
             <button class="chip-btn active" type="button" data-open-add-anniversary>기념일 추가</button>
           </div>
           <div class="list">
