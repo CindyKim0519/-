@@ -1381,6 +1381,16 @@ h3 {
   padding: 12px;
 }
 
+.faq-page .inner-card .between {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.faq-page .inner-card .chip-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .setting-switch-track,
 .setting-switch-knob,
 .setting-switch-label {

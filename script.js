@@ -1845,6 +1845,8 @@ function handleAction(action, element) {
     "privacy-policy": openPrivacyPolicyModal,
     security: openSecurityModal,
     support: openSupportModal,
+    "support-contact": openSupportContactPage,
+    "support-submit": () => showToast("문의가 접수됐어요."),
     account: openAccountModal,
     "password-change": openPasswordChangePage,
     "previous-archive": () => openPinGate("이전 커플 보관함", openArchiveModal),
@@ -2531,13 +2533,20 @@ function openSupportModal() {
     ["AI", "AI 정리에 실패하면 어떻게 하나요?", "다시 시도하거나 원문으로 보낼 수 있어요."],
   ];
   openModal(`
-    <div class="modal-sheet">
-      <div class="between"><h3>FAQ</h3><button class="icon-btn" data-close>닫기</button></div>
+    <div class="modal-sheet notification-page faq-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>FAQ</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
       <div class="section-stack">
         <section class="card">
           <div class="form-field"><label>FAQ 검색</label><input placeholder="궁금한 내용을 입력해보세요." /></div>
-          <div class="chip-row">
-            ${["전체", "기록", "사진", "저장", "AI"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}" type="button">${item}</button>`).join("")}
+          <div class="form-field">
+            <label>FAQ 유형</label>
+            <select>
+              ${["전체", "기록", "사진", "저장", "AI"].map((item) => `<option>${item}</option>`).join("")}
+            </select>
           </div>
         </section>
         <section class="card">
@@ -2551,10 +2560,52 @@ function openSupportModal() {
             `).join("")}
           </div>
         </section>
-        <button class="primary-btn full" type="button" data-action="settings-toggle">문의하기</button>
+        <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
       </div>
     </div>
   `);
+  qs("#modal").classList.add("page-modal");
+  bindActions(qs(".modal-sheet"));
+}
+
+function openSupportContactPage() {
+  openModal(`
+    <div class="modal-sheet notification-page support-contact-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-action="support" aria-label="뒤로가기">←</button>
+        <h3>문의하기</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <div class="form-field">
+            <label>문의 유형</label>
+            <select>
+              <option>기록/사진</option>
+              <option>일기</option>
+              <option>질문/메시지</option>
+              <option>계정/PIN</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>이메일</label>
+            <input value="harin@duari.app" />
+          </div>
+          <div class="form-field">
+            <label>문의 내용</label>
+            <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
+          </div>
+        </section>
+        <section class="card">
+          <h3>답변 안내</h3>
+          <p>문의 내용은 앱 안에서 확인할 수 있고, 필요한 경우 이메일로도 안내됩니다.</p>
+        </section>
+        <button class="primary-btn full" type="button" data-action="support-submit">문의 보내기</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
 
