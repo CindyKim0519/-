@@ -1713,7 +1713,7 @@ function renderMy() {
       <div class="list">${[
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
         ["커플 설정", "연애 시작일, 기념일, 숨긴 사진 관리, 연결 해제", "couple-settings"],
-        ["알림", "푸시, 오늘의 질문, 기념일", "notification-settings"],
+        ["알림", "푸시, 기념일", "notification-settings"],
         ["개인정보", "보안 PIN 변경, PIN 재설정", "security"],
         ["고객센터/약관", "문의, FAQ, 약관, 개인정보처리방침", "support"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
@@ -2276,7 +2276,7 @@ function openNotificationSettingsModal() {
           <div class="between"><strong>앱 내부 알림</strong><span class="chip-btn active">항상 켬</span></div>
           <p>앱 안에서 기록, 일기, 메시지 알림을 확인할 수 있도록 유지됩니다.</p>
         </section>
-        ${["휴대폰 푸시", "오늘의 질문 알림", "기념일 알림"].map((item) => `
+        ${["휴대폰 푸시", "기념일 알림"].map((item) => `
           <section class="card notification-setting-card">
             <div class="between"><strong>${item}</strong><button class="chip-btn active" data-action="settings-toggle">켬</button></div>
           </section>
