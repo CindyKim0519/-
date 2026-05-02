@@ -1713,8 +1713,8 @@ function renderMy() {
       <div class="list">${[
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
         ["커플 설정", "연애 시작일, 기념일, 숨긴 사진 관리, 연결 해제", "couple-settings"],
-        ["알림", "푸시, 기념일", "notification-settings"],
-        ["개인정보", "보안 PIN 변경, PIN 재설정", "security"],
+        ["알림", "기본 알림, 기념일", "notification-settings"],
+        ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
         ["고객센터/약관", "문의, FAQ, 약관, 개인정보처리방침", "support"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
       <p class="tiny-note">Duari v0.1.0</p>
@@ -1732,6 +1732,7 @@ function toggleSettingSwitch(element) {
   const isActive = !element.classList.contains("active");
   element.classList.toggle("active", isActive);
   element.setAttribute("aria-pressed", String(isActive));
+  if (element.dataset.stateKey) state[element.dataset.stateKey] = isActive;
   const label = element.querySelector(".setting-switch-label");
   if (label) label.textContent = isActive ? "켬" : "끔";
 }
@@ -1831,6 +1832,7 @@ function handleAction(action, element) {
       element.classList.toggle("active");
       element.textContent = element.classList.contains("active") ? "켬" : "끔";
     },
+    "pin-reset-complete": () => showToast("PIN 재설정이 완료됐어요."),
     "hidden-photos": openHiddenPhotosModal,
     "relation-management": openRelationManagementModal,
     "couple-settings": openCoupleSettingsModal,
@@ -2316,7 +2318,58 @@ function openAlbumManagementModal() {
 }
 
 function openSecurityModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>보안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><button class="ghost-btn">비밀번호 변경</button><button class="ghost-btn">앱 보안 PIN 변경</button><button class="ghost-btn">PIN 재설정</button><section class="card"><div class="between"><strong>관계 전환 시 PIN 확인</strong><span class="chip-btn active">켬</span></div></section></div></div>`);
+  openPinResetPage();
+}
+
+function openPinResetPage() {
+  const switchActive = state.switchPinEnabled ? "active" : "";
+  const switchPressed = state.switchPinEnabled ? "true" : "false";
+  const switchLabel = state.switchPinEnabled ? "켬" : "끔";
+  openModal(`
+    <div class="modal-sheet notification-page pin-reset-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>PIN 재설정</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>본인 확인</h3>
+          <p>계정 이메일로 본인 확인을 진행한 뒤 새 6자리 PIN을 설정합니다.</p>
+          <div class="form-field">
+            <label>계정 이메일</label>
+            <input value="harin@duari.app" readonly />
+          </div>
+        </section>
+        <section class="card">
+          <h3>새 PIN</h3>
+          <div class="form-field">
+            <label>새 PIN 6자리</label>
+            <input type="password" inputmode="numeric" maxlength="6" placeholder="숫자 6자리" />
+          </div>
+          <div class="form-field">
+            <label>새 PIN 확인</label>
+            <input type="password" inputmode="numeric" maxlength="6" placeholder="한 번 더 입력" />
+          </div>
+        </section>
+        <section class="card notification-setting-card">
+          <div class="between">
+            <div>
+              <strong>관계 전환 시 PIN 확인</strong>
+              <p>마이 > 관계 관리에서 다른 관계로 전환할 때 PIN을 확인합니다.</p>
+            </div>
+            <button class="setting-switch ${switchActive}" type="button" data-action="settings-toggle" data-state-key="switchPinEnabled" aria-pressed="${switchPressed}">
+              <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
+              <span class="setting-switch-label">${switchLabel}</span>
+            </button>
+          </div>
+        </section>
+        <button class="primary-btn full" data-action="pin-reset-complete">PIN 재설정 완료</button>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  bindActions(qs(".modal-sheet"));
 }
 
 function openAccountModal() {
@@ -2715,8 +2768,7 @@ function openAnniversariesModal() {
 }
 
 function openSecurityModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>보안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><button class="ghost-btn" data-action="settings-toggle">비밀번호 변경</button><button class="ghost-btn" data-action="settings-toggle">앱 보안 PIN 변경</button><button class="ghost-btn" data-action="settings-toggle">PIN 재설정</button><section class="card"><div class="between"><strong>관계 전환 시 PIN 확인</strong><button class="chip-btn active" data-action="settings-toggle">켬</button></div></section></div></div>`);
-  bindActions(qs(".modal-sheet"));
+  openPinResetPage();
 }
 
 function openAccountModal() {
