@@ -1387,8 +1387,25 @@ h3 {
 }
 
 .faq-page .inner-card .chip-btn {
+  align-items: center;
+  display: inline-flex;
   flex-shrink: 0;
+  justify-content: center;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.faq-type-group {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.faq-type-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin: 0;
 }
 
 .setting-switch-track,

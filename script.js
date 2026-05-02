@@ -2532,6 +2532,7 @@ function openSupportModal() {
     ["사진", "사진 일부 업로드에 실패하면 어떻게 되나요?", "실패한 사진만 제외하고 저장할 수 있어요."],
     ["AI", "AI 정리에 실패하면 어떻게 하나요?", "다시 시도하거나 원문으로 보낼 수 있어요."],
   ];
+  const faqTypes = ["기록", "사진", "저장", "AI"];
   openModal(`
     <div class="modal-sheet notification-page faq-page">
       <header class="notification-header">
@@ -2541,26 +2542,35 @@ function openSupportModal() {
       </header>
       <div class="section-stack">
         <section class="card">
+          <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
           <div class="form-field"><label>FAQ 검색</label><input placeholder="궁금한 내용을 입력해보세요." /></div>
           <div class="form-field">
             <label>FAQ 유형</label>
             <select>
-              ${["전체", "기록", "사진", "저장", "AI"].map((item) => `<option>${item}</option>`).join("")}
+              ${["전체", ...faqTypes].map((item) => `<option>${item}</option>`).join("")}
             </select>
           </div>
         </section>
         <section class="card">
           <div class="between"><h3>자주 묻는 질문</h3><span class="meta">${faqItems.length}개</span></div>
-          <div class="list">
-            ${faqItems.map(([category, question, answer]) => `
-              <article class="card inner-card">
-                <div class="between"><strong>${question}</strong><span class="chip-btn">${category}</span></div>
-                <p>${answer}</p>
-              </article>
-            `).join("")}
-          </div>
+          ${faqTypes.map((type) => {
+            const items = faqItems.filter(([category]) => category === type);
+            if (!items.length) return "";
+            return `
+              <div class="faq-type-group">
+                <p class="faq-type-label">${type}</p>
+                <div class="list">
+                  ${items.map(([category, question, answer]) => `
+                    <article class="card inner-card">
+                      <div class="between"><strong>${question}</strong><span class="chip-btn">${category}</span></div>
+                      <p>${answer}</p>
+                    </article>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")}
         </section>
-        <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
       </div>
     </div>
   `);
