@@ -2674,12 +2674,16 @@ function openSupportSubmitNotice() {
   modal.insertAdjacentHTML("beforeend", `
     <div class="support-submit-overlay" role="dialog" aria-modal="true">
       <div class="support-submit-sheet">
-        <h3>문의가 접수됐어요</h3>
+        <h3>문의를 보내시겠어요?</h3>
         <p>문의 답변은 알림으로 앱 안에서 확인할 수 있어요.</p>
-        <button class="primary-btn full" type="button" data-support-submit-confirm>확인</button>
+        <div class="row">
+          <button class="ghost-btn" type="button" data-support-submit-cancel>취소</button>
+          <button class="primary-btn" type="button" data-support-submit-confirm>보내기</button>
+        </div>
       </div>
     </div>
   `);
+  qs("[data-support-submit-cancel]", modal).addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
   qs("[data-support-submit-confirm]", modal).addEventListener("click", () => openSupportModal());
 }
 
