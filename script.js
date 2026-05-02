@@ -11077,7 +11077,7 @@ function duariDiaryDateLabel(diary = {}) {
 }
 
 function duariDiaryDateMeta(diary = {}) {
-  return `<p class="meta diary-date-meta">작성일 ${duariEscapeHtml(duariDiaryDateLabel(diary))}</p>`;
+  return `<p class="meta diary-date-meta">${duariEscapeHtml(duariDiaryDateLabel(diary))}</p>`;
 }
 
 if (Array.isArray(state.diaries)) {
