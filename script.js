@@ -2757,7 +2757,7 @@ function openSupportInquiryDetail(inquiry) {
         ${inquiry.answer ? `<section class="card"><h3>답변</h3><p>${inquiry.answer}</p></section>` : ""}
         ${editable ? `
           <div class="support-submit-actions">
-            <button class="ghost-btn" type="button" data-action="settings-toggle">수정</button>
+            <button class="ghost-btn" type="button" data-support-inquiry-edit>수정</button>
             <button class="primary-btn" type="button" data-support-inquiry-delete>삭제</button>
           </div>
         ` : ""}
@@ -2767,7 +2767,65 @@ function openSupportInquiryDetail(inquiry) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  qs("[data-support-inquiry-edit]", sheet)?.addEventListener("click", () => openSupportInquiryEditPage(inquiry));
   qs("[data-support-inquiry-delete]", sheet)?.addEventListener("click", () => openSupportInquiryDeleteConfirm());
+}
+
+function openSupportInquiryEditPage(inquiry) {
+  openModal(`
+    <div class="modal-sheet notification-page support-contact-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" type="button" data-support-edit-back aria-label="뒤로가기">←</button>
+        <h3>문의 수정</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <div class="form-field">
+            <label>문의 유형</label>
+            <select>
+              ${["기록", "사진", "일기", "질문", "메시지", "계정", "PIN", "기타"].map((type) => `<option ${type === inquiry.type ? "selected" : ""}>${type}</option>`).join("")}
+            </select>
+          </div>
+          <div class="form-field">
+            <label>이메일</label>
+            <input value="harin@duari.app" />
+          </div>
+          <div class="form-field">
+            <label>문의 내용</label>
+            <textarea>${inquiry.body}</textarea>
+          </div>
+          <div class="form-field">
+            <label>사진 추가</label>
+            <section class="support-photo-field">
+              <div class="support-photo-grid" data-support-photo-grid>
+                <button class="support-photo-add" type="button" data-support-add-photo aria-label="사진 추가">+</button>
+                ${Array.from({ length: inquiry.photos }, (_, index) => `<div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>${index + 1}</span></div>`).join("")}
+              </div>
+            </section>
+          </div>
+          <button class="primary-btn full" type="button" data-support-edit-save>수정 저장</button>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qs("[data-support-edit-back]", sheet).addEventListener("click", () => openSupportInquiryDetail(inquiry));
+  qs("[data-support-edit-save]", sheet).addEventListener("click", () => {
+    showToast("문의 수정 내용을 저장했어요.");
+    openSupportInquiryDetail(inquiry);
+  });
+  qs("[data-support-add-photo]", sheet).addEventListener("click", () => {
+    const grid = qs("[data-support-photo-grid]", sheet);
+    const nextIndex = qsa(".support-photo-preview", grid).length + 1;
+    grid.insertAdjacentHTML("beforeend", `<div class="support-photo-preview"><button class="support-photo-remove" type="button" data-support-remove-photo aria-label="사진 삭제">×</button><span>${nextIndex}</span></div>`);
+  });
+  qs("[data-support-photo-grid]", sheet).addEventListener("click", (event) => {
+    const removeButton = event.target.closest?.("[data-support-remove-photo]");
+    if (removeButton) removeButton.closest(".support-photo-preview")?.remove();
+  });
 }
 
 function openSupportInquiryDeleteConfirm() {
