@@ -11418,7 +11418,7 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
   }).filter((item) => {
     const searchTarget = [item.question, item.original, item.sent, item.status, item.date].join(" ").toLowerCase();
     const matchesQuery = !normalizedQuery || searchTarget.includes(normalizedQuery);
-    const matchesDate = !normalizedDate || item.date === normalizedDate;
+    const matchesDate = !normalizedDate || item.date.startsWith(normalizedDate);
     return matchesQuery && matchesDate;
   });
 }
@@ -11447,8 +11447,8 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
             <input id="questionHistorySearch" value="${duariEscapeHtml(query)}" placeholder="질문이나 답변 검색" />
           </div>
           <div class="form-field">
-            <label for="questionHistoryDate">날짜</label>
-            <input id="questionHistoryDate" type="date" value="${String(date || "").replaceAll(".", "-")}" />
+            <label for="questionHistoryDate">월</label>
+            <input id="questionHistoryDate" type="month" value="${String(date || "").slice(0, 7).replaceAll(".", "-")}" />
           </div>
         </div>
         <p class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</p>
