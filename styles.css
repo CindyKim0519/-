@@ -821,6 +821,12 @@ h3 {
   border-color: var(--border-default);
 }
 
+.question-history-page .question-history-card {
+  border: 0;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
 .question-history-card h3 {
   overflow: hidden;
   text-overflow: ellipsis;
