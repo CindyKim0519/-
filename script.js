@@ -3408,20 +3408,25 @@ function openConnectModal() {
 }
 
 function currentRelationInfo() {
-  if (!state.currentRelation) state.currentRelation = { name: "봄이 & 하린", date: "2025.03.05", status: "연결됨" };
+  if (!state.currentRelation) state.currentRelation = { name: "봄이 & 하린", date: "2025.03.05", status: "연결됨", myName: "하린" };
   return state.currentRelation;
+}
+
+function relationMyName(relation = currentRelationInfo()) {
+  return relation.myName || "하린";
 }
 
 function relationPartnerName(relation = currentRelationInfo()) {
   const parts = String(relation.name || "").split("&").map((item) => item.trim()).filter(Boolean);
-  return parts.length > 1 ? parts[1] : "봄이";
+  const myName = relationMyName(relation);
+  return parts.find((item) => item !== myName) || parts[0] || "봄이";
 }
 
 function relationSwitchOptions() {
   if (!state.relationOptions) {
     state.relationOptions = [
-      { name: "지우 & 하린", date: "2024.08.12", status: "연결됨" },
-      { name: "민서 & 하린", date: "2023.11.20", status: "연결 해제됨" },
+      { name: "지우 & 하린", date: "2024.08.12", status: "연결됨", myName: "하린" },
+      { name: "민서 & 하린", date: "2023.11.20", status: "연결 해제됨", myName: "하린" },
     ];
   }
   return state.relationOptions;
@@ -3555,7 +3560,7 @@ function openRelationAddPage(step = 1, draft = {}) {
       <div class="form-field">
         <div class="field-label-row">
           <label>내 닉네임</label>
-          <span class="meta">내 정보에서도 수정 가능</span>
+          <span class="meta">완료 후 변경 불가</span>
         </div>
         <input data-relation-add-my-name value="${data.myName}" placeholder="내 닉네임" />
       </div>
@@ -3616,6 +3621,7 @@ function openRelationAddPage(step = 1, draft = {}) {
       name: `${nextData.myName} & ${nextData.partnerName}`,
       date: nextData.startDate.replaceAll("-", "."),
       status: "연결됨",
+      myName: nextData.myName,
     };
     state.connected = true;
     openRelationAddPage(4, nextData);
@@ -3726,6 +3732,7 @@ function openSecurityModal() {
 
 function openAccountModal() {
   const current = currentRelationInfo();
+  const myName = relationMyName(current);
   const partnerName = relationPartnerName(current);
   openModal(`
     <div class="modal-sheet notification-page my-info-page">
@@ -3737,7 +3744,7 @@ function openAccountModal() {
       <div class="section-stack">
         <section class="card my-info-readonly-card">
           <h3>계정 정보</h3>
-          <div class="my-info-row"><span>닉네임</span><strong>하린</strong></div>
+          <div class="my-info-row"><span>닉네임</span><strong>${myName}</strong></div>
           <div class="my-info-row"><span>생년월일</span><strong>1998.08.14</strong></div>
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
           <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
@@ -3750,6 +3757,7 @@ function openAccountModal() {
           <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
+          <div class="my-info-row"><span>닉네임 변경</span><strong>변경 불가</strong></div>
         </section>
         <button class="ghost-btn full" type="button" data-action="settings-toggle">로그아웃</button>
       </div>
