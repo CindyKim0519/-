@@ -1846,7 +1846,6 @@ function handleAction(action, element) {
     security: openSecurityModal,
     support: openSupportModal,
     "support-contact": openSupportContactPage,
-    "support-submit": (element) => openSupportSubmitNotice(element.closest(".modal-sheet")),
     account: openAccountModal,
     "password-change": openPasswordChangePage,
     "previous-archive": () => openPinGate("이전 커플 보관함", openArchiveModal),
@@ -2658,19 +2657,21 @@ function openSupportContactPage() {
             <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
           </div>
         </section>
-        <button class="primary-btn full" type="button" data-action="support-submit">문의 보내기</button>
+        <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qs("[data-support-submit]", sheet).addEventListener("click", () => openSupportSubmitNotice());
 }
 
-function openSupportSubmitNotice(sheet) {
-  if (!sheet) return;
-  const existing = qs(".support-submit-overlay", sheet);
+function openSupportSubmitNotice() {
+  const modal = qs("#modal");
+  const existing = qs(".support-submit-overlay", modal);
   if (existing) existing.remove();
-  sheet.insertAdjacentHTML("beforeend", `
+  modal.insertAdjacentHTML("beforeend", `
     <div class="support-submit-overlay" role="dialog" aria-modal="true">
       <div class="support-submit-sheet">
         <h3>문의가 접수됐어요</h3>
@@ -2679,7 +2680,7 @@ function openSupportSubmitNotice(sheet) {
       </div>
     </div>
   `);
-  qs("[data-support-submit-confirm]", sheet).addEventListener("click", () => openSupportModal());
+  qs("[data-support-submit-confirm]", modal).addEventListener("click", () => openSupportModal());
 }
 
 function openTermsModal() {
