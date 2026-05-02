@@ -1711,7 +1711,6 @@ function renderMy() {
         </div>
       </section>
       <div class="list">${[
-        ["계정", "프로필 수정, 로그아웃, 회원 탈퇴", "account"],
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
         ["커플 설정", "연애 시작일, 기념일, 숨긴 사진 관리, 연결 해제", "couple-settings"],
         ["알림", "질문, 기념일, 반응, 푸시 미리보기", "notification-settings"],
