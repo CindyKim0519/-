@@ -4092,7 +4092,7 @@ qsa(".login-grid .ghost-btn").forEach((button) => {
   button.addEventListener("click", () => openLoginModal(button.textContent.trim()));
 });
 
-qs("#startApp").addEventListener("click", startSetup);
+qs("#startApp")?.addEventListener("click", startSetup);
 qs("#openNotifications").addEventListener("click", () => {
   openModal(`<div class="modal-sheet"><div class="between"><h3>알림</h3><button class="icon-btn" data-close>닫기</button></div><div class="tabs" style="margin:10px 0">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}">${item}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card"><div class="between"><strong>${item.type}</strong><span class="meta">알림</span></div><p>${item.text}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent">요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
   bindActions(qs(".modal-sheet"));
@@ -12293,13 +12293,16 @@ function openSignupModal() {
             <button class="chip-btn active" type="button">개인정보</button>
           </div>
         </section>
-        <button class="primary-btn full" type="button" data-entry-signup-complete>가입 후 설정</button>
+        <button class="primary-btn full" type="button" data-entry-signup-complete>가입 완료</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
-  qs("[data-entry-signup-complete]")?.addEventListener("click", openFirstSetupPage);
+  qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
+    openLoginModal("이메일");
+    showToast("회원가입이 완료됐어요. 이메일로 로그인해 주세요.");
+  });
 }
 
 function startSetup() {
@@ -12375,7 +12378,7 @@ function openStartAlonePage() {
       <div class="section-stack">
         <section class="hero-card">
           <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
-          <p>나만 보기 기록, 개인 일기, 비공개 질문 답변, 전할 말 초안을 먼저 남길 수 있어요.</p>
+          <p>혼자 먼저 시작하면 나만보기 기록과 개인 일기만 사용할 수 있어요.</p>
         </section>
         <button class="primary-btn full" type="button" data-entry-confirm-alone>혼자 시작하기</button>
         <button class="ghost-btn full" type="button" data-entry-connect>상대와 연결하기</button>
@@ -12398,13 +12401,13 @@ function openStartAlonePage() {
 
 (() => {
   const onboarding = qs("#onboarding");
-  const startButton = qs("#startApp");
+  const signupButton = qs("#signupApp");
   const loginButtons = qsa(".login-grid .ghost-btn");
-  startButton?.addEventListener("click", (event) => {
+  signupButton?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
-    openLoginModal("이메일");
+    openSignupModal();
   }, true);
   loginButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
