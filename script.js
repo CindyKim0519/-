@@ -11289,14 +11289,7 @@ function openQuestionHistoryDetail(index = 0, backAction = null) {
         <section class="card">
           <div class="between"><h3>보낸 답변</h3><span class="linked-diary-type">${duariEscapeHtml(item.status)}</span></div>
           <p>${duariEscapeHtml(item.sent)}</p>
-        </section>
-        <section class="card">
-          <h3>작성 원문</h3>
-          <p>${duariEscapeHtml(item.original)}</p>
-        </section>
-        <section class="card">
           <div class="question-history-meta detail">
-            <span>${duariEscapeHtml(item.method)}</span>
             <span>${duariEscapeHtml(item.date)}</span>
           </div>
         </section>
