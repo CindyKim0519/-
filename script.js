@@ -11577,9 +11577,10 @@ window.setTimeout(() => {
 
 function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {}) {
   const normalizedQuery = String(query || "").trim().toLowerCase();
+  const normalizedDate = String(date || "").trim().replaceAll("-", ".");
   return state.memories.filter((memory) => {
     const matchesQuery = !normalizedQuery || [memory.title, memory.place, memory.type].some((value) => String(value || "").toLowerCase().includes(normalizedQuery));
-    const matchesDate = !date || toDateInputValue(memory.date) === date;
+    const matchesDate = !normalizedDate || String(memory.date || "").startsWith(normalizedDate);
     const matchesType = type === "전체" || memory.type === type;
     return matchesQuery && matchesDate && matchesType;
   });
@@ -11824,8 +11825,8 @@ function renderAlbum() {
       ${currentView === "record" || currentView === "photo" ? `
         <div class="album-filter-grid">
           <div class="form-field">
-            <label for="albumDateFilter">날짜</label>
-            <input id="albumDateFilter" type="date" />
+            <label for="albumDateFilter">월</label>
+            <input id="albumDateFilter" type="month" />
           </div>
           <div class="form-field">
             <label for="albumTypeFilter">기록 유형</label>
