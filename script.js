@@ -12257,7 +12257,6 @@ function openLoginModal(provider = "이메일") {
           <div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div>
           <div class="form-field"><label>비밀번호</label><input type="password" placeholder="비밀번호" /></div>
           <button class="primary-btn full" type="button" data-entry-login-complete>로그인</button>
-          <button class="ghost-btn full" type="button" data-entry-signup>이메일로 회원가입</button>
         ` : `
           <section class="card">
             <h3>소셜 계정으로 계속하기</h3>
@@ -12269,8 +12268,13 @@ function openLoginModal(provider = "이메일") {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-entry-login-complete]")?.addEventListener("click", openFirstSetupPage);
-  qs("[data-entry-signup]")?.addEventListener("click", openSignupModal);
+  qs("[data-entry-login-complete]")?.addEventListener("click", () => {
+    if (isEmail) {
+      returnToEntryScreen("회원가입 후 로그인해 주세요.");
+      return;
+    }
+    openFirstSetupPage();
+  });
 }
 
 function openSignupModal() {
@@ -12307,6 +12311,16 @@ function openSignupModal() {
 
 function startSetup() {
   openFirstSetupPage();
+}
+
+function returnToEntryScreen(message = "") {
+  closeModal();
+  state.slide = 0;
+  qs("#app")?.classList.add("is-hidden");
+  qs("#onboarding")?.classList.remove("is-hidden");
+  qs("#onboarding")?.classList.add("is-visible");
+  renderOnboarding();
+  if (message) showToast(message);
 }
 
 function openFirstSetupPage() {
