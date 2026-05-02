@@ -1425,6 +1425,11 @@ h3 {
   text-align: center;
 }
 
+.relation-switch-card {
+  display: grid;
+  gap: 10px;
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);

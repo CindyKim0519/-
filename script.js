@@ -3424,31 +3424,29 @@ function openRelationManagementModal() {
             <span class="chip-btn active relation-current-badge">현재 사용 중</span>
           </div>
         </section>
-        <section class="card">
-          <div class="between">
-            <h3>관계 전환</h3>
-            <button class="chip-btn active" type="button" data-action="relation-add">관계 추가</button>
-          </div>
+        <section class="card relation-switch-card">
+          <h3>관계 전환</h3>
           <div class="list">
             <article class="card inner-card">
               <div class="between">
                 <div>
-                  <strong>봄이 & 하린</strong>
-                  <p class="meta">2025.03.05부터</p>
+                  <strong>지우 & 하린</strong>
+                  <p class="meta">2024.08.12부터</p>
                 </div>
-                <span class="chip-btn active">현재</span>
+                <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
               </div>
             </article>
             <article class="card inner-card">
               <div class="between">
                 <div>
-                  <strong>이전 관계</strong>
-                  <p class="meta">보관됨 · 조회 전용</p>
+                  <strong>민서 & 하린</strong>
+                  <p class="meta">2023.11.20부터</p>
                 </div>
-                <button class="chip-btn" type="button" data-action="previous-archive">보관함</button>
+                <button class="chip-btn" type="button" data-action="settings-toggle">전환</button>
               </div>
             </article>
           </div>
+          <button class="primary-btn full" type="button" data-action="relation-add">관계 추가</button>
         </section>
       </div>
     </div>
