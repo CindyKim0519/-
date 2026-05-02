@@ -1701,7 +1701,6 @@ function renderMy() {
       <section class="card my-profile-card">
         <div class="my-profile-header">
           <div class="my-profile-summary">
-            <div class="my-profile-avatar" aria-hidden="true">하</div>
             <div class="my-profile-text">
               <h3>하린</h3>
               <p class="meta">harin@duari.app</p>
@@ -1719,7 +1718,7 @@ function renderMy() {
         ["문의하기", "문의 접수와 문의내역", "support-contact"],
         ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
-      ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
+      ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="menu-chevron" aria-hidden="true">›</span></div><p>${body}</p></button>`).join("")}</div>
       <p class="tiny-note">Duari v0.1.0</p>
     </div>
   `;
@@ -2521,7 +2520,7 @@ function bindPinResetPage(sheet) {
 }
 
 function openAccountModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>계정</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>닉네임</label><input value="하린" /></div><button class="ghost-btn">프로필 사진 변경</button><button class="ghost-btn">프로필 사진 삭제</button><button class="ghost-btn">로그아웃</button><button class="primary-btn" data-action="danger-withdraw">회원 탈퇴</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>계정</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>닉네임</label><input value="하린" /></div><button class="ghost-btn">로그아웃</button><button class="primary-btn" data-action="danger-withdraw">회원 탈퇴</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -3322,13 +3321,6 @@ function openAccountModal() {
       <div class="section-stack">
         <section class="card my-info-readonly-card">
           <h3>계정 정보</h3>
-          <div class="my-info-photo-block">
-            <div class="my-info-photo-wrap">
-              <div class="my-info-photo">하</div>
-              <button class="my-info-camera-btn" type="button" data-action="settings-toggle" aria-label="프로필 사진 변경"></button>
-            </div>
-            <button class="ghost-btn my-info-delete-photo" type="button" data-action="settings-toggle">사진 삭제</button>
-          </div>
           <div class="my-info-row"><span>닉네임</span><strong>하린</strong></div>
           <div class="my-info-row"><span>생년월일</span><strong>1998.08.14</strong></div>
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
