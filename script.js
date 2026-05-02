@@ -1698,7 +1698,20 @@ function renderQuestions() {
 function renderMy() {
   qs("#my").innerHTML = `
     <div class="section-stack">
-      <section class="card"><div class="between"><div><p class="eyebrow">계정</p><h3>하린</h3></div><button class="chip-btn" data-action="toggle-connection">${state.connected ? "혼자 상태 보기" : "연결 상태 보기"}</button></div></section>
+      <section class="card my-profile-card">
+        <div class="my-profile-summary">
+          <div class="my-profile-avatar" aria-hidden="true">하</div>
+          <div class="my-profile-text">
+            <p class="eyebrow">내 프로필</p>
+            <h3>하린</h3>
+            <p class="meta">이메일 로그인 · harin@duari.app</p>
+          </div>
+        </div>
+        <div class="my-profile-actions">
+          <button class="ghost-btn" data-action="account">계정 관리</button>
+          <button class="chip-btn" data-action="toggle-connection">${state.connected ? "혼자 상태 보기" : "연결 상태 보기"}</button>
+        </div>
+      </section>
       <div class="list">${[
         ["계정", "프로필 수정, 로그아웃, 회원 탈퇴", "account"],
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
