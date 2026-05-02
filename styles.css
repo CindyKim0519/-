@@ -794,6 +794,54 @@ h3 {
   width: 100%;
 }
 
+.question-history-section {
+  display: grid;
+  gap: 12px;
+}
+
+.question-history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.question-history-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  text-align: left;
+}
+
+.question-history-card h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.question-history-card p {
+  margin: 0;
+}
+
+.question-history-meta {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.question-history-meta span + span::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+.question-history-meta.detail {
+  justify-content: flex-start;
+}
+
 .album-filter-grid {
   display: grid;
   gap: 10px;

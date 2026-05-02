@@ -11049,11 +11049,55 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     textarea.value = makeFreshAiRedraftFromOriginal(original, tone);
   });
   qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.method = "AI 다듬음";
+    duariQuestionAnswerDraft.original = original || duariQuestionAnswerDraft.body || "";
     duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
     openQuestionModal();
     showToast("AI 결과를 답변 본문에 저장했어요.");
   });
 }
+
+// Final question history send/AI hooks. These run after older duplicated question flows.
+function openQuestionSendConfirmOverlay() {
+  const page = qs(".question-answer-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>상대방에게 전달할까요?</h3>
+        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-question-send-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-question-send-confirm]", page)?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || duariQuestionAnswerDraft.body || "";
+    duariAddQuestionHistory({ method: duariQuestionAnswerDraft.method || "원문" });
+    duariQuestionAnswerDraft.body = "";
+    duariQuestionAnswerDraft.method = "원문";
+    qs(".ai-confirm-overlay", page)?.remove();
+    closeModal();
+    setTab("questions");
+    showToast("답변을 상대방에게 전달했어요.");
+  });
+}
+
+const duariQuestionAiResultFinalBase = openQuestionAiResultPage;
+openQuestionAiResultPage = function openQuestionAiResultPage(draft = {}) {
+  duariQuestionAiResultFinalBase(draft);
+  qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.method = "AI 다듬음";
+    duariQuestionAnswerDraft.original = draft.original || duariQuestionAnswerDraft.body || "";
+  }, { capture: true });
+};
+
+window.setTimeout(() => {
+  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
+}, 0);
 
 // Final question tab layout: keep the tab focused on today's question.
 function renderQuestions() {
@@ -11073,6 +11117,241 @@ function renderQuestions() {
   `;
   bindActions(questions);
 }
+
+window.setTimeout(() => {
+  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
+}, 0);
+
+function duariQuestionHistorySeed() {
+  if (!Array.isArray(state.questionHistory)) {
+    state.questionHistory = [
+      {
+        question: "요즘 나에게 가장 힘이 되는 말은 뭐야?",
+        original: "네가 괜찮다고 말해줄 때 마음이 놓여.",
+        sent: "네가 괜찮다고 말해줄 때 마음이 놓여. 그 말이 요즘 나한테 큰 힘이 돼.",
+        method: "AI 다듬음",
+        status: "읽음",
+        date: "5월 2일"
+      },
+      {
+        question: "최근에 고마웠던 순간은 언제야?",
+        original: "늦게까지 기다려준 게 고마웠어.",
+        sent: "늦게까지 기다려준 게 고마웠어.",
+        method: "원문",
+        status: "전달됨",
+        date: "5월 1일"
+      },
+      {
+        question: "우리의 작은 습관 중 좋아하는 건?",
+        original: "걷다가 손 잡는 거.",
+        sent: "걷다가 자연스럽게 손 잡는 순간이 좋아.",
+        method: "AI 다듬음",
+        status: "읽음",
+        date: "4월 29일"
+      },
+      {
+        question: "요즘 가장 자주 떠오르는 감정은 뭐야?",
+        original: "기대감이 커.",
+        sent: "요즘은 기대감이 커. 앞으로 같이 할 것들이 자주 떠올라.",
+        method: "AI 다듬음",
+        status: "전달됨",
+        date: "4월 27일"
+      }
+    ];
+  }
+  return state.questionHistory;
+}
+
+function duariAddQuestionHistory({ method = "원문" } = {}) {
+  const body = (qs("#questionAnswerBody")?.value || duariQuestionAnswerDraft.body || "").trim();
+  const question = duariQuestionAnswerDraft.question || duariCurrentQuestionText();
+  if (!body) return;
+  duariQuestionHistorySeed().unshift({
+    question,
+    original: duariQuestionAnswerDraft.original || body,
+    sent: body,
+    method,
+    status: "전달됨",
+    date: "오늘"
+  });
+}
+
+function duariQuestionHistoryCard(item, index) {
+  return `
+    <article class="question-history-card" role="button" tabindex="0" data-question-history-index="${index}">
+      <div class="between">
+        <h3>${duariEscapeHtml(item.question)}</h3>
+        <span class="linked-diary-type">${duariEscapeHtml(item.status)}</span>
+      </div>
+      <p>${duariEscapeHtml(item.sent)}</p>
+      <div class="question-history-meta">
+        <span>${duariEscapeHtml(item.method)}</span>
+        <span>${duariEscapeHtml(item.date)}</span>
+      </div>
+    </article>
+  `;
+}
+
+function bindQuestionHistoryCards(root, backAction) {
+  qsa("[data-question-history-index]", root).forEach((card) => {
+    const open = () => openQuestionHistoryDetail(Number(card.dataset.questionHistoryIndex || 0), backAction);
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      open();
+    });
+  });
+}
+
+function renderQuestions() {
+  const questions = qs("#questions");
+  if (!questions) return;
+  const history = duariQuestionHistorySeed();
+  questions.innerHTML = `
+    <div class="section-stack">
+      <section class="question-card">
+        <p class="eyebrow">오늘의 질문</p>
+        <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
+        <div class="home-question-actions question-action-row">
+          <button class="primary-btn" data-action="answer-question">답변 추가</button>
+          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+        </div>
+      </section>
+      <section class="card question-history-section">
+        <div class="between">
+          <h3>전달한 질문</h3>
+          <span class="meta">최근 ${Math.min(history.length, 3)}개</span>
+        </div>
+        <div class="question-history-list">
+          ${history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")}
+        </div>
+        <button class="ghost-btn full" type="button" data-question-history-all>전체 보기</button>
+      </section>
+    </div>
+  `;
+  bindActions(questions);
+  bindQuestionHistoryCards(questions, () => setTab("questions"));
+  qs("[data-question-history-all]", questions)?.addEventListener("click", openQuestionHistoryPage);
+}
+
+function openQuestionHistoryPage(filter = "전체") {
+  const history = duariQuestionHistorySeed();
+  const filtered = history.filter((item) => {
+    if (filter === "원문") return item.method === "원문";
+    if (filter === "AI 다듬음") return item.method === "AI 다듬음";
+    if (filter === "읽음") return item.status === "읽음";
+    return true;
+  });
+  openModal(`
+    <div class="modal-sheet notification-page question-history-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-history-back aria-label="뒤로가기">←</button>
+        <h3>전달한 질문</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <div class="chip-row question-history-filters">
+          ${["전체", "원문", "AI 다듬음", "읽음"].map((item) => `<button class="chip-btn ${item === filter ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
+        </div>
+        <div class="question-history-list">
+          ${filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">전달한 질문이 없습니다.</p>`}
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".question-history-page");
+  qs("[data-question-history-back]", sheet)?.addEventListener("click", () => {
+    closeModal();
+    setTab("questions");
+  });
+  qsa("[data-question-history-filter]", sheet).forEach((button) => {
+    button.addEventListener("click", () => openQuestionHistoryPage(button.dataset.questionHistoryFilter || "전체"));
+  });
+  bindQuestionHistoryCards(sheet, () => openQuestionHistoryPage(filter));
+}
+
+function openQuestionHistoryDetail(index = 0, backAction = null) {
+  const history = duariQuestionHistorySeed();
+  const item = history[index] || history[0];
+  if (!item) return;
+  openModal(`
+    <div class="modal-sheet notification-page question-history-detail-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-question-detail-back aria-label="뒤로가기">←</button>
+        <h3>질문 상세</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <p class="eyebrow">질문</p>
+          <h3>${duariEscapeHtml(item.question)}</h3>
+        </section>
+        <section class="card">
+          <div class="between"><h3>보낸 답변</h3><span class="linked-diary-type">${duariEscapeHtml(item.status)}</span></div>
+          <p>${duariEscapeHtml(item.sent)}</p>
+        </section>
+        <section class="card">
+          <h3>작성 원문</h3>
+          <p>${duariEscapeHtml(item.original)}</p>
+        </section>
+        <section class="card">
+          <div class="question-history-meta detail">
+            <span>${duariEscapeHtml(item.method)}</span>
+            <span>${duariEscapeHtml(item.date)}</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-question-detail-back]")?.addEventListener("click", () => {
+    if (typeof backAction === "function") {
+      runWithoutModalHistory(backAction);
+      return;
+    }
+    closeModal();
+    setTab("questions");
+  });
+}
+
+function openQuestionSendConfirmOverlay() {
+  const page = qs(".question-answer-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>상대방에게 전달할까요?</h3>
+        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-question-send-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-question-send-confirm]", page)?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.body = qs("#questionAnswerBody")?.value || duariQuestionAnswerDraft.body || "";
+    duariAddQuestionHistory({ method: duariQuestionAnswerDraft.method || "원문" });
+    duariQuestionAnswerDraft.body = "";
+    duariQuestionAnswerDraft.method = "원문";
+    qs(".ai-confirm-overlay", page)?.remove();
+    closeModal();
+    setTab("questions");
+    showToast("답변을 상대방에게 전달했어요.");
+  });
+}
+
+const duariQuestionAiResultBase = openQuestionAiResultPage;
+openQuestionAiResultPage = function openQuestionAiResultPage(draft = {}) {
+  duariQuestionAiResultBase(draft);
+  qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.method = "AI 다듬음";
+    duariQuestionAnswerDraft.original = draft.original || duariQuestionAnswerDraft.body || "";
+  }, { capture: true });
+};
 
 window.setTimeout(() => {
   if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
@@ -11651,6 +11930,8 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     textarea.value = makeFreshAiRedraftFromOriginal(original, selectedTone);
   });
   qs("[data-question-ai-apply]")?.addEventListener("click", () => {
+    duariQuestionAnswerDraft.method = "AI 다듬음";
+    duariQuestionAnswerDraft.original = original || duariQuestionAnswerDraft.body || "";
     duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
     openQuestionModal();
     showToast("AI 결과를 답변 본문에 저장했어요.");
