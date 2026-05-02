@@ -1712,7 +1712,7 @@ function renderMy() {
       </section>
       <div class="list">${[
         ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
-        ["커플 설정", "연애 시작일, 기념일, 숨긴 사진 관리, 연결 해제", "couple-settings"],
+        ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
         ["고객센터/약관", "문의, FAQ, 약관, 개인정보처리방침", "support"],
@@ -2264,13 +2264,84 @@ function openRelationManagementModal() {
 }
 
 function openCoupleSettingsModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>커플 설정</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><div class="between"><div><h3>봄이</h3><p>상대 프로필 사진 작게 표시</p></div><span class="chip-btn">프로필</span></div></section><section class="card"><h3>연애 시작일</h3><p>2025.03.05 · 수정 가능</p></section><button class="ghost-btn" data-action="anniversaries">기념일 관리</button><button class="ghost-btn" data-action="relationship-notification-settings">관계별 알림 설정</button><button class="ghost-btn" data-action="album-management">앨범 관리</button><button class="primary-btn" data-action="danger-disconnect">연결 해제</button></div></div>`);
-  qs('[data-action="anniversaries"]').addEventListener("click", openAnniversariesModal);
-  bindActions(qs(".modal-sheet"));
+  openAnniversarySettingsPage();
 }
 
 function openAnniversariesModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>기념일 관리</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${state.anniversaries.map((item) => `<section class="card"><div class="between"><strong>${item.name}</strong><span class="meta">${item.date}</span></div><p>${item.repeat ? "매년 반복" : "반복 없음"} · ${item.alert ? "알림 켬" : "알림 끔"}</p></section>`).join("")}<div class="form-field"><label>직접 기념일 이름</label><input placeholder="예: 처음 여행 간 날" /></div><div class="form-field"><label>날짜</label><input value="2026-05-20" /></div><button class="primary-btn full">기념일 추가</button></div></div>`);
+  openAnniversarySettingsPage();
+}
+
+function openAnniversarySettingsPage() {
+  openModal(`
+    <div class="modal-sheet notification-page anniversary-settings-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <h3>기념일 설정</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>자동 기념일</h3>
+          <p>우리의 시작일을 기준으로 100일 단위와 주년을 자동으로 보여줍니다.</p>
+          <div class="tag-row">
+            <span class="chip-btn active">100일 단위</span>
+            <span class="chip-btn active">주년</span>
+          </div>
+        </section>
+        <section class="card">
+          <div class="between"><h3>직접 기념일</h3><span class="meta">${state.anniversaries.length}개</span></div>
+          <div class="list">
+            ${state.anniversaries.map((item) => `
+              <article class="card inner-card">
+                <div class="between">
+                  <strong>${item.name}</strong>
+                  <span class="meta">${item.date}</span>
+                </div>
+                <p>${item.repeat ? "매년 반복" : "반복 없음"} · ${item.alert ? "알림 켬" : "알림 끔"}</p>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+        <section class="card">
+          <h3>기념일 추가</h3>
+          <div class="form-field">
+            <label>이름</label>
+            <input placeholder="예: 처음 여행 간 날" />
+          </div>
+          <div class="form-field">
+            <label>날짜</label>
+            <input type="date" value="2026-05-20" />
+          </div>
+          <div class="form-field">
+            <label>메모</label>
+            <textarea placeholder="기억하고 싶은 내용을 남겨보세요."></textarea>
+          </div>
+          <div class="section-stack compact-stack">
+            ${["매년 반복", "기념일 알림"].map((item) => `
+              <div class="between anniversary-setting-row">
+                <strong>${item}</strong>
+                <button class="setting-switch active" type="button" aria-pressed="true">
+                  <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
+                  <span class="setting-switch-label">켬</span>
+                </button>
+              </div>
+            `).join("")}
+          </div>
+          <button class="primary-btn full" data-action="add-anniversary">기념일 추가</button>
+        </section>
+        <section class="card">
+          <h3>알림 기준</h3>
+          <p>D-7과 D-day에 알려주고, 홈에는 가장 가까운 기념일 1개만 표시합니다.</p>
+        </section>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qsa(".setting-switch", sheet).forEach((button) => {
+    button.addEventListener("click", () => toggleSettingSwitch(button));
+  });
 }
 
 function openHiddenPhotosModal() {
@@ -2836,8 +2907,7 @@ function openRelationManagementModal() {
 }
 
 function openAnniversariesModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>기념일 관리</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${state.anniversaries.map((item) => `<section class="card"><div class="between"><strong>${item.name}</strong><span class="meta">${item.date}</span></div><p>${item.repeat ? "매년 반복" : "반복 없음"} · ${item.alert ? "알림 켬" : "알림 끔"}</p></section>`).join("")}<div class="form-field"><label>직접 기념일 이름</label><input placeholder="첫 여행 간 날" /></div><div class="form-field"><label>날짜</label><input value="2026-05-20" /></div><button class="primary-btn full" data-action="add-anniversary">기념일 추가</button></div></div>`);
-  bindActions(qs(".modal-sheet"));
+  openAnniversarySettingsPage();
 }
 
 function openSecurityModal() {
