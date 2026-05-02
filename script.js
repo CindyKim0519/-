@@ -2527,12 +2527,27 @@ function openAccountModal() {
 
 function openSupportModal() {
   const faqItems = [
+    ["시작", "커플 연결 없이 혼자 먼저 사용할 수 있나요?", "네, 나만 보기 기록, 개인 일기, 비공개 답변, 전할 말 초안을 먼저 사용할 수 있어요."],
+    ["시작", "상대와 연결하면 어떤 기능이 열리나요?", "공유 일기, 우리 둘이 보기 기록, 상대 반응, 메시지 전달 같은 함께 쓰는 기능을 사용할 수 있어요."],
+    ["시작", "초대 코드는 얼마나 유지되나요?", "초대 코드는 7일 동안 사용할 수 있고, 만료되면 새로 초대하면 됩니다."],
     ["기록", "사진 권한을 거부해도 기록할 수 있나요?", "네, 사진 없이 기록을 남길 수 있어요."],
+    ["기록", "한 기록에 사진을 몇 장까지 넣을 수 있나요?", "한 기록에는 최대 30장까지 추가할 수 있어요."],
+    ["기록", "나만 보기 기록을 나중에 공유할 수 있나요?", "기록 수정에서 공개 범위를 바꾸는 흐름으로 공유 여부를 조정할 수 있어요."],
+    ["기록", "기록을 삭제하면 연결된 일기도 같이 삭제되나요?", "기록만 삭제되고, 연결된 일기는 유지되며 기록 연결만 해제됩니다."],
+    ["사진", "상대가 올린 사진도 다운로드할 수 있나요?", "네, 현재 관계와 이전 커플 보관함에서 사진 다운로드가 가능합니다."],
+    ["사진", "상대가 올린 사진을 삭제할 수 있나요?", "상대가 올린 사진은 내 화면에서 숨길 수 있지만 삭제할 수는 없어요."],
     ["저장", "저장에 실패하면 작성 내용이 사라지나요?", "작성 내용은 유지하고, 기록 저장 실패 시 임시 저장을 제공합니다."],
     ["사진", "사진 일부 업로드에 실패하면 어떻게 되나요?", "실패한 사진만 제외하고 저장할 수 있어요."],
+    ["일기", "개인 일기는 상대에게 보이나요?", "아니요. 개인 일기는 존재 자체도 상대에게 노출되지 않아요."],
+    ["일기", "개인 일기를 공유하면 원본도 바뀌나요?", "아니요. 공유 복사본을 만들고, 원본 개인 일기는 계속 나만 보기로 남습니다."],
+    ["일기", "공유 일기에 사진을 첨부할 수 있나요?", "아니요. 일기는 글과 감정, 관련 기록 연결 중심으로 작성합니다."],
+    ["질문", "질문 답변을 비공개로 저장할 수 있나요?", "네, 상대에게 보내지 않고 내 답변으로 저장해둘 수 있어요."],
+    ["질문", "직접 만든 질문은 수정할 수 있나요?", "직접 만든 질문은 수정하지 않고, 필요하면 새 질문을 만드는 흐름으로 사용합니다."],
     ["AI", "AI 정리에 실패하면 어떻게 하나요?", "다시 시도하거나 원문으로 보낼 수 있어요."],
+    ["AI", "AI가 내 비공개 일기도 참고하나요?", "아니요. 기록 상세에서는 기록 정보와 내가 입력한 원문만 참고하고 비공개 일기는 참고하지 않아요."],
+    ["계정", "PIN은 어디에 사용되나요?", "이전 커플 보관함 접근, 관계 연결 해제, 이전 관계 전체 삭제, 회원 탈퇴 같은 중요한 동작에 사용됩니다."],
   ];
-  const faqTypes = ["기록", "사진", "저장", "AI"];
+  const faqTypes = ["시작", "기록", "사진", "저장", "일기", "질문", "AI", "계정"];
   openModal(`
     <div class="modal-sheet notification-page faq-page">
       <header class="notification-header">
@@ -2541,8 +2556,8 @@ function openSupportModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
+        <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
         <section class="card">
-          <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
           <div class="form-field"><label>FAQ 검색</label><input placeholder="궁금한 내용을 입력해보세요." /></div>
           <div class="form-field">
             <label>FAQ 유형</label>
@@ -2560,9 +2575,9 @@ function openSupportModal() {
               <div class="faq-type-group">
                 <p class="faq-type-label">${type}</p>
                 <div class="list">
-                  ${items.map(([category, question, answer]) => `
+                  ${items.map(([, question, answer]) => `
                     <article class="card inner-card">
-                      <div class="between"><strong>${question}</strong><span class="chip-btn">${category}</span></div>
+                      <strong>${question}</strong>
                       <p>${answer}</p>
                     </article>
                   `).join("")}

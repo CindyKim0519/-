@@ -1381,18 +1381,9 @@ h3 {
   padding: 12px;
 }
 
-.faq-page .inner-card .between {
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.faq-page .inner-card .chip-btn {
-  align-items: center;
-  display: inline-flex;
-  flex-shrink: 0;
-  justify-content: center;
-  line-height: 1;
-  white-space: nowrap;
+.faq-page .inner-card strong {
+  display: block;
+  line-height: var(--line-height-md);
 }
 
 .faq-type-group {
