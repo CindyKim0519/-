@@ -1479,22 +1479,50 @@ h3 {
 .support-photo-add {
   background: var(--color-white);
   color: var(--accent-primary);
+  font-size: 24px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .support-photo-preview {
   background: linear-gradient(135deg, var(--color-pink-100), var(--color-pink-50));
   color: var(--accent-primary);
   font-weight: 700;
+  position: relative;
+}
+
+.support-photo-remove {
+  align-items: center;
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  display: inline-flex;
+  font-size: 13px;
+  height: 22px;
+  justify-content: center;
+  line-height: 1;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 22px;
 }
 
 .support-history-card {
+  display: grid;
+  gap: 8px;
   text-align: left;
   width: 100%;
 }
 
 .support-history-photo-grid {
   grid-template-columns: repeat(4, 46px);
+}
+
+.support-history-date {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
 }
 
 .setting-switch-track,
