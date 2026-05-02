@@ -309,6 +309,10 @@ h3 {
   margin-bottom: 0;
 }
 
+.diary-card .diary-date-meta {
+  margin-top: 8px;
+}
+
 .dots {
   align-items: center;
   display: flex;
