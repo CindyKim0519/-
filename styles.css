@@ -899,13 +899,6 @@ h3 {
   padding: 6px 12px;
 }
 
-.my-info-profile-card {
-  align-items: center;
-  display: grid;
-  gap: 14px;
-  justify-items: center;
-}
-
 .my-info-photo {
   align-items: center;
   background: var(--color-pink-50);
@@ -920,11 +913,58 @@ h3 {
   width: 84px;
 }
 
-.my-info-photo-actions {
+.my-info-photo-block {
+  align-items: center;
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: 100%;
+  justify-items: center;
+  padding: 2px 0 6px;
+}
+
+.my-info-photo-wrap {
+  position: relative;
+}
+
+.my-info-camera-btn {
+  align-items: center;
+  background: var(--accent-primary);
+  border: 2px solid var(--color-white);
+  border-radius: 50%;
+  bottom: 0;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 0;
+  width: 30px;
+}
+
+.my-info-camera-btn::before {
+  border: 2px solid var(--color-white);
+  border-radius: 4px;
+  content: "";
+  height: 10px;
+  width: 14px;
+}
+
+.my-info-camera-btn::after {
+  background: var(--color-white);
+  border-radius: 50%;
+  content: "";
+  height: 4px;
+  left: 13px;
+  position: absolute;
+  top: 13px;
+  width: 4px;
+}
+
+.my-info-delete-photo {
+  font-size: var(--font-size-sm);
+  height: 32px;
+  min-height: 32px;
+  padding: 0 12px;
 }
 
 .my-info-readonly-card {

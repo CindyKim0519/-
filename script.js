@@ -2689,15 +2689,15 @@ function openAccountModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <section class="card my-info-profile-card">
-          <div class="my-info-photo">하</div>
-          <div class="my-info-photo-actions">
-            <button class="ghost-btn" type="button" data-action="settings-toggle">사진 변경</button>
-            <button class="ghost-btn" type="button" data-action="settings-toggle">사진 삭제</button>
-          </div>
-        </section>
         <section class="card my-info-readonly-card">
           <h3>계정 정보</h3>
+          <div class="my-info-photo-block">
+            <div class="my-info-photo-wrap">
+              <div class="my-info-photo">하</div>
+              <button class="my-info-camera-btn" type="button" data-action="settings-toggle" aria-label="프로필 사진 변경"></button>
+            </div>
+            <button class="ghost-btn my-info-delete-photo" type="button" data-action="settings-toggle">사진 삭제</button>
+          </div>
           <div class="my-info-row"><span>닉네임</span><strong>하린</strong></div>
           <div class="my-info-row"><span>생년월일</span><strong>1998.08.14</strong></div>
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
