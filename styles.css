@@ -1438,6 +1438,19 @@ h3 {
   width: 100%;
 }
 
+.support-tabs {
+  grid-template-columns: 1fr 1fr;
+}
+
+.support-tab-panel {
+  display: none;
+}
+
+.support-tab-panel.active {
+  display: grid;
+  gap: 12px;
+}
+
 .setting-switch-track,
 .setting-switch-knob,
 .setting-switch-label {

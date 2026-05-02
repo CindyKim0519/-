@@ -1715,7 +1715,8 @@ function renderMy() {
         ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["FAQ", "자주 묻는 질문과 문의하기", "support"],
+        ["FAQ", "자주 묻는 질문", "support"],
+        ["문의하기", "문의 접수와 문의내역", "support-contact"],
         ["약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
@@ -2602,7 +2603,6 @@ function openSupportModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <button class="primary-btn full" type="button" data-action="support-contact">문의하기</button>
         <section class="card">
           <div class="form-field"><label>FAQ 검색</label><input data-faq-search placeholder="궁금한 내용을 입력해보세요." /></div>
           <div class="form-field">
@@ -2629,12 +2629,16 @@ function openSupportContactPage() {
   openModal(`
     <div class="modal-sheet notification-page support-contact-page">
       <header class="notification-header">
-        <button class="notification-nav-btn" data-action="support" aria-label="뒤로가기">←</button>
+        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
         <h3>문의하기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <section class="card">
+        <div class="tabs support-tabs">
+          <button class="chip-btn active" type="button" data-support-tab="form">문의하기</button>
+          <button class="chip-btn" type="button" data-support-tab="history">문의내역</button>
+        </div>
+        <section class="card support-tab-panel active" data-support-panel="form">
           <div class="form-field">
             <label>문의 유형</label>
             <select>
@@ -2656,15 +2660,39 @@ function openSupportContactPage() {
             <label>문의 내용</label>
             <textarea placeholder="궁금한 점이나 문제가 생긴 상황을 적어주세요."></textarea>
           </div>
+          <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
         </section>
-        <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
+        <section class="card support-tab-panel" data-support-panel="history">
+          <div class="between"><h3>문의내역</h3><span class="meta">2개</span></div>
+          <div class="list">
+            <article class="card inner-card">
+              <div class="between"><strong>사진 업로드 문의</strong><span class="meta">답변 완료</span></div>
+              <p>2026.05.01 · 사진 일부가 올라가지 않는 상황</p>
+            </article>
+            <article class="card inner-card">
+              <div class="between"><strong>PIN 재설정 문의</strong><span class="meta">접수됨</span></div>
+              <p>2026.04.29 · 인증 메일 확인 관련 문의</p>
+            </article>
+          </div>
+        </section>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  bindSupportTabs(sheet);
   qs("[data-support-submit]", sheet).addEventListener("click", () => openSupportSubmitNotice());
+}
+
+function bindSupportTabs(sheet) {
+  qsa("[data-support-tab]", sheet).forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.supportTab;
+      qsa("[data-support-tab]", sheet).forEach((item) => item.classList.toggle("active", item === button));
+      qsa("[data-support-panel]", sheet).forEach((panel) => panel.classList.toggle("active", panel.dataset.supportPanel === target));
+    });
+  });
 }
 
 function openSupportSubmitNotice() {
@@ -2684,7 +2712,7 @@ function openSupportSubmitNotice() {
     </div>
   `);
   qs("[data-support-submit-cancel]", modal).addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
-  qs("[data-support-submit-confirm]", modal).addEventListener("click", () => openSupportModal());
+  qs("[data-support-submit-confirm]", modal).addEventListener("click", () => openSupportContactPage());
 }
 
 function openTermsModal() {
