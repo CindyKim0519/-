@@ -11185,7 +11185,6 @@ function duariQuestionHistoryCard(item, index) {
       </div>
       <p>${duariEscapeHtml(item.sent)}</p>
       <div class="question-history-meta">
-        <span>${duariEscapeHtml(item.method)}</span>
         <span>${duariEscapeHtml(item.date)}</span>
       </div>
     </article>
@@ -11238,9 +11237,8 @@ function renderQuestions() {
 function openQuestionHistoryPage(filter = "전체") {
   const history = duariQuestionHistorySeed();
   const filtered = history.filter((item) => {
-    if (filter === "원문") return item.method === "원문";
-    if (filter === "AI 다듬음") return item.method === "AI 다듬음";
     if (filter === "읽음") return item.status === "읽음";
+    if (filter === "전달됨") return item.status === "전달됨";
     return true;
   });
   openModal(`
@@ -11252,7 +11250,7 @@ function openQuestionHistoryPage(filter = "전체") {
       </header>
       <div class="section-stack">
         <div class="chip-row question-history-filters">
-          ${["전체", "원문", "AI 다듬음", "읽음"].map((item) => `<button class="chip-btn ${item === filter ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
+          ${["전체", "읽음", "전달됨"].map((item) => `<button class="chip-btn ${item === filter ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
         </div>
         <div class="question-history-list">
           ${filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">전달한 질문이 없습니다.</p>`}

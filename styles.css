@@ -805,14 +805,20 @@ h3 {
 }
 
 .question-history-card {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-card);
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
   cursor: pointer;
   display: grid;
   gap: 8px;
   padding: 14px;
   text-align: left;
+}
+
+.card .question-history-card {
+  background: var(--color-white);
+  border-color: var(--border-default);
 }
 
 .question-history-card h3 {
