@@ -1362,7 +1362,9 @@ h3 {
 }
 
 .anniversary-kebab {
-  background: transparent;
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
   display: inline-flex;
   flex-direction: column;
   gap: 3px;
