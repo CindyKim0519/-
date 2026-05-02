@@ -1706,7 +1706,7 @@ function renderMy() {
               <p class="meta">우리 시작일: 2025.03.05</p>
             </div>
           </div>
-          <button class="chip-btn" data-action="account">내 정보</button>
+          <button class="chip-btn" data-action="account">우리 정보</button>
         </div>
       </section>
       <div class="list">${[
