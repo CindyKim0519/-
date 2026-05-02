@@ -1715,7 +1715,7 @@ function renderMy() {
         ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["고객센터", "문의, FAQ", "support"],
+        ["FAQ", "자주 묻는 질문과 문의하기", "support"],
         ["약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
@@ -2524,20 +2524,34 @@ function openAccountModal() {
 }
 
 function openSupportModal() {
+  const faqItems = [
+    ["기록", "사진 권한을 거부해도 기록할 수 있나요?", "네, 사진 없이 기록을 남길 수 있어요."],
+    ["저장", "저장에 실패하면 작성 내용이 사라지나요?", "작성 내용은 유지하고, 기록 저장 실패 시 임시 저장을 제공합니다."],
+    ["사진", "사진 일부 업로드에 실패하면 어떻게 되나요?", "실패한 사진만 제외하고 저장할 수 있어요."],
+    ["AI", "AI 정리에 실패하면 어떻게 하나요?", "다시 시도하거나 원문으로 보낼 수 있어요."],
+  ];
   openModal(`
     <div class="modal-sheet">
-      <div class="between"><h3>고객센터</h3><button class="icon-btn" data-close>닫기</button></div>
+      <div class="between"><h3>FAQ</h3><button class="icon-btn" data-close>닫기</button></div>
       <div class="section-stack">
-        <div class="form-field"><label>앱 내 문의</label><textarea placeholder="문의 내용을 남겨주세요."></textarea></div>
         <section class="card">
-          <h3>FAQ</h3>
-          <div class="list">
-            <article class="card inner-card"><strong>사진 권한을 거부해도 기록할 수 있나요?</strong><p>네, 사진 없이 기록을 남길 수 있어요.</p></article>
-            <article class="card inner-card"><strong>저장에 실패하면 작성 내용이 사라지나요?</strong><p>작성 내용은 유지하고, 기록 저장 실패 시 임시 저장을 제공합니다.</p></article>
-            <article class="card inner-card"><strong>사진 일부 업로드에 실패하면 어떻게 되나요?</strong><p>실패한 사진만 제외하고 저장할 수 있어요.</p></article>
-            <article class="card inner-card"><strong>AI 정리에 실패하면 어떻게 하나요?</strong><p>다시 시도하거나 원문으로 보낼 수 있어요.</p></article>
+          <div class="form-field"><label>FAQ 검색</label><input placeholder="궁금한 내용을 입력해보세요." /></div>
+          <div class="chip-row">
+            ${["전체", "기록", "사진", "저장", "AI"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}" type="button">${item}</button>`).join("")}
           </div>
         </section>
+        <section class="card">
+          <div class="between"><h3>자주 묻는 질문</h3><span class="meta">${faqItems.length}개</span></div>
+          <div class="list">
+            ${faqItems.map(([category, question, answer]) => `
+              <article class="card inner-card">
+                <div class="between"><strong>${question}</strong><span class="chip-btn">${category}</span></div>
+                <p>${answer}</p>
+              </article>
+            `).join("")}
+          </div>
+        </section>
+        <button class="primary-btn full" type="button" data-action="settings-toggle">문의하기</button>
       </div>
     </div>
   `);
