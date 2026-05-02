@@ -2779,6 +2779,11 @@ h3 {
   color: var(--text-secondary);
 }
 
+.modal-sheet .anniversary-kebab {
+  background: transparent;
+  border-color: var(--border-default);
+}
+
 .toast {
   background: var(--color-charcoal);
   border-radius: var(--radius-sm);
