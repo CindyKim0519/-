@@ -2358,6 +2358,7 @@ function openPinResetPage() {
             <label>새 PIN 확인</label>
             <input data-confirm-pin type="password" inputmode="numeric" maxlength="6" placeholder="한 번 더 입력" disabled />
           </div>
+          <button class="primary-btn full" type="button" data-pin-reset-complete disabled>PIN 재설정 완료</button>
         </section>
         <section class="card notification-setting-card">
           <div class="between">
@@ -2371,7 +2372,6 @@ function openPinResetPage() {
             </button>
           </div>
         </section>
-        <button class="primary-btn full" type="button" data-pin-reset-complete disabled>PIN 재설정 완료</button>
       </div>
     </div>
   `);
