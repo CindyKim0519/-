@@ -1702,8 +1702,8 @@ function renderMy() {
         <div class="my-profile-header">
           <div class="my-profile-summary">
             <div class="my-profile-text">
-              <h3>하린</h3>
-              <p class="meta">harin@duari.app</p>
+              <h3>봄이 & 하린</h3>
+              <p class="meta">우리 시작일: 2025.03.05</p>
             </div>
           </div>
           <button class="chip-btn" data-action="account">내 정보</button>
