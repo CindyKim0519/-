@@ -2272,11 +2272,7 @@ function openNotificationSettingsModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <section class="card notification-setting-card">
-          <div class="between"><strong>앱 내부 알림</strong><span class="chip-btn active">항상 켬</span></div>
-          <p>앱 안에서 기록, 일기, 메시지 알림을 확인할 수 있도록 유지됩니다.</p>
-        </section>
-        ${["휴대폰 푸시", "기념일 알림"].map((item) => `
+        ${["휴대폰 알림", "기념일 알림"].map((item) => `
           <section class="card notification-setting-card">
             <div class="between"><strong>${item}</strong><button class="chip-btn active" data-action="settings-toggle">켬</button></div>
           </section>
