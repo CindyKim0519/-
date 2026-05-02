@@ -12261,7 +12261,7 @@ function openLoginModal(provider = "이메일") {
         ` : `
           <section class="card">
             <h3>소셜 계정으로 계속하기</h3>
-            <p>로그인 후 닉네임과 6자리 PIN만 설정하면 바로 시작할 수 있어요.</p>
+            <p>로그인 후 6자리 PIN만 설정하면 바로 시작할 수 있어요.</p>
           </section>
           <button class="primary-btn full" type="button" data-entry-login-complete>계속하기</button>
         `}
@@ -12316,13 +12316,9 @@ function openFirstSetupPage() {
       </header>
       <div class="section-stack">
         <section class="card">
-          <h3>필수 설정</h3>
-          <p>계정 기본 닉네임과 앱 보안 PIN을 설정해요. 프로필 사진은 나중에 우리 정보에서 관리할 수 있어요.</p>
+          <h3>앱 보안 PIN</h3>
+          <p>이전 커플 보관함, 관계 전환 확인, 회원 탈퇴 같은 중요한 동작에 사용할 6자리 PIN을 설정해요.</p>
         </section>
-        <div class="form-field">
-          <label>닉네임</label>
-          <input data-entry-nickname value="${state.accountNickname || "하린"}" />
-        </div>
         <div class="form-field">
           <label>앱 보안 PIN 6자리</label>
           <input data-entry-pin maxlength="6" value="123456" inputmode="numeric" />
@@ -12333,17 +12329,11 @@ function openFirstSetupPage() {
   `);
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-setup-next]")?.addEventListener("click", () => {
-    const nickname = qs("[data-entry-nickname]")?.value.trim();
     const pin = qs("[data-entry-pin]")?.value.trim();
-    if (!nickname) {
-      showToast("닉네임을 입력해 주세요.");
-      return;
-    }
     if (!/^\d{6}$/.test(pin || "")) {
       showToast("PIN은 숫자 6자리로 입력해 주세요.");
       return;
     }
-    state.accountNickname = nickname;
     openStartMethodPage();
   });
 }
@@ -12369,7 +12359,7 @@ function openStartMethodPage() {
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-setup-back]")?.addEventListener("click", openFirstSetupPage);
   qs("[data-entry-connect]")?.addEventListener("click", () => {
-    openRelationAddPage(1, { fromOnboarding: true, myName: state.accountNickname || "하린" });
+    openRelationAddPage(1, { fromOnboarding: true });
   });
   qs("[data-entry-alone]")?.addEventListener("click", openStartAlonePage);
 }
@@ -12415,7 +12405,7 @@ function openStartAlonePage() {
     setTab("home");
     showToast("혼자 먼저 시작했어요. 상대 초대는 언제든 할 수 있어요.");
   });
-  qs("[data-entry-connect]")?.addEventListener("click", () => openRelationAddPage(1, { fromOnboarding: true, myName: state.accountNickname || "하린" }));
+  qs("[data-entry-connect]")?.addEventListener("click", () => openRelationAddPage(1, { fromOnboarding: true }));
 }
 
 (() => {
