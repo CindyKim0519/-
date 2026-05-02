@@ -2284,12 +2284,30 @@ function addCustomAnniversary(element) {
   showToast("기념일 설정에 추가했어요.");
 }
 
-function openAddAnniversaryPage() {
+function saveEditedAnniversary(element, index) {
+  const sheet = element.closest(".modal-sheet");
+  const name = qs("[data-anniversary-name]", sheet)?.value.trim() || "새 기념일";
+  const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
+  const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
+  state.anniversaries[index] = { ...state.anniversaries[index], name, date: date.replaceAll("-", "."), repeat };
+  openAnniversarySettingsPage();
+  showToast("기념일을 수정했어요.");
+}
+
+function deleteAnniversary(index) {
+  state.anniversaries.splice(index, 1);
+  openAnniversarySettingsPage();
+  showToast("기념일을 삭제했어요.");
+}
+
+function openAddAnniversaryPage(editIndex = null) {
+  const isEdit = Number.isInteger(editIndex);
+  const editing = isEdit ? state.anniversaries[editIndex] : null;
   openModal(`
     <div class="modal-sheet notification-page anniversary-settings-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-anniversary-add-back aria-label="뒤로가기">←</button>
-        <h3>기념일 추가</h3>
+        <h3>${isEdit ? "기념일 수정" : "기념일 추가"}</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -2297,22 +2315,22 @@ function openAddAnniversaryPage() {
           <h3>기념일 정보</h3>
           <div class="form-field">
             <label>이름</label>
-            <input data-anniversary-name placeholder="예: 처음 여행 간 날" />
+            <input data-anniversary-name placeholder="예: 처음 여행 간 날" value="${editing?.name || ""}" />
           </div>
           <div class="form-field">
             <label>날짜</label>
-            <input data-anniversary-date type="date" value="2026-05-20" />
+            <input data-anniversary-date type="date" value="${editing?.date?.replaceAll(".", "-") || "2026-05-20"}" />
           </div>
           <div class="section-stack compact-stack">
             <div class="between anniversary-setting-row">
               <strong>매년 반복</strong>
-              <button class="setting-switch active" type="button" aria-pressed="true" data-anniversary-repeat>
+              <button class="setting-switch ${editing?.repeat === false ? "" : "active"}" type="button" aria-pressed="${editing?.repeat === false ? "false" : "true"}" data-anniversary-repeat>
                 <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
-                <span class="setting-switch-label">켬</span>
+                <span class="setting-switch-label">${editing?.repeat === false ? "끔" : "켬"}</span>
               </button>
             </div>
           </div>
-          <button class="primary-btn full" type="button" data-save-anniversary>기념일 추가</button>
+          <button class="primary-btn full" type="button" data-save-anniversary>${isEdit ? "수정 완료" : "기념일 추가"}</button>
         </section>
       </div>
     </div>
@@ -2321,7 +2339,10 @@ function openAddAnniversaryPage() {
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
   qs("[data-anniversary-add-back]", sheet)?.addEventListener("click", openAnniversarySettingsPage);
-  qs("[data-save-anniversary]", sheet)?.addEventListener("click", (event) => addCustomAnniversary(event.currentTarget));
+  qs("[data-save-anniversary]", sheet)?.addEventListener("click", (event) => {
+    if (isEdit) saveEditedAnniversary(event.currentTarget, editIndex);
+    else addCustomAnniversary(event.currentTarget);
+  });
   qsa(".setting-switch", sheet).forEach((button) => {
     button.addEventListener("click", () => toggleSettingSwitch(button));
   });
@@ -2353,13 +2374,25 @@ function openAnniversarySettingsPage() {
             <button class="chip-btn active" type="button" data-open-add-anniversary>기념일 추가</button>
           </div>
           <div class="list">
-            ${state.anniversaries.map((item) => `
+            ${state.anniversaries.map((item, index) => `
               <article class="card inner-card">
-                <div class="between">
-                  <strong>${item.name}</strong>
-                  <span class="meta">${item.date}</span>
+                <div class="between anniversary-item-header">
+                  <div class="anniversary-item-text">
+                    <strong>${item.name}</strong>
+                    <p>${item.date} · ${item.repeat ? "매년 반복" : "반복 없음"}</p>
+                  </div>
+                  <div class="anniversary-menu-wrap">
+                    <button class="icon-btn anniversary-kebab" type="button" data-anniversary-menu aria-label="더보기" title="더보기">
+                      <span aria-hidden="true"></span>
+                      <span aria-hidden="true"></span>
+                      <span aria-hidden="true"></span>
+                    </button>
+                    <div class="anniversary-dropdown" data-anniversary-dropdown hidden>
+                      <button type="button" data-edit-anniversary="${index}">수정</button>
+                      <button type="button" data-delete-anniversary="${index}">삭제</button>
+                    </div>
+                  </div>
                 </div>
-                <p>${item.repeat ? "매년 반복" : "반복 없음"} · ${item.alert ? "알림 켬" : "알림 끔"}</p>
               </article>
             `).join("")}
           </div>
@@ -2371,6 +2404,34 @@ function openAnniversarySettingsPage() {
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
   qs("[data-open-add-anniversary]", sheet)?.addEventListener("click", openAddAnniversaryPage);
+  sheet.addEventListener("click", (event) => {
+    const menuButton = event.target.closest("[data-anniversary-menu]");
+    if (menuButton) {
+      const menu = menuButton.closest(".anniversary-menu-wrap")?.querySelector("[data-anniversary-dropdown]");
+      const willOpen = menu?.hidden;
+      qsa("[data-anniversary-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-anniversary-menu]", sheet).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        menuButton.classList.add("active");
+      }
+      return;
+    }
+    const editButton = event.target.closest("[data-edit-anniversary]");
+    if (editButton) {
+      openAddAnniversaryPage(Number(editButton.dataset.editAnniversary));
+      return;
+    }
+    const deleteButton = event.target.closest("[data-delete-anniversary]");
+    if (deleteButton) {
+      deleteAnniversary(Number(deleteButton.dataset.deleteAnniversary));
+      return;
+    }
+    if (!event.target.closest(".anniversary-menu-wrap")) {
+      qsa("[data-anniversary-dropdown]", sheet).forEach((item) => { item.hidden = true; });
+      qsa("[data-anniversary-menu]", sheet).forEach((item) => item.classList.remove("active"));
+    }
+  });
   qsa(".setting-switch", sheet).forEach((button) => {
     button.addEventListener("click", () => toggleSettingSwitch(button));
   });

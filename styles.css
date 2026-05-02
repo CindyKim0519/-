@@ -1332,6 +1332,85 @@ h3 {
   gap: 8px;
 }
 
+.anniversary-item-header {
+  align-items: flex-start;
+}
+
+.anniversary-item-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.anniversary-item-text strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anniversary-item-text p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  margin: 0;
+}
+
+.anniversary-menu-wrap {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.anniversary-kebab {
+  background: transparent;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  height: 32px;
+  padding: 0;
+  width: 32px;
+}
+
+.anniversary-kebab span {
+  background: var(--text-secondary);
+  border-radius: 50%;
+  display: block;
+  height: 3px;
+  width: 3px;
+}
+
+.anniversary-dropdown {
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  min-width: 92px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+}
+
+.anniversary-dropdown[hidden] {
+  display: none;
+}
+
+.anniversary-dropdown button {
+  background: var(--color-white);
+  border: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  min-height: 36px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.anniversary-dropdown button:last-child {
+  color: var(--accent-primary);
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);
