@@ -12377,18 +12377,6 @@ function openStartAlonePage() {
           <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
           <p>나만 보기 기록, 개인 일기, 비공개 질문 답변, 전할 말 초안을 먼저 남길 수 있어요.</p>
         </section>
-        <div class="solo-feature-grid">
-          ${["나만 보기 기록", "개인 일기", "질문 답변 비공개 저장", "전할 말 초안 작성"].map((item) => `<section class="card"><strong>${item}</strong></section>`).join("")}
-        </div>
-        <section class="card">
-          <h3>연결 전 제한</h3>
-          <ul class="solo-limit-list">
-            <li>상대에게 보내기</li>
-            <li>공유 일기</li>
-            <li>상대 반응</li>
-            <li>커플 공동 기록</li>
-          </ul>
-        </section>
         <button class="primary-btn full" type="button" data-entry-confirm-alone>혼자 시작하기</button>
         <button class="ghost-btn full" type="button" data-entry-connect>상대와 연결하기</button>
       </div>
