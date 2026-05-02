@@ -3503,7 +3503,7 @@ function collectRelationAddDraft(sheet, draft = {}) {
     method: selectedMethod,
     code: qs("[data-relation-add-code]", sheet)?.value.trim() || draft.code,
     partnerName: qs("[data-relation-add-partner]", sheet)?.value.trim() || draft.partnerName,
-    myName: qs("[data-relation-add-my-name]", sheet)?.value.trim() || draft.myName,
+    myName: draft.myName,
     startDate: qs("[data-relation-add-start]", sheet)?.value || draft.startDate,
   });
 }
@@ -3531,7 +3531,7 @@ function openRelationAddPage(step = 1, draft = {}) {
         <input data-relation-add-code value="${data.code}" placeholder="예: DUARI-0520" />
       </div>
       <div class="button-row two">
-        <button class="ghost-btn" type="button" data-relation-link-copy>링크 만들기</button>
+        <button class="ghost-btn" type="button" data-relation-link-copy>초대 링크 공유</button>
         <button class="primary-btn" type="button" data-relation-add-next>다음</button>
       </div>
     `,
@@ -3546,10 +3546,15 @@ function openRelationAddPage(step = 1, draft = {}) {
           </div>
         </div>
       </section>
-      <div class="form-field">
-        <label>내 닉네임</label>
-        <input data-relation-add-my-name value="${data.myName}" placeholder="내 닉네임" />
-      </div>
+      <section class="card inner-card relation-readonly-card">
+        <div class="between">
+          <div>
+            <span class="meta">내 닉네임</span>
+            <strong>${data.myName}</strong>
+          </div>
+          <span class="meta">내 정보에서 수정</span>
+        </div>
+      </section>
       <button class="primary-btn full" type="button" data-relation-add-next>다음</button>
     `,
     3: `
