@@ -1822,6 +1822,7 @@ function handleAction(action, element) {
     "relation-add": () => openRelationAddPage(1),
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
+    logout: logoutToLogin,
     "settings-toggle": (element) => {
       if (element.classList.contains("setting-switch")) {
         toggleSettingSwitch(element);
@@ -3769,12 +3770,22 @@ function openAccountModal() {
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
           <div class="my-info-row"><span>닉네임 변경</span><strong>변경 불가</strong></div>
         </section>
-        <button class="ghost-btn full" type="button" data-action="settings-toggle">로그아웃</button>
+        <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
+}
+
+function logoutToLogin() {
+  closeModal();
+  state.slide = 0;
+  qs("#app")?.classList.add("is-hidden");
+  qs("#onboarding")?.classList.remove("is-hidden");
+  qs("#onboarding")?.classList.add("is-visible");
+  renderOnboarding();
+  showToast("로그아웃했어요.");
 }
 
 function openPasswordChangePage() {
