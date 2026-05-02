@@ -1,11 +1,11 @@
 :root {
   color-scheme: light;
 
-  --color-pink-50: #effaf3;
-  --color-pink-100: #cfeedd;
-  --color-pink-300: #83d7a9;
-  --color-pink-500: #42b978;
-  --color-pink-600: #2f9f63;
+  --color-pink-50: #fff1f5;
+  --color-pink-100: #ffd6df;
+  --color-pink-300: #ff8da3;
+  --color-pink-500: #ff5f83;
+  --color-pink-600: #f04b72;
   --color-mint-50: #effbfa;
   --color-mint-100: #d9f4f1;
   --color-sand-50: #fff9f1;
@@ -31,7 +31,7 @@
   --accent-primary: var(--color-pink-500);
   --accent-primary-pressed: var(--color-pink-600);
   --accent-illustration: var(--color-mint-100);
-  --gradient-header: linear-gradient(135deg, #83d7a9 0%, #5ec58d 52%, #42b978 100%);
+  --gradient-header: linear-gradient(135deg, #ff8da3 0%, #ff6f8f 52%, #ff5f83 100%);
 
   --font-body: "Pretendard", "Nunito", Arial, sans-serif;
 
@@ -131,7 +131,7 @@ body {
 
 .ds-field:focus {
   border-color: var(--border-active);
-  box-shadow: 0 0 0 3px rgba(66, 185, 120, 0.14);
+  box-shadow: 0 0 0 3px rgba(255, 95, 131, 0.12);
   outline: 0;
 }
 
@@ -143,7 +143,7 @@ body {
 }
 
 .ds-progress-dots span {
-  background: #c7dfd0;
+  background: #e6c8d0;
   border-radius: var(--radius-pill);
   height: 5px;
   width: 5px;
