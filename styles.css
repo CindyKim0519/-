@@ -949,6 +949,18 @@ h3 {
   color: var(--accent-primary);
 }
 
+.withdrawal-page {
+  background: var(--color-white);
+}
+
+.withdrawal-reasons {
+  margin-top: 12px;
+}
+
+.withdrawal-other-field {
+  margin-top: 12px;
+}
+
 .password-change-card {
   display: grid;
   gap: 12px;

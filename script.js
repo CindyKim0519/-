@@ -3048,7 +3048,47 @@ function openArchiveModal() {
 
 function openWithdrawalModal() {
   openPinGate("회원 탈퇴", () => {
-    openModal(`<div class="modal-sheet"><div class="between"><h3>회원 탈퇴</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>탈퇴 사유 설문</label><textarea placeholder="선택 사항"></textarea></div><section class="card"><h3>삭제되는 데이터</h3><p>계정 정보, 개인 일기, 개인 초안, 나만 보기 기록, 개인 설정</p></section><section class="card"><h3>상대 공간에 보존 가능</h3><p>공유 기록, 공유 사진, 공유 일기, 보낸 메시지, 반응은 탈퇴한 사용자로 표시될 수 있어요.</p></section><button class="primary-btn">최종 탈퇴</button></div></div>`);
+    openModal(`
+      <div class="modal-sheet notification-page withdrawal-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" data-withdraw-back aria-label="뒤로가기">←</button>
+          <h3>회원 탈퇴</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          <section class="card">
+            <h3>탈퇴 사유</h3>
+            <div class="chip-row withdrawal-reasons" data-withdraw-reasons>
+              ${["사용 빈도가 낮아요", "기록을 정리하고 싶어요", "사용이 어려워요", "다른 서비스를 사용할게요", "기타"].map((reason) => `<button class="chip-btn" type="button" data-withdraw-reason="${reason}">${reason}</button>`).join("")}
+            </div>
+            <div class="form-field withdrawal-other-field" data-withdraw-other hidden>
+              <label>기타 사유</label>
+              <textarea placeholder="탈퇴 사유를 적어주세요."></textarea>
+            </div>
+          </section>
+          <section class="card">
+            <h3>탈퇴 후 데이터</h3>
+            <p>공유 기록이나 일기, 전달한 질문은 상대방 화면에 보존되고 나머지는 영구적으로 삭제됩니다.</p>
+          </section>
+          <button class="primary-btn full" type="button" data-withdraw-final>최종 탈퇴</button>
+        </div>
+      </div>
+    `);
+    qs("#modal").classList.add("page-modal");
+    const sheet = qs(".withdrawal-page");
+    qs("[data-withdraw-back]", sheet)?.addEventListener("click", openAccountModal);
+    qsa("[data-withdraw-reason]", sheet).forEach((button) => {
+      button.addEventListener("click", () => {
+        qsa("[data-withdraw-reason]", sheet).forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        const otherField = qs("[data-withdraw-other]", sheet);
+        if (otherField) otherField.hidden = button.dataset.withdrawReason !== "기타";
+      });
+    });
+    qs("[data-withdraw-final]", sheet)?.addEventListener("click", () => {
+      closeModal();
+      returnToEntryScreen("회원 탈퇴가 완료됐어요.");
+    });
   });
 }
 
@@ -3768,7 +3808,6 @@ function openAccountModal() {
           <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
-          <div class="my-info-row"><span>닉네임 변경</span><strong>변경 불가</strong></div>
         </section>
         <div class="account-danger-actions">
           <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
