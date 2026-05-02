@@ -1715,7 +1715,7 @@ function renderMy() {
         ["기념일 설정", "자동 기념일, 직접 기념일, 알림", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["고객센터", "문의, FAQ, 오류/복구 정책", "support"],
+        ["고객센터", "문의, FAQ", "support"],
         ["약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="meta">열기</span></div><p>${body}</p></button>`).join("")}</div>
@@ -2524,12 +2524,28 @@ function openAccountModal() {
 }
 
 function openSupportModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>고객센터/약관</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>앱 내 문의</label><textarea placeholder="문의 내용을 남겨주세요."></textarea></div><section class="card"><h3>FAQ</h3><p>사진 권한을 거부해도 사진 없이 기록할 수 있나요? 네, 가능합니다.</p></section><button class="ghost-btn" data-action="error-policy">오류/복구 정책</button><button class="ghost-btn" data-action="terms">이용약관</button><button class="ghost-btn" data-action="privacy-policy">개인정보처리방침</button></div></div>`);
+  openModal(`
+    <div class="modal-sheet">
+      <div class="between"><h3>고객센터</h3><button class="icon-btn" data-close>닫기</button></div>
+      <div class="section-stack">
+        <div class="form-field"><label>앱 내 문의</label><textarea placeholder="문의 내용을 남겨주세요."></textarea></div>
+        <section class="card">
+          <h3>FAQ</h3>
+          <div class="list">
+            <article class="card inner-card"><strong>사진 권한을 거부해도 기록할 수 있나요?</strong><p>네, 사진 없이 기록을 남길 수 있어요.</p></article>
+            <article class="card inner-card"><strong>저장에 실패하면 작성 내용이 사라지나요?</strong><p>작성 내용은 유지하고, 기록 저장 실패 시 임시 저장을 제공합니다.</p></article>
+            <article class="card inner-card"><strong>사진 일부 업로드에 실패하면 어떻게 되나요?</strong><p>실패한 사진만 제외하고 저장할 수 있어요.</p></article>
+            <article class="card inner-card"><strong>AI 정리에 실패하면 어떻게 하나요?</strong><p>다시 시도하거나 원문으로 보낼 수 있어요.</p></article>
+          </div>
+        </section>
+      </div>
+    </div>
+  `);
   bindActions(qs(".modal-sheet"));
 }
 
 function openTermsModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>이용약관</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>회원가입 동의</h3><p>회원가입 화면에서 필수 약관에 동의합니다.</p></section><section class="card"><h3>마이 하단 확인</h3><p>가입 후에도 고객센터/약관 메뉴에서 언제든 확인할 수 있습니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>이용약관</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>회원가입 동의</h3><p>회원가입 화면에서 필수 약관에 동의합니다.</p></section><section class="card"><h3>마이 하단 확인</h3><p>가입 후에도 마이 탭에서 언제든 확인할 수 있습니다.</p></section></div></div>`);
 }
 
 function openPrivacyPolicyModal() {
