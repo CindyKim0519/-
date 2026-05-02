@@ -3491,7 +3491,7 @@ function relationAddDraftDefaults(draft = {}) {
 }
 
 function relationAddPageShell(step, bodyHtml) {
-  const progressItems = ["방식", "확인", "시작일", "완료"];
+  const progressItems = ["초대 코드", "닉네임", "시작일", "완료"];
   return `
     <div class="modal-sheet notification-page relation-add-page">
       <header class="notification-header">
