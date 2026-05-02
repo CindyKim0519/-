@@ -1696,21 +1696,22 @@ function renderQuestions() {
 }
 
 function renderMy() {
+  const current = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
   qs("#my").innerHTML = `
     <div class="section-stack">
       <section class="card my-profile-card">
         <div class="my-profile-header">
           <div class="my-profile-summary">
             <div class="my-profile-text">
-              <h3>봄이 & 하린</h3>
-              <p class="meta">우리 시작일: 2025.03.05</p>
+              <h3>${current.name}</h3>
+              <p class="meta">${current.date}부터</p>
             </div>
           </div>
           <button class="chip-btn" data-action="account">우리 정보</button>
         </div>
       </section>
       <div class="list">${[
-        ["관계 관리", "관계 전환, 관계 추가, 이전 커플 보관함", "relation-management"],
+        ["관계 관리", "관계 전환, 관계 추가", "relation-management"],
         ["기념일 설정", "자동 기념일, 추가한 기념일", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
@@ -3411,6 +3412,11 @@ function currentRelationInfo() {
   return state.currentRelation;
 }
 
+function relationPartnerName(relation = currentRelationInfo()) {
+  const parts = String(relation.name || "").split("&").map((item) => item.trim()).filter(Boolean);
+  return parts.length > 1 ? parts[1] : "봄이";
+}
+
 function relationSwitchOptions() {
   if (!state.relationOptions) {
     state.relationOptions = [
@@ -3555,7 +3561,10 @@ function openRelationAddPage(step = 1, draft = {}) {
           <span class="meta">내 정보에서 수정</span>
         </div>
       </section>
-      <button class="primary-btn full" type="button" data-relation-add-next>다음</button>
+      <div class="button-row two">
+        <button class="ghost-btn" type="button" data-relation-add-prev>이전</button>
+        <button class="primary-btn" type="button" data-relation-add-next>다음</button>
+      </div>
     `,
     3: `
       <section class="card relation-add-card">
@@ -3566,7 +3575,10 @@ function openRelationAddPage(step = 1, draft = {}) {
         <label>우리 시작일</label>
         <input type="date" data-relation-add-start value="${data.startDate}" />
       </div>
-      <button class="primary-btn full" type="button" data-relation-add-complete>연결하기</button>
+      <div class="button-row two">
+        <button class="ghost-btn" type="button" data-relation-add-prev>이전</button>
+        <button class="primary-btn" type="button" data-relation-add-complete>연결하기</button>
+      </div>
     `,
     4: `
       <section class="card relation-add-complete-card">
@@ -3595,6 +3607,7 @@ function openRelationAddPage(step = 1, draft = {}) {
     });
   });
   qs("[data-relation-link-copy]", sheet)?.addEventListener("click", () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."));
+  qs("[data-relation-add-prev]", sheet)?.addEventListener("click", backTarget);
   qs("[data-relation-add-next]", sheet)?.addEventListener("click", () => openRelationAddPage(step + 1, collectRelationAddDraft(sheet, data)));
   qs("[data-relation-add-complete]", sheet)?.addEventListener("click", () => {
     const nextData = collectRelationAddDraft(sheet, data);
@@ -3714,6 +3727,8 @@ function openSecurityModal() {
 }
 
 function openAccountModal() {
+  const current = currentRelationInfo();
+  const partnerName = relationPartnerName(current);
   openModal(`
     <div class="modal-sheet notification-page my-info-page">
       <header class="notification-header">
@@ -3733,10 +3748,10 @@ function openAccountModal() {
         </section>
         <section class="card my-info-readonly-card">
           <h3>관계 정보</h3>
-          <div class="my-info-row"><span>우리의 시작일</span><strong>2025.03.05</strong></div>
-          <div class="my-info-row"><span>연결된 상대</span><strong>봄이</strong></div>
+          <div class="my-info-row"><span>우리의 시작일</span><strong>${current.date}</strong></div>
+          <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
-          <div class="my-info-row"><span>상태</span><strong>연결됨</strong></div>
+          <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
         </section>
         <button class="ghost-btn full" type="button" data-action="settings-toggle">로그아웃</button>
       </div>
