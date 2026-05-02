@@ -3418,14 +3418,17 @@ function openRelationManagementModal() {
         <section class="card">
           <div class="between">
             <div>
-              <h3>나 & 상대방 이름</h3>
-              <p class="meta">우리 시작일: 2025.03.05</p>
+              <h3>봄이 & 하린</h3>
+              <p class="meta">2025.03.05부터</p>
             </div>
             <span class="chip-btn active relation-current-badge">현재 사용 중</span>
           </div>
         </section>
         <section class="card">
-          <h3>관계 전환</h3>
+          <div class="between">
+            <h3>관계 전환</h3>
+            <button class="chip-btn active" type="button" data-action="relation-add">관계 추가</button>
+          </div>
           <div class="list">
             <article class="card inner-card">
               <div class="between">
@@ -3446,11 +3449,6 @@ function openRelationManagementModal() {
               </div>
             </article>
           </div>
-        </section>
-        <section class="card">
-          <h3>관계 추가</h3>
-          <p>새 관계를 추가하면 기존 관계와 기록은 분리해서 관리됩니다.</p>
-          <button class="primary-btn full" type="button" data-action="relation-add">관계 추가</button>
         </section>
       </div>
     </div>
