@@ -2625,7 +2625,8 @@ function openSupportModal() {
   bindSupportFaqFilters(sheet, faqItems, faqTypes);
 }
 
-function openSupportContactPage() {
+function openSupportContactPage(initialTab = "form") {
+  const showHistory = initialTab === "history";
   const inquiries = [
     {
       title: "사진 업로드 문의",
@@ -2655,10 +2656,10 @@ function openSupportContactPage() {
       </header>
       <div class="section-stack">
         <div class="tabs support-tabs">
-          <button class="chip-btn active" type="button" data-support-tab="form">문의하기</button>
-          <button class="chip-btn" type="button" data-support-tab="history">문의내역</button>
+          <button class="chip-btn ${showHistory ? "" : "active"}" type="button" data-support-tab="form">문의하기</button>
+          <button class="chip-btn ${showHistory ? "active" : ""}" type="button" data-support-tab="history">문의내역</button>
         </div>
-        <section class="card support-tab-panel active" data-support-panel="form">
+        <section class="card support-tab-panel ${showHistory ? "" : "active"}" data-support-panel="form">
           <div class="form-field">
             <label>문의 유형</label>
             <select>
@@ -2692,7 +2693,7 @@ function openSupportContactPage() {
           </div>
           <button class="primary-btn full" type="button" data-support-submit>문의 보내기</button>
         </section>
-        <section class="card support-tab-panel" data-support-panel="history">
+        <section class="card support-tab-panel ${showHistory ? "active" : ""}" data-support-panel="history">
           <div class="between"><h3>문의내역</h3><span class="meta">${inquiries.length}개</span></div>
           <div class="list">
             ${inquiries.map((item, index) => `
@@ -2788,6 +2789,7 @@ function openSupportInquiryDeleteConfirm() {
   qs("[data-support-delete-cancel]", modal).addEventListener("click", () => qs(".support-submit-overlay", modal)?.remove());
   qs("[data-support-delete-confirm]", modal).addEventListener("click", () => {
     qs(".support-submit-overlay", modal)?.remove();
+    openSupportContactPage("history");
     showToast("문의가 삭제됐어요.");
   });
 }
