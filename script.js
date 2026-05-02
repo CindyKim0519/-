@@ -2735,7 +2735,7 @@ function openSupportInquiryDetail(inquiry) {
   openModal(`
     <div class="modal-sheet notification-page support-inquiry-detail-page">
       <header class="notification-header">
-        <button class="notification-nav-btn" data-action="support-contact" aria-label="뒤로가기">←</button>
+        <button class="notification-nav-btn" type="button" data-support-detail-back aria-label="뒤로가기">←</button>
         <h3>문의 상세</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
@@ -2767,6 +2767,7 @@ function openSupportInquiryDetail(inquiry) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  qs("[data-support-detail-back]", sheet).addEventListener("click", () => openSupportContactPage("history"));
   qs("[data-support-inquiry-edit]", sheet)?.addEventListener("click", () => openSupportInquiryEditPage(inquiry));
   qs("[data-support-inquiry-delete]", sheet)?.addEventListener("click", () => openSupportInquiryDeleteConfirm());
 }
