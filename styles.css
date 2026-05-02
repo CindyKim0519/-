@@ -1496,16 +1496,6 @@ h3 {
   border-color: var(--accent-primary);
 }
 
-.relation-readonly-card {
-  background: var(--color-white);
-  box-shadow: none;
-}
-
-.relation-readonly-card strong {
-  display: block;
-  margin-top: 4px;
-}
-
 .relation-preview-profile {
   align-items: center;
   display: flex;
