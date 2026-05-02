@@ -1819,7 +1819,7 @@ function handleAction(action, element) {
     "send-ai-result": () => (state.connected ? showToast("최종 메시지만 상대에게 보냈어요.") : openConnectModal()),
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": openConnectModal,
-    "add-anniversary": () => showToast("직접 기념일을 추가했어요. D-7과 D-day 알림을 사용할 수 있어요."),
+    "add-anniversary": addCustomAnniversary,
     "download-photo": () => showToast("다운로드가 완료됐어요."),
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     "settings-toggle": (element) => {
@@ -2274,6 +2274,16 @@ function openAnniversariesModal() {
   openAnniversarySettingsPage();
 }
 
+function addCustomAnniversary(element) {
+  const sheet = element.closest(".modal-sheet");
+  const name = qs("[data-anniversary-name]", sheet)?.value.trim() || "새 기념일";
+  const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
+  const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
+  state.anniversaries.unshift({ name, date: date.replaceAll("-", "."), repeat, alert: true });
+  openAnniversarySettingsPage();
+  showToast("추가한 기념일을 목록 상단에 넣었어요.");
+}
+
 function openAnniversarySettingsPage() {
   openModal(`
     <div class="modal-sheet notification-page anniversary-settings-page">
@@ -2286,13 +2296,9 @@ function openAnniversarySettingsPage() {
         <section class="card">
           <h3>자동 기념일</h3>
           <p>우리의 시작일을 기준으로 100일 단위와 주년을 자동으로 보여줍니다.</p>
-          <div class="tag-row">
-            <span class="chip-btn active">100일 단위</span>
-            <span class="chip-btn active">주년</span>
-          </div>
         </section>
         <section class="card">
-          <div class="between"><h3>직접 기념일</h3><span class="meta">${state.anniversaries.length}개</span></div>
+          <div class="between"><h3>추가한 기념일</h3><span class="meta">${state.anniversaries.length}개</span></div>
           <div class="list">
             ${state.anniversaries.map((item) => `
               <article class="card inner-card">
@@ -2309,21 +2315,17 @@ function openAnniversarySettingsPage() {
           <h3>기념일 추가</h3>
           <div class="form-field">
             <label>이름</label>
-            <input placeholder="예: 처음 여행 간 날" />
+            <input data-anniversary-name placeholder="예: 처음 여행 간 날" />
           </div>
           <div class="form-field">
             <label>날짜</label>
-            <input type="date" value="2026-05-20" />
-          </div>
-          <div class="form-field">
-            <label>메모</label>
-            <textarea placeholder="기억하고 싶은 내용을 남겨보세요."></textarea>
+            <input data-anniversary-date type="date" value="2026-05-20" />
           </div>
           <div class="section-stack compact-stack">
-            ${["매년 반복", "기념일 알림"].map((item) => `
+            ${["매년 반복"].map((item) => `
               <div class="between anniversary-setting-row">
                 <strong>${item}</strong>
-                <button class="setting-switch active" type="button" aria-pressed="true">
+                <button class="setting-switch active" type="button" aria-pressed="true" data-anniversary-repeat>
                   <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
                   <span class="setting-switch-label">켬</span>
                 </button>
