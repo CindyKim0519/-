@@ -895,24 +895,6 @@ h3 {
   align-self: center;
 }
 
-.record-pagination {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-}
-
-.record-pagination .chip-btn {
-  justify-content: center;
-  width: 100%;
-}
-
-.record-pagination .icon-only {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .album-photo-summary {
   align-items: center;
   display: flex;

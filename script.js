@@ -11581,24 +11581,21 @@ function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {
 
 const DUARI_ALBUM_RECORD_PAGE_SIZE = 10;
 
-function duariAlbumRecordPageInfo(memories = state.memories) {
-  const totalPages = Math.max(1, Math.ceil(memories.length / DUARI_ALBUM_RECORD_PAGE_SIZE));
-  const currentPage = Math.min(Math.max(Number(state.albumRecordPage) || 1, 1), totalPages);
-  const start = (currentPage - 1) * DUARI_ALBUM_RECORD_PAGE_SIZE;
-  state.albumRecordPage = currentPage;
-  return {
-    currentPage,
-    totalPages,
-    pageMemories: memories.slice(start, start + DUARI_ALBUM_RECORD_PAGE_SIZE)
-  };
+function duariAlbumRecordVisibleCount() {
+  if (!state.albumRecordVisibleCount) state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+  return state.albumRecordVisibleCount;
 }
 
-function renderAlbumRecordPage(memories = state.memories) {
-  const { currentPage, totalPages, pageMemories } = duariAlbumRecordPageInfo(memories);
+function duariIncreaseAlbumRecordVisibleCount() {
+  state.albumRecordVisibleCount = duariAlbumRecordVisibleCount() + DUARI_ALBUM_RECORD_PAGE_SIZE;
+}
+
+function renderAlbumRecordList(memories = state.memories) {
+  const visibleCount = duariAlbumRecordVisibleCount();
+  const visibleMemories = memories.slice(0, visibleCount);
   return {
-    html: pageMemories.length ? memoryCards(pageMemories) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`,
-    currentPage,
-    totalPages
+    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`,
+    hasMore: memories.length > visibleMemories.length
   };
 }
 
@@ -11783,7 +11780,7 @@ function renderAlbum() {
 
   let content = "";
   if (currentView === "record") {
-    const recordPage = renderAlbumRecordPage(state.memories);
+    const recordList = renderAlbumRecordList(state.memories);
     content = `
       <div class="album-record-toolbar">
         <div class="between">
@@ -11791,12 +11788,8 @@ function renderAlbum() {
           <button class="primary-btn" type="button" data-action="new-memory">새 기록 추가</button>
         </div>
       </div>
-      <div class="list album-record-list" data-album-record-list>${recordPage.html}</div>
-      <nav class="record-pagination" aria-label="기록 페이지">
-        <button class="chip-btn icon-only" type="button" data-record-page-prev ${recordPage.currentPage <= 1 ? "disabled" : ""} aria-label="이전">‹</button>
-        <span class="meta" data-record-page-label>${recordPage.currentPage} / ${recordPage.totalPages}</span>
-        <button class="chip-btn icon-only" type="button" data-record-page-next ${recordPage.currentPage >= recordPage.totalPages ? "disabled" : ""} aria-label="다음">›</button>
-      </nav>
+      <div class="list album-record-list" data-album-record-list>${recordList.html}</div>
+      <button class="ghost-btn full album-record-load-more" type="button" data-record-load-more ${recordList.hasMore ? "" : "hidden"}>더보기</button>
     `;
   }
   if (currentView === "photo") {
@@ -11851,13 +11844,12 @@ function renderAlbum() {
     const dateInput = qs("#albumDateFilter", album);
     const typeSelect = qs("#albumTypeFilter", album);
     let filteredRecords = state.memories;
-    const renderRecordPagination = (filtered) => {
-      const recordPage = renderAlbumRecordPage(filtered);
-      qs("[data-album-record-list]", album).innerHTML = recordPage.html;
+    const renderRecordList = (filtered) => {
+      const recordList = renderAlbumRecordList(filtered);
+      qs("[data-album-record-list]", album).innerHTML = recordList.html;
       qs("[data-record-count]", album).textContent = `총 ${filtered.length}개`;
-      qs("[data-record-page-label]", album).textContent = `${recordPage.currentPage} / ${recordPage.totalPages}`;
-      qs("[data-record-page-prev]", album).disabled = recordPage.currentPage <= 1;
-      qs("[data-record-page-next]", album).disabled = recordPage.currentPage >= recordPage.totalPages;
+      const loadMoreButton = qs("[data-record-load-more]", album);
+      if (loadMoreButton) loadMoreButton.hidden = !recordList.hasMore;
     };
     const applyFilters = () => {
       const filtered = duariAlbumFilterMemories({
@@ -11867,8 +11859,8 @@ function renderAlbum() {
       });
       filteredRecords = filtered;
       if (currentView === "record") {
-        state.albumRecordPage = 1;
-        renderRecordPagination(filtered);
+        state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+        renderRecordList(filtered);
       }
       if (currentView === "photo") {
         const totalPhotos = filtered.reduce((sum, memory) => sum + (state.memories.indexOf(memory) === 0 ? 7 : 4), 0);
@@ -11880,14 +11872,9 @@ function renderAlbum() {
       input?.addEventListener("input", applyFilters);
       input?.addEventListener("change", applyFilters);
     });
-    qs("[data-record-page-prev]", album)?.addEventListener("click", () => {
-      state.albumRecordPage = (Number(state.albumRecordPage) || 1) - 1;
-      renderRecordPagination(filteredRecords);
-      bindActions(album);
-    });
-    qs("[data-record-page-next]", album)?.addEventListener("click", () => {
-      state.albumRecordPage = (Number(state.albumRecordPage) || 1) + 1;
-      renderRecordPagination(filteredRecords);
+    qs("[data-record-load-more]", album)?.addEventListener("click", () => {
+      duariIncreaseAlbumRecordVisibleCount();
+      renderRecordList(filteredRecords);
       bindActions(album);
     });
   }
