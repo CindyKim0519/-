@@ -35,12 +35,12 @@ const state = {
     { title: "내가 바랐던 것", body: "크게 바란 건 아니지만 알아주면 좋겠다고 생각했다.", scope: "개인", type: "나만 보기", feelings: ["기대", "서운함"], linked: "비 오는 날의 통화", author: "나", date: "2026.04.29" },
     { title: "괜찮아지는 중", body: "시간이 조금 지나니 마음이 부드럽게 가라앉았다.", scope: "개인", type: "나만 보기", feelings: ["안정", "안도"], linked: "비 오는 날의 통화", author: "나", date: "2026.04.28" },
     { title: "다음엔 이렇게 말하기", body: "내 마음을 탓하지 않고 짧고 솔직하게 말해보기.", scope: "개인", type: "나만 보기", feelings: ["용기", "솔직함"], linked: "비 오는 날의 통화", author: "나", date: "2026.04.27" },
-    { title: "초안: 고마운 마음", body: "오늘 고마웠던 장면을 조금 더 다듬어서 전하고 싶다.", scope: "draft", type: "임시 저장", feelings: ["고마움"], linked: "관련 기록 없음", author: "나", date: "2026.05.02" },
-    { title: "초안: 서운했던 순간", body: "서운함을 탓처럼 들리지 않게 정리해보고 있다.", scope: "draft", type: "임시 저장", feelings: ["서운함", "조심스러움"], linked: "관련 기록 없음", author: "나", date: "2026.05.01" },
-    { title: "초안: 다음 데이트", body: "다음에 같이 가고 싶은 곳과 이유를 적어두었다.", scope: "draft", type: "임시 저장", feelings: ["기대"], linked: "관련 기록 없음", author: "나", date: "2026.04.30" },
-    { title: "초안: 미안한 마음", body: "내가 놓쳤던 부분을 인정하고 부드럽게 말해보고 싶다.", scope: "draft", type: "임시 저장", feelings: ["미안함", "솔직함"], linked: "관련 기록 없음", author: "나", date: "2026.04.29" },
-    { title: "초안: 오래 남은 말", body: "상대가 해준 말 중 오래 남은 문장을 정리 중이다.", scope: "draft", type: "임시 저장", feelings: ["소중함"], linked: "관련 기록 없음", author: "나", date: "2026.04.28" },
-    { title: "초안: 오늘의 마음", body: "지금 바로 보내기보다 조금 더 생각해보고 싶다.", scope: "draft", type: "임시 저장", feelings: ["차분함"], linked: "관련 기록 없음", author: "나", date: "2026.04.27" },
+    { title: "고마운 마음", body: "오늘 고마웠던 장면을 조금 더 다듬어서 전하고 싶다.", scope: "draft", type: "임시 저장", feelings: ["고마움"], linked: "관련 기록 없음", author: "나", date: "2026.05.02" },
+    { title: "서운했던 순간", body: "서운함을 탓처럼 들리지 않게 정리해보고 있다.", scope: "draft", type: "임시 저장", feelings: ["서운함", "조심스러움"], linked: "관련 기록 없음", author: "나", date: "2026.05.01" },
+    { title: "다음 데이트", body: "다음에 같이 가고 싶은 곳과 이유를 적어두었다.", scope: "draft", type: "임시 저장", feelings: ["기대"], linked: "관련 기록 없음", author: "나", date: "2026.04.30" },
+    { title: "미안한 마음", body: "내가 놓쳤던 부분을 인정하고 부드럽게 말해보고 싶다.", scope: "draft", type: "임시 저장", feelings: ["미안함", "솔직함"], linked: "관련 기록 없음", author: "나", date: "2026.04.29" },
+    { title: "오래 남은 말", body: "상대가 해준 말 중 오래 남은 문장을 정리 중이다.", scope: "draft", type: "임시 저장", feelings: ["소중함"], linked: "관련 기록 없음", author: "나", date: "2026.04.28" },
+    { title: "오늘의 마음", body: "지금 바로 보내기보다 조금 더 생각해보고 싶다.", scope: "draft", type: "임시 저장", feelings: ["차분함"], linked: "관련 기록 없음", author: "나", date: "2026.04.27" },
   ],
   hiddenPhotos: ["성수에서 보낸 오후 · 3번째 사진", "여행 1주년 · 1번째 사진"],
   anniversaries: [
@@ -11150,13 +11150,42 @@ function duariIncreaseDiaryVisibleCount() {
   state.diaryVisibleCounts[view] = duariDiaryVisibleCount() + 5;
 }
 
+function duariDiaryFilterForCurrentView() {
+  state.diaryFilters = state.diaryFilters || {};
+  const view = state.diaryView || "mineShared";
+  state.diaryFilters[view] = state.diaryFilters[view] || { query: "", month: "" };
+  return state.diaryFilters[view];
+}
+
+function duariFilterDiaryEntries(entries = [], filter = {}) {
+  const normalizedQuery = String(filter.query || "").trim().toLowerCase();
+  const normalizedMonth = String(filter.month || "").trim().replaceAll("-", ".");
+  return entries.filter((entry) => {
+    const dateLabel = duariDiaryDateLabel(entry);
+    const searchTarget = [
+      entry.title,
+      entry.body,
+      entry.linked,
+      entry.type,
+      entry.scope,
+      dateLabel,
+      ...(entry.feelings || [])
+    ].join(" ").toLowerCase();
+    const matchesQuery = !normalizedQuery || searchTarget.includes(normalizedQuery);
+    const matchesMonth = !normalizedMonth || dateLabel.startsWith(normalizedMonth);
+    return matchesQuery && matchesMonth;
+  });
+}
+
 renderDiary = function renderDiary() {
   normalizeDiaryView();
   const diary = qs("#diary");
   const entries = diaryEntriesForCurrentView();
+  const diaryFilter = duariDiaryFilterForCurrentView();
+  const filteredEntries = duariFilterDiaryEntries(entries, diaryFilter);
   const visibleCount = duariDiaryVisibleCount();
-  const visibleEntries = entries.slice(0, visibleCount);
-  const hasMoreEntries = entries.length > visibleEntries.length;
+  const visibleEntries = filteredEntries.slice(0, visibleCount);
+  const hasMoreEntries = filteredEntries.length > visibleEntries.length;
   diary.innerHTML = `
     <div class="section-stack">
       <div class="tabs diary-tabs">
@@ -11164,12 +11193,22 @@ renderDiary = function renderDiary() {
         <button class="chip-btn ${state.diaryView === "private" ? "active" : ""}" data-diary-view="private">나만보기</button>
         <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
       </div>
+      <div class="diary-filter-grid">
+        <div class="form-field">
+          <label for="diarySearch">일기 검색</label>
+          <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목이나 본문 검색" />
+        </div>
+        <div class="form-field">
+          <label for="diaryMonthFilter">월</label>
+          <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
+        </div>
+      </div>
       <div class="diary-list-toolbar">
-        <p class="meta diary-list-count">총 ${entries.length}개</p>
+        <p class="meta diary-list-count">총 ${filteredEntries.length}개</p>
         <button class="primary-btn" data-action="diary-scope-first">일기 추가</button>
       </div>
       <div class="list">
-        ${visibleEntries.map((entry, index) => `
+        ${visibleEntries.length ? visibleEntries.map((entry, index) => `
           <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
             <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
             <p>${entry.body}</p>
@@ -11178,7 +11217,7 @@ renderDiary = function renderDiary() {
             </div>
             ${duariDiaryDateMeta(entry)}
           </article>
-        `).join("")}
+        `).join("") : `<p class="linked-record-empty">조건에 맞는 일기가 없습니다.</p>`}
       </div>
       ${hasMoreEntries ? `<button class="ghost-btn full diary-load-more" type="button" data-diary-load-more>더보기</button>` : ""}
     </div>
@@ -11189,9 +11228,22 @@ renderDiary = function renderDiary() {
       renderDiary();
     });
   });
+  const searchInput = qs("#diarySearch", diary);
+  const monthInput = qs("#diaryMonthFilter", diary);
+  const applyDiaryFilters = () => {
+    const filter = duariDiaryFilterForCurrentView();
+    filter.query = searchInput?.value || "";
+    filter.month = monthInput?.value || "";
+    state.diaryVisibleCounts = state.diaryVisibleCounts || {};
+    state.diaryVisibleCounts[state.diaryView || "mineShared"] = 5;
+    renderDiary();
+  };
+  searchInput?.addEventListener("change", applyDiaryFilters);
+  monthInput?.addEventListener("input", applyDiaryFilters);
+  monthInput?.addEventListener("change", applyDiaryFilters);
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
     const openEntry = () => {
-      const entry = entries[Number(card.dataset.diaryEntryIndex)] || entries[0];
+      const entry = filteredEntries[Number(card.dataset.diaryEntryIndex)] || filteredEntries[0] || entries[0];
       renderDiaryDetailReadOnly(entry, () => renderDiary());
     };
     card.addEventListener("click", openEntry);

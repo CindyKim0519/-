@@ -826,6 +826,12 @@ h3 {
   gap: 12px;
 }
 
+.diary-filter-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 148px;
+}
+
 .diary-list-toolbar .primary-btn {
   min-height: 38px;
   padding: 0 14px;
