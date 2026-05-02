@@ -2294,7 +2294,7 @@ function openAddAnniversaryPage() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <section class="card">
+        <section class="card anniversary-form-card">
           <h3>기념일 정보</h3>
           <div class="form-field">
             <label>이름</label>
@@ -2345,7 +2345,7 @@ function openAnniversarySettingsPage() {
           <p>D-7과 D-day에 알려주고, 홈에는 가장 가까운 기념일 1개만 표시합니다.</p>
         </section>
         <section class="card">
-          <div class="between">
+          <div class="between anniversary-list-header">
             <div>
               <h3>추가한 기념일</h3>
               <span class="meta">${state.anniversaries.length}개</span>

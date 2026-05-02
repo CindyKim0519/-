@@ -1306,6 +1306,32 @@ h3 {
   padding: 12px;
 }
 
+.anniversary-list-header {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.anniversary-list-header > div {
+  min-width: 0;
+}
+
+.anniversary-list-header .chip-btn {
+  flex: 0 0 auto;
+}
+
+.anniversary-form-card {
+  display: grid;
+  gap: 8px;
+}
+
+.anniversary-form-card > h3 {
+  margin-bottom: 0;
+}
+
+.anniversary-form-card .compact-stack {
+  gap: 8px;
+}
+
 .faq-page .inner-card strong {
   display: block;
   line-height: var(--line-height-md);
