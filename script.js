@@ -12407,16 +12407,16 @@ function openSignupModal() {
       </header>
       <div class="section-stack">
         <div class="form-field">
-          <label>이메일 <span class="required-mark">필수</span></label>
+          <label>이메일</label>
           <input data-signup-email placeholder="duari@example.com" autocomplete="email" value="${signupAttr(draft.email)}" />
         </div>
         <div class="form-field">
-          <label>비밀번호 <span class="required-mark">필수</span></label>
+          <label>비밀번호</label>
           <input data-signup-password type="password" autocomplete="new-password" value="${signupAttr(draft.password)}" />
           <p class="tiny-note">영문, 숫자 포함 8자 이상을 권장해요.</p>
         </div>
         <div class="form-field">
-          <label>비밀번호 확인 <span class="required-mark">필수</span></label>
+          <label>비밀번호 확인</label>
           <input class="signup-password-confirm" data-signup-password-confirm type="password" autocomplete="new-password" value="${signupAttr(draft.confirm)}" />
           <p class="signup-match-message" data-signup-password-message>비밀번호를 한 번 더 입력해 주세요.</p>
         </div>
