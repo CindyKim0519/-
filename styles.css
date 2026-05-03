@@ -991,14 +991,18 @@ h3 {
   color: var(--accent-primary);
 }
 
-.signup-password-input.is-match,
-.signup-password-confirm.is-match {
+.form-field input.signup-password-input.is-match,
+.form-field input.signup-password-input.is-match:focus,
+.form-field input.signup-password-confirm.is-match,
+.form-field input.signup-password-confirm.is-match:focus {
   border-color: #2f827a;
   box-shadow: 0 0 0 2px rgba(47, 130, 122, 0.12);
 }
 
-.signup-password-input.is-mismatch,
-.signup-password-confirm.is-mismatch {
+.form-field input.signup-password-input.is-mismatch,
+.form-field input.signup-password-input.is-mismatch:focus,
+.form-field input.signup-password-confirm.is-mismatch,
+.form-field input.signup-password-confirm.is-mismatch:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(234, 91, 117, 0.12);
 }
