@@ -9,6 +9,13 @@ const state = {
   connected: true,
   aloneCtaHidden: false,
   switchPinEnabled: true,
+  registeredEmails: (() => {
+    try {
+      return JSON.parse(localStorage.getItem("duariRegisteredEmails") || "[]");
+    } catch {
+      return [];
+    }
+  })(),
   tab: "home",
   albumView: "record",
   diaryView: "shared",
@@ -12291,8 +12298,8 @@ function openLoginModal(provider = "이메일") {
       </header>
       <div class="section-stack">
         ${isEmail ? `
-          <div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div>
-          <div class="form-field"><label>비밀번호</label><input type="password" placeholder="비밀번호" /></div>
+          <div class="form-field"><label>이메일</label><input data-login-email placeholder="duari@example.com" /></div>
+          <div class="form-field"><label>비밀번호</label><input data-login-password type="password" placeholder="비밀번호" /></div>
           <button class="primary-btn full" type="button" data-entry-login-complete>로그인</button>
         ` : `
           <section class="card">
@@ -12307,7 +12314,8 @@ function openLoginModal(provider = "이메일") {
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-complete]")?.addEventListener("click", () => {
     if (isEmail) {
-      if (state.emailSignupCompleted) {
+      const email = normalizeSignupEmail(qs("[data-login-email]")?.value || "");
+      if (email && signupEmailExists(email)) {
         completeEmailLogin();
       } else {
         returnToEntryScreen("회원가입 후 로그인해 주세요.");
@@ -12359,6 +12367,29 @@ function signupAttr(value = "") {
     .replaceAll("&", "&amp;")
     .replaceAll("\"", "&quot;")
     .replaceAll("<", "&lt;");
+}
+
+function normalizeSignupEmail(email = "") {
+  return String(email).trim().toLowerCase();
+}
+
+function signupEmailExists(email = "") {
+  const normalized = normalizeSignupEmail(email);
+  return Array.isArray(state.registeredEmails) && state.registeredEmails.includes(normalized);
+}
+
+function registerSignupEmail(email = "") {
+  const normalized = normalizeSignupEmail(email);
+  if (!normalized) return;
+  state.registeredEmails = Array.isArray(state.registeredEmails) ? state.registeredEmails : [];
+  if (!state.registeredEmails.includes(normalized)) {
+    state.registeredEmails.push(normalized);
+    try {
+      localStorage.setItem("duariRegisteredEmails", JSON.stringify(state.registeredEmails));
+    } catch {
+      // Prototype fallback: keep the email in memory when browser storage is unavailable.
+    }
+  }
 }
 
 function saveSignupDraft() {
@@ -12506,7 +12537,7 @@ function openSignupModal() {
   });
   updateAllTerms();
   qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
-    const email = emailInput?.value.trim() || "";
+    const email = normalizeSignupEmail(emailInput?.value || "");
     const password = passwordInput?.value || "";
     const confirm = confirmInput?.value || "";
     const requiredTermsAccepted = qsa("[data-terms-item][data-required='true']").every((item) => item.classList.contains("is-checked"));
@@ -12516,6 +12547,10 @@ function openSignupModal() {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showToast("이메일 형식을 확인해 주세요.");
+      return;
+    }
+    if (signupEmailExists(email)) {
+      showToast("이미 가입된 이메일이에요. 이메일 로그인으로 진행해 주세요.");
       return;
     }
     if (!passwordIsValid(password)) {
@@ -12530,6 +12565,7 @@ function openSignupModal() {
       showToast("필수 약관에 동의해 주세요.");
       return;
     }
+    registerSignupEmail(email);
     state.emailSignupCompleted = true;
     state.signupDraft = null;
     openLoginModal("이메일");
