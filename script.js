@@ -3682,9 +3682,11 @@ function openRelationAddPage(step = 1, draft = {}) {
       myName: nextData.myName,
     };
     state.connected = true;
+    markCurrentAccountSetupComplete();
     openRelationAddPage(4, nextData);
   });
   qs("[data-relation-add-home]", sheet)?.addEventListener("click", () => {
+    markCurrentAccountSetupComplete();
     closeModal();
     qs("#onboarding")?.classList.add("is-hidden");
     qs("#app")?.classList.remove("is-hidden");
@@ -12328,6 +12330,7 @@ function openLoginModal(provider = "이메일") {
         return;
       }
       if (await loginCredentialsMatch(email, password)) {
+        state.currentLoginEmail = email;
         completeEmailLogin();
       } else if (signupEmailExists(email)) {
         showToast("이메일 또는 비밀번호가 일치하지 않아요.");
@@ -12393,6 +12396,12 @@ function signupEmailExists(email = "") {
   return accounts.some((account) => account.email === normalized);
 }
 
+function getSignupAccount(email = "") {
+  const normalized = normalizeSignupEmail(email);
+  const accounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+  return accounts.find((account) => account.email === normalized) || null;
+}
+
 async function makeSignupPasswordHash(email = "", password = "") {
   const source = `${normalizeSignupEmail(email)}:${password}`;
   if (window.crypto?.subtle && window.TextEncoder) {
@@ -12410,6 +12419,22 @@ async function loginCredentialsMatch(email = "", password = "") {
   return accounts.some((account) => account.email === normalized && (account.passwordHash === passwordHash || account.password === password));
 }
 
+function saveRegisteredAccounts() {
+  try {
+    localStorage.setItem("duariRegisteredEmails", JSON.stringify(state.registeredEmails || []));
+    localStorage.setItem("duariRegisteredAccounts", JSON.stringify(state.registeredAccounts || []));
+  } catch {
+    // Prototype fallback: keep accounts in memory when browser storage is unavailable.
+  }
+}
+
+function markCurrentAccountSetupComplete() {
+  const account = getSignupAccount(state.currentLoginEmail);
+  if (!account) return;
+  account.setupComplete = true;
+  saveRegisteredAccounts();
+}
+
 async function registerSignupAccount(email = "", password = "") {
   const normalized = normalizeSignupEmail(email);
   if (!normalized) return;
@@ -12422,16 +12447,12 @@ async function registerSignupAccount(email = "", password = "") {
   const existingAccount = state.registeredAccounts.find((account) => account.email === normalized);
   if (existingAccount) {
     existingAccount.passwordHash = passwordHash;
+    existingAccount.setupComplete = false;
     delete existingAccount.password;
   } else {
-    state.registeredAccounts.push({ email: normalized, passwordHash });
+    state.registeredAccounts.push({ email: normalized, passwordHash, setupComplete: false });
   }
-  try {
-    localStorage.setItem("duariRegisteredEmails", JSON.stringify(state.registeredEmails));
-    localStorage.setItem("duariRegisteredAccounts", JSON.stringify(state.registeredAccounts));
-  } catch {
-    // Prototype fallback: keep the account in memory when browser storage is unavailable.
-  }
+  saveRegisteredAccounts();
 }
 
 function saveSignupDraft() {
@@ -12632,6 +12653,12 @@ function returnToEntryScreen(message = "") {
 }
 
 function completeEmailLogin() {
+  const account = getSignupAccount(state.currentLoginEmail);
+  if (account && !account.setupComplete) {
+    openFirstSetupPage();
+    showToast("처음 로그인이라 첫 설정을 진행해 주세요.");
+    return;
+  }
   closeModal();
   state.connected = true;
   qs("#onboarding")?.classList.add("is-hidden");
@@ -12721,6 +12748,7 @@ function openStartAlonePage() {
   qs("[data-entry-confirm-alone]")?.addEventListener("click", () => {
     state.connected = false;
     state.aloneCtaHidden = false;
+    markCurrentAccountSetupComplete();
     closeModal();
     qs("#onboarding").classList.add("is-hidden");
     qs("#app").classList.remove("is-hidden");
