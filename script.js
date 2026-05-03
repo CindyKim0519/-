@@ -3462,6 +3462,30 @@ function currentRelationInfo() {
   return state.currentRelation;
 }
 
+function duariRelationDays(dateText = "") {
+  const normalized = String(dateText || "").replaceAll(".", "-");
+  const start = new Date(`${normalized}T00:00:00`);
+  if (Number.isNaN(start.getTime())) return 421;
+  const today = new Date();
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.max(1, Math.floor((todayMidnight - start) / 86400000) + 1);
+}
+
+function saveCurrentRelationToAccount() {
+  const account = typeof getSignupAccount === "function" ? getSignupAccount(state.currentLoginEmail) : null;
+  if (!account) return;
+  account.currentRelation = { ...currentRelationInfo() };
+  account.connected = !!state.connected;
+  if (typeof saveRegisteredAccounts === "function") saveRegisteredAccounts();
+}
+
+function applyCurrentAccountRelation() {
+  const account = typeof getSignupAccount === "function" ? getSignupAccount(state.currentLoginEmail) : null;
+  if (!account) return;
+  if (account.currentRelation) state.currentRelation = { ...account.currentRelation };
+  if (typeof account.connected === "boolean") state.connected = account.connected;
+}
+
 function relationMyName(relation = currentRelationInfo()) {
   return relation.myName || "하린";
 }
@@ -3488,6 +3512,7 @@ function switchRelation(option) {
     state.currentRelation = { ...option };
     state.relationOptions = relationSwitchOptions().filter((item) => item.name !== option.name);
     state.relationOptions.unshift(previous);
+    saveCurrentRelationToAccount();
     closeModal();
     setTab("home");
     renderHome();
@@ -3683,6 +3708,7 @@ function openRelationAddPage(step = 1, draft = {}) {
     };
     state.connected = true;
     markCurrentAccountSetupComplete();
+    saveCurrentRelationToAccount();
     openRelationAddPage(4, nextData);
   });
   qs("[data-relation-add-home]", sheet)?.addEventListener("click", () => {
@@ -11404,14 +11430,15 @@ function renderHome() {
         </article>
       `).join("")
     : `<p>아직 최근 일기가 없어요.</p>`;
-  const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린" };
+  const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
+  const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
   home.innerHTML = `
     <div class="section-stack">
       <section class="hero-card home-hero">
         <div class="between">
           <div>
             <p class="relationship-name">${currentRelation.name}</p>
-            <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">421</strong><span>일</span></h3>
+            <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">${relationshipDays}</strong><span>일</span></h3>
           </div>
           <span class="anniversary-pill">D-7 여행 1주년</span>
         </div>
@@ -12451,6 +12478,8 @@ function markCurrentAccountSetupComplete() {
   const account = getSignupAccount(state.currentLoginEmail);
   if (!account) return;
   account.setupComplete = true;
+  account.currentRelation = { ...currentRelationInfo() };
+  account.connected = !!state.connected;
   saveRegisteredAccounts();
 }
 
@@ -12678,8 +12707,9 @@ function completeEmailLogin() {
     showToast("처음 로그인이라 첫 설정을 진행해 주세요.");
     return;
   }
+  applyCurrentAccountRelation();
   closeModal();
-  state.connected = true;
+  if (typeof state.connected !== "boolean") state.connected = true;
   qs("#onboarding")?.classList.add("is-hidden");
   qs("#app")?.classList.remove("is-hidden");
   setTab("home");
