@@ -12389,9 +12389,8 @@ function normalizeSignupEmail(email = "") {
 
 function signupEmailExists(email = "") {
   const normalized = normalizeSignupEmail(email);
-  const emails = Array.isArray(state.registeredEmails) ? state.registeredEmails : [];
   const accounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
-  return emails.includes(normalized) || accounts.some((account) => account.email === normalized);
+  return accounts.some((account) => account.email === normalized);
 }
 
 async function makeSignupPasswordHash(email = "", password = "") {
