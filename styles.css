@@ -961,6 +961,85 @@ h3 {
   margin-top: 12px;
 }
 
+.required-mark {
+  color: var(--accent-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.signup-match-message {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-sm);
+  margin: 6px 0 0;
+}
+
+.signup-match-message.is-match {
+  color: #2f827a;
+}
+
+.signup-match-message.is-mismatch {
+  color: var(--accent-primary);
+}
+
+.signup-terms-card {
+  display: grid;
+  gap: 10px;
+}
+
+.terms-row {
+  align-items: center;
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 22px 1fr auto;
+  min-height: 48px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.terms-all-row {
+  grid-template-columns: 22px 1fr;
+}
+
+.terms-check {
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 20px;
+  justify-content: center;
+  width: 20px;
+}
+
+.terms-row.is-checked .terms-check {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.terms-row.is-checked .terms-check::after {
+  color: var(--color-white);
+  content: "✓";
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.terms-copy {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.terms-copy small {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
 .password-change-card {
   display: grid;
   gap: 12px;

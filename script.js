@@ -3107,11 +3107,6 @@ function openLoginModal(provider = "이메일") {
   qs("[data-signup]")?.addEventListener("click", openSignupModal);
 }
 
-function openSignupModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>회원가입</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div><div class="form-field"><label>비밀번호</label><input type="password" /></div><div class="form-field"><label>비밀번호 확인</label><input type="password" /></div><section class="card"><h3>약관 동의</h3><p>이용약관과 개인정보처리방침에 동의한 뒤 가입합니다.</p><div class="chip-row" style="margin-top:10px"><button class="chip-btn active">필수 약관</button><button class="chip-btn active">개인정보</button></div></section><button class="primary-btn full" data-complete-login>가입 후 설정</button></div></div>`);
-  qs("[data-complete-login]").addEventListener("click", startSetup);
-}
-
 function openSharedDiaryConfirmModal() {
   openModal(`<div class="modal-sheet"><div class="between"><h3>공유 일기 저장</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><p>공유 일기는 상대가 볼 수 있고 반응할 수 있어요. 저장 후에도 작성자만 수정하거나 삭제할 수 있습니다.</p><section class="card"><div class="between"><strong>이후 다시 묻지 않기</strong><span class="chip-btn">끔</span></div></section><button class="ghost-btn">임시 저장</button><button class="primary-btn" data-close>공유 일기로 저장</button></div></div>`);
 }
@@ -12332,16 +12327,37 @@ function openSignupModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <div class="form-field"><label>이메일</label><input placeholder="duari@example.com" /></div>
-        <div class="form-field"><label>비밀번호</label><input type="password" /></div>
-        <div class="form-field"><label>비밀번호 확인</label><input type="password" /></div>
-        <section class="card">
+        <div class="form-field">
+          <label>이메일 <span class="required-mark">필수</span></label>
+          <input data-signup-email placeholder="duari@example.com" autocomplete="email" />
+        </div>
+        <div class="form-field">
+          <label>비밀번호 <span class="required-mark">필수</span></label>
+          <input data-signup-password type="password" autocomplete="new-password" />
+          <p class="tiny-note">영문, 숫자 포함 8자 이상을 권장해요.</p>
+        </div>
+        <div class="form-field">
+          <label>비밀번호 확인 <span class="required-mark">필수</span></label>
+          <input data-signup-password-confirm type="password" autocomplete="new-password" />
+          <p class="signup-match-message" data-signup-password-message>비밀번호를 한 번 더 입력해 주세요.</p>
+        </div>
+        <section class="card signup-terms-card">
           <h3>약관 동의</h3>
-          <p>이용약관과 개인정보처리방침에 동의한 뒤 가입합니다.</p>
-          <div class="chip-row" style="margin-top:10px">
-            <button class="chip-btn active" type="button">필수 약관</button>
-            <button class="chip-btn active" type="button">개인정보</button>
-          </div>
+          <button class="terms-row terms-all-row" type="button" data-terms-all>
+            <span class="terms-check" aria-hidden="true"></span>
+            <strong>전체 동의</strong>
+          </button>
+          ${[
+            ["이용약관 동의", "필수"],
+            ["개인정보처리방침 동의", "필수"],
+            ["마케팅 정보 수신 동의", "선택"],
+          ].map(([name, type]) => `
+            <button class="terms-row" type="button" data-terms-item data-required="${type === "필수"}">
+              <span class="terms-check" aria-hidden="true"></span>
+              <span class="terms-copy"><strong>${name}</strong><small>${type}</small></span>
+              <span class="menu-chevron" aria-hidden="true">›</span>
+            </button>
+          `).join("")}
         </section>
         <button class="primary-btn full" type="button" data-entry-signup-complete>가입 완료</button>
       </div>
@@ -12349,7 +12365,60 @@ function openSignupModal() {
   `);
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
+  const emailInput = qs("[data-signup-email]");
+  const passwordInput = qs("[data-signup-password]");
+  const confirmInput = qs("[data-signup-password-confirm]");
+  const passwordMessage = qs("[data-signup-password-message]");
+  const updatePasswordMessage = () => {
+    const password = passwordInput?.value || "";
+    const confirm = confirmInput?.value || "";
+    if (!confirm) {
+      passwordMessage.textContent = "비밀번호를 한 번 더 입력해 주세요.";
+      passwordMessage.className = "signup-match-message";
+      return;
+    }
+    const matched = password === confirm;
+    passwordMessage.textContent = matched ? "비밀번호가 일치해요." : "비밀번호가 일치하지 않아요.";
+    passwordMessage.className = `signup-match-message ${matched ? "is-match" : "is-mismatch"}`;
+  };
+  [passwordInput, confirmInput].forEach((input) => input?.addEventListener("input", updatePasswordMessage));
+  const updateAllTerms = () => {
+    const items = qsa("[data-terms-item]");
+    const allChecked = items.length > 0 && items.every((item) => item.classList.contains("is-checked"));
+    qs("[data-terms-all]")?.classList.toggle("is-checked", allChecked);
+  };
+  qsa("[data-terms-item]").forEach((button) => {
+    button.addEventListener("click", () => {
+      button.classList.toggle("is-checked");
+      updateAllTerms();
+    });
+  });
+  qs("[data-terms-all]")?.addEventListener("click", (event) => {
+    const nextChecked = !event.currentTarget.classList.contains("is-checked");
+    event.currentTarget.classList.toggle("is-checked", nextChecked);
+    qsa("[data-terms-item]").forEach((item) => item.classList.toggle("is-checked", nextChecked));
+  });
   qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
+    const email = emailInput?.value.trim() || "";
+    const password = passwordInput?.value || "";
+    const confirm = confirmInput?.value || "";
+    const requiredTermsAccepted = qsa("[data-terms-item][data-required='true']").every((item) => item.classList.contains("is-checked"));
+    if (!email || !password || !confirm) {
+      showToast("이메일, 비밀번호, 비밀번호 확인은 필수 항목이에요.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("이메일 형식을 확인해 주세요.");
+      return;
+    }
+    if (password !== confirm) {
+      showToast("비밀번호 확인이 일치하지 않아요.");
+      return;
+    }
+    if (!requiredTermsAccepted) {
+      showToast("필수 약관에 동의해 주세요.");
+      return;
+    }
     state.emailSignupCompleted = true;
     openLoginModal("이메일");
     showToast("회원가입이 완료됐어요. 이메일로 로그인해 주세요.");
