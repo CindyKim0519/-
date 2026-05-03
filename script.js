@@ -3476,6 +3476,11 @@ function saveCurrentRelationToAccount() {
   if (!account) return;
   account.currentRelation = { ...currentRelationInfo() };
   account.connected = !!state.connected;
+  try {
+    localStorage.setItem("duariLastCurrentRelation", JSON.stringify(account.currentRelation));
+  } catch {
+    // Prototype fallback: keep the relation in memory when browser storage is unavailable.
+  }
   if (typeof saveRegisteredAccounts === "function") saveRegisteredAccounts();
 }
 
@@ -3483,6 +3488,18 @@ function applyCurrentAccountRelation() {
   const account = typeof getSignupAccount === "function" ? getSignupAccount(state.currentLoginEmail) : null;
   if (!account) return;
   if (account.currentRelation) state.currentRelation = { ...account.currentRelation };
+  else {
+    try {
+      const savedRelation = JSON.parse(localStorage.getItem("duariLastCurrentRelation") || "null");
+      if (savedRelation?.name && savedRelation?.date) {
+        state.currentRelation = { ...savedRelation };
+        account.currentRelation = { ...savedRelation };
+        saveRegisteredAccounts();
+      }
+    } catch {
+      // Ignore malformed prototype storage.
+    }
+  }
   if (typeof account.connected === "boolean") state.connected = account.connected;
 }
 
@@ -12480,6 +12497,11 @@ function markCurrentAccountSetupComplete() {
   account.setupComplete = true;
   account.currentRelation = { ...currentRelationInfo() };
   account.connected = !!state.connected;
+  try {
+    localStorage.setItem("duariLastCurrentRelation", JSON.stringify(account.currentRelation));
+  } catch {
+    // Prototype fallback: keep the relation in memory when browser storage is unavailable.
+  }
   saveRegisteredAccounts();
 }
 
@@ -12708,6 +12730,13 @@ function completeEmailLogin() {
     return;
   }
   applyCurrentAccountRelation();
+  if (account && account.setupComplete && account.connected !== false && !account.currentRelation) {
+    account.setupComplete = false;
+    saveRegisteredAccounts();
+    openFirstSetupPage();
+    showToast("관계 정보를 다시 설정해 주세요.");
+    return;
+  }
   closeModal();
   if (typeof state.connected !== "boolean") state.connected = true;
   qs("#onboarding")?.classList.add("is-hidden");
