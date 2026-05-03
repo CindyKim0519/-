@@ -3100,6 +3100,7 @@ function openWithdrawalModal() {
       });
     });
     qs("[data-withdraw-final]", sheet)?.addEventListener("click", () => {
+      deleteCurrentLoginAccount();
       closeModal();
       returnToEntryScreen("회원 탈퇴가 완료됐어요.");
     });
@@ -3877,11 +3878,36 @@ function openAccountModal() {
 function logoutToLogin() {
   closeModal();
   state.slide = 0;
+  state.currentLoginEmail = "";
   qs("#app")?.classList.add("is-hidden");
   qs("#onboarding")?.classList.remove("is-hidden");
   qs("#onboarding")?.classList.add("is-visible");
   renderOnboarding();
   showToast("로그아웃했어요.");
+}
+
+function deleteCurrentLoginAccount() {
+  const currentKey = normalizeSignupEmail(state.currentLoginEmail || "");
+  if (!currentKey) return;
+  state.registeredAccounts = Array.isArray(state.registeredAccounts)
+    ? state.registeredAccounts.filter((account) => account.email !== currentKey)
+    : [];
+  state.registeredEmails = Array.isArray(state.registeredEmails)
+    ? state.registeredEmails.filter((email) => normalizeSignupEmail(email) !== currentKey)
+    : [];
+  saveRegisteredAccounts();
+  try {
+    const savedRelation = JSON.parse(localStorage.getItem("duariLastCurrentRelation") || "null");
+    const currentRelation = currentRelationInfo();
+    if (savedRelation?.name === currentRelation.name && savedRelation?.date === currentRelation.date) {
+      localStorage.removeItem("duariLastCurrentRelation");
+    }
+  } catch {
+    localStorage.removeItem("duariLastCurrentRelation");
+  }
+  state.currentLoginEmail = "";
+  state.signupDraft = null;
+  state.emailSignupCompleted = false;
 }
 
 function openPasswordChangePage() {
