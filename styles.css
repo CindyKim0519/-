@@ -1012,6 +1012,23 @@ h3 {
   gap: 10px;
 }
 
+.entry-switch-text {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  margin: 2px 0 0;
+  text-align: center;
+}
+
+.entry-switch-text button {
+  background: transparent;
+  border: 0;
+  color: var(--accent-primary);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 0 0 4px;
+}
+
 .terms-row {
   align-items: center;
   background: var(--color-white);

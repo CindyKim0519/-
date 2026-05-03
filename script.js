@@ -12471,11 +12471,13 @@ function openSignupModal() {
           `).join("")}
         </section>
         <button class="primary-btn full" type="button" data-entry-signup-complete>가입 완료</button>
+        <p class="entry-switch-text">이미 계정이 있나요? <button type="button" data-entry-signup-login>이메일 로그인</button></p>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
+  qs("[data-entry-signup-login]")?.addEventListener("click", () => openLoginModal("이메일"));
   const emailInput = qs("[data-signup-email]");
   const passwordInput = qs("[data-signup-password]");
   const confirmInput = qs("[data-signup-password-confirm]");
