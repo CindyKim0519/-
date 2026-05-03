@@ -16,6 +16,13 @@ const state = {
       return [];
     }
   })(),
+  registeredAccounts: (() => {
+    try {
+      return JSON.parse(localStorage.getItem("duariRegisteredAccounts") || "[]");
+    } catch {
+      return [];
+    }
+  })(),
   tab: "home",
   albumView: "record",
   diaryView: "shared",
@@ -12312,11 +12319,18 @@ function openLoginModal(provider = "이메일") {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-entry-login-complete]")?.addEventListener("click", () => {
+  qs("[data-entry-login-complete]")?.addEventListener("click", async () => {
     if (isEmail) {
       const email = normalizeSignupEmail(qs("[data-login-email]")?.value || "");
-      if (email && signupEmailExists(email)) {
+      const password = qs("[data-login-password]")?.value || "";
+      if (!email || !password) {
+        showToast("이메일과 비밀번호를 입력해 주세요.");
+        return;
+      }
+      if (await loginCredentialsMatch(email, password)) {
         completeEmailLogin();
+      } else if (signupEmailExists(email)) {
+        showToast("이메일 또는 비밀번호가 일치하지 않아요.");
       } else {
         returnToEntryScreen("회원가입 후 로그인해 주세요.");
       }
@@ -12375,20 +12389,49 @@ function normalizeSignupEmail(email = "") {
 
 function signupEmailExists(email = "") {
   const normalized = normalizeSignupEmail(email);
-  return Array.isArray(state.registeredEmails) && state.registeredEmails.includes(normalized);
+  const emails = Array.isArray(state.registeredEmails) ? state.registeredEmails : [];
+  const accounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+  return emails.includes(normalized) || accounts.some((account) => account.email === normalized);
 }
 
-function registerSignupEmail(email = "") {
+async function makeSignupPasswordHash(email = "", password = "") {
+  const source = `${normalizeSignupEmail(email)}:${password}`;
+  if (window.crypto?.subtle && window.TextEncoder) {
+    const bytes = new TextEncoder().encode(source);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  return `prototype:${btoa(unescape(encodeURIComponent(source)))}`;
+}
+
+async function loginCredentialsMatch(email = "", password = "") {
+  const normalized = normalizeSignupEmail(email);
+  const accounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+  const passwordHash = await makeSignupPasswordHash(normalized, password);
+  return accounts.some((account) => account.email === normalized && (account.passwordHash === passwordHash || account.password === password));
+}
+
+async function registerSignupAccount(email = "", password = "") {
   const normalized = normalizeSignupEmail(email);
   if (!normalized) return;
+  const passwordHash = await makeSignupPasswordHash(normalized, password);
   state.registeredEmails = Array.isArray(state.registeredEmails) ? state.registeredEmails : [];
+  state.registeredAccounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
   if (!state.registeredEmails.includes(normalized)) {
     state.registeredEmails.push(normalized);
-    try {
-      localStorage.setItem("duariRegisteredEmails", JSON.stringify(state.registeredEmails));
-    } catch {
-      // Prototype fallback: keep the email in memory when browser storage is unavailable.
-    }
+  }
+  const existingAccount = state.registeredAccounts.find((account) => account.email === normalized);
+  if (existingAccount) {
+    existingAccount.passwordHash = passwordHash;
+    delete existingAccount.password;
+  } else {
+    state.registeredAccounts.push({ email: normalized, passwordHash });
+  }
+  try {
+    localStorage.setItem("duariRegisteredEmails", JSON.stringify(state.registeredEmails));
+    localStorage.setItem("duariRegisteredAccounts", JSON.stringify(state.registeredAccounts));
+  } catch {
+    // Prototype fallback: keep the account in memory when browser storage is unavailable.
   }
 }
 
@@ -12538,7 +12581,7 @@ function openSignupModal() {
     qsa("[data-terms-item]").forEach((item) => item.classList.toggle("is-checked", nextChecked));
   });
   updateAllTerms();
-  qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
+  qs("[data-entry-signup-complete]")?.addEventListener("click", async () => {
     const email = normalizeSignupEmail(emailInput?.value || "");
     const password = passwordInput?.value || "";
     const confirm = confirmInput?.value || "";
@@ -12567,7 +12610,7 @@ function openSignupModal() {
       showToast("필수 약관에 동의해 주세요.");
       return;
     }
-    registerSignupEmail(email);
+    await registerSignupAccount(email, password);
     state.emailSignupCompleted = true;
     state.signupDraft = null;
     openLoginModal("이메일");
