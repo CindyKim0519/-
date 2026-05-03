@@ -12318,7 +12318,86 @@ function openLoginModal(provider = "이메일") {
   });
 }
 
+const signupTerms = [
+  {
+    key: "terms",
+    name: "이용약관 동의",
+    type: "필수",
+    title: "이용약관",
+    content: [
+      ["서비스 이용", "듀아리는 커플의 사진, 기록, 일기, 질문 답변을 안전하게 정리하는 관계 기록 서비스입니다."],
+      ["회원가입과 동의", "회원가입을 위해 이메일, 비밀번호, 필수 약관 동의가 필요합니다. 선택 약관은 동의하지 않아도 서비스를 이용할 수 있습니다."],
+      ["기록과 공유", "나만 보기 기록은 본인에게만 보이며, 우리 둘이 보기 기록과 공유 일기는 연결된 상대에게 표시될 수 있습니다."],
+    ],
+  },
+  {
+    key: "privacy",
+    name: "개인정보처리방침 동의",
+    type: "필수",
+    title: "개인정보처리방침",
+    content: [
+      ["수집하는 정보", "계정 이메일, 닉네임, 프로필 정보, 관계 기록, 일기, 질문 답변, 알림 설정처럼 서비스 이용에 필요한 정보를 다룹니다."],
+      ["개인 기록 보호", "개인 일기, 개인 초안, 나만 보기 기록은 상대에게 존재 자체가 노출되지 않도록 분리해서 관리합니다."],
+      ["탈퇴와 보존", "탈퇴 시 개인 데이터는 삭제되며, 공유 기록이나 공유 일기처럼 상대 공간에 남는 정보는 탈퇴한 사용자로 표시될 수 있습니다."],
+    ],
+  },
+  {
+    key: "marketing",
+    name: "마케팅 정보 수신 동의",
+    type: "선택",
+    title: "마케팅 정보 수신 동의",
+    content: [
+      ["선택 동의", "이 항목은 선택 사항이며 동의하지 않아도 듀아리의 기본 기능을 사용할 수 있습니다."],
+      ["수신 내용", "새 기능, 이벤트, 관계 기록 팁처럼 앱 이용에 도움이 되는 안내를 받을 수 있습니다."],
+      ["철회", "마이 탭의 알림 또는 계정 설정에서 언제든 수신 동의를 변경할 수 있습니다."],
+    ],
+  },
+];
+
+function signupAttr(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("<", "&lt;");
+}
+
+function saveSignupDraft() {
+  const terms = {};
+  qsa("[data-terms-item]").forEach((item) => {
+    terms[item.dataset.termKey] = item.classList.contains("is-checked");
+  });
+  state.signupDraft = {
+    email: qs("[data-signup-email]")?.value || "",
+    password: qs("[data-signup-password]")?.value || "",
+    confirm: qs("[data-signup-password-confirm]")?.value || "",
+    terms,
+  };
+}
+
+function openSignupTermsPage(termKey) {
+  saveSignupDraft();
+  const term = signupTerms.find((item) => item.key === termKey) || signupTerms[0];
+  openModal(`
+    <div class="modal-sheet notification-page policy-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-signup-terms-back aria-label="뒤로가기">←</button>
+        <h3>${term.title}</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="policy-content">
+        ${term.content.map(([title, body]) => `
+          <h4>${title}</h4>
+          <p>${body}</p>
+        `).join("")}
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-signup-terms-back]")?.addEventListener("click", openSignupModal);
+}
+
 function openSignupModal() {
+  const draft = state.signupDraft || { email: "", password: "", confirm: "", terms: {} };
   openModal(`
     <div class="modal-sheet notification-page entry-flow-page">
       <header class="notification-header">
@@ -12329,16 +12408,16 @@ function openSignupModal() {
       <div class="section-stack">
         <div class="form-field">
           <label>이메일 <span class="required-mark">필수</span></label>
-          <input data-signup-email placeholder="duari@example.com" autocomplete="email" />
+          <input data-signup-email placeholder="duari@example.com" autocomplete="email" value="${signupAttr(draft.email)}" />
         </div>
         <div class="form-field">
           <label>비밀번호 <span class="required-mark">필수</span></label>
-          <input data-signup-password type="password" autocomplete="new-password" />
+          <input data-signup-password type="password" autocomplete="new-password" value="${signupAttr(draft.password)}" />
           <p class="tiny-note">영문, 숫자 포함 8자 이상을 권장해요.</p>
         </div>
         <div class="form-field">
           <label>비밀번호 확인 <span class="required-mark">필수</span></label>
-          <input data-signup-password-confirm type="password" autocomplete="new-password" />
+          <input class="signup-password-confirm" data-signup-password-confirm type="password" autocomplete="new-password" value="${signupAttr(draft.confirm)}" />
           <p class="signup-match-message" data-signup-password-message>비밀번호를 한 번 더 입력해 주세요.</p>
         </div>
         <section class="card signup-terms-card">
@@ -12347,16 +12426,17 @@ function openSignupModal() {
             <span class="terms-check" aria-hidden="true"></span>
             <strong>전체 동의</strong>
           </button>
-          ${[
-            ["이용약관 동의", "필수"],
-            ["개인정보처리방침 동의", "필수"],
-            ["마케팅 정보 수신 동의", "선택"],
-          ].map(([name, type]) => `
-            <button class="terms-row" type="button" data-terms-item data-required="${type === "필수"}">
-              <span class="terms-check" aria-hidden="true"></span>
-              <span class="terms-copy"><strong>${name}</strong><small>${type}</small></span>
-              <span class="menu-chevron" aria-hidden="true">›</span>
-            </button>
+          ${signupTerms.map(({ key, name, type }) => `
+            <div class="terms-row ${draft.terms?.[key] ? "is-checked" : ""}" data-terms-item data-term-key="${key}" data-required="${type === "필수"}">
+              <button class="terms-check-button" type="button" data-terms-check aria-label="${name} 체크">
+                <span class="terms-check" aria-hidden="true"></span>
+              </button>
+              <button class="terms-copy" type="button" data-terms-toggle>
+                <span class="terms-kind ${type === "필수" ? "required" : "optional"}">(${type})</span>
+                <strong>${name}</strong>
+              </button>
+              <button class="terms-chevron-btn" type="button" data-terms-open="${key}" aria-label="${name} 보기">›</button>
+            </div>
           `).join("")}
         </section>
         <button class="primary-btn full" type="button" data-entry-signup-complete>가입 완료</button>
@@ -12375,29 +12455,35 @@ function openSignupModal() {
     if (!confirm) {
       passwordMessage.textContent = "비밀번호를 한 번 더 입력해 주세요.";
       passwordMessage.className = "signup-match-message";
+      confirmInput?.classList.remove("is-match", "is-mismatch");
       return;
     }
     const matched = password === confirm;
     passwordMessage.textContent = matched ? "비밀번호가 일치해요." : "비밀번호가 일치하지 않아요.";
     passwordMessage.className = `signup-match-message ${matched ? "is-match" : "is-mismatch"}`;
+    confirmInput?.classList.toggle("is-match", matched);
+    confirmInput?.classList.toggle("is-mismatch", !matched);
   };
   [passwordInput, confirmInput].forEach((input) => input?.addEventListener("input", updatePasswordMessage));
+  updatePasswordMessage();
   const updateAllTerms = () => {
     const items = qsa("[data-terms-item]");
     const allChecked = items.length > 0 && items.every((item) => item.classList.contains("is-checked"));
     qs("[data-terms-all]")?.classList.toggle("is-checked", allChecked);
   };
-  qsa("[data-terms-item]").forEach((button) => {
-    button.addEventListener("click", () => {
-      button.classList.toggle("is-checked");
+  qsa("[data-terms-item]").forEach((row) => {
+    qsa("[data-terms-check], [data-terms-toggle]", row).forEach((button) => button.addEventListener("click", () => {
+      row.classList.toggle("is-checked");
       updateAllTerms();
-    });
+    }));
   });
+  qsa("[data-terms-open]").forEach((button) => button.addEventListener("click", () => openSignupTermsPage(button.dataset.termsOpen)));
   qs("[data-terms-all]")?.addEventListener("click", (event) => {
     const nextChecked = !event.currentTarget.classList.contains("is-checked");
     event.currentTarget.classList.toggle("is-checked", nextChecked);
     qsa("[data-terms-item]").forEach((item) => item.classList.toggle("is-checked", nextChecked));
   });
+  updateAllTerms();
   qs("[data-entry-signup-complete]")?.addEventListener("click", () => {
     const email = emailInput?.value.trim() || "";
     const password = passwordInput?.value || "";
@@ -12420,6 +12506,7 @@ function openSignupModal() {
       return;
     }
     state.emailSignupCompleted = true;
+    state.signupDraft = null;
     openLoginModal("이메일");
     showToast("회원가입이 완료됐어요. 이메일로 로그인해 주세요.");
   });

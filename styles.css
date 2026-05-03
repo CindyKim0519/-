@@ -983,6 +983,16 @@ h3 {
   color: var(--accent-primary);
 }
 
+.signup-password-confirm.is-match {
+  border-color: #2f827a;
+  box-shadow: 0 0 0 2px rgba(47, 130, 122, 0.12);
+}
+
+.signup-password-confirm.is-mismatch {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(234, 91, 117, 0.12);
+}
+
 .signup-terms-card {
   display: grid;
   gap: 10px;
@@ -1001,8 +1011,23 @@ h3 {
   text-align: left;
 }
 
+.terms-row button {
+  font: inherit;
+}
+
 .terms-all-row {
   grid-template-columns: 22px 1fr;
+}
+
+.terms-check-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 22px;
 }
 
 .terms-check {
@@ -1029,14 +1054,48 @@ h3 {
 
 .terms-copy {
   align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
   display: flex;
   gap: 8px;
+  justify-content: flex-start;
   min-width: 0;
+  padding: 0;
+  text-align: left;
 }
 
-.terms-copy small {
+.terms-kind {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.terms-kind.required {
+  color: var(--accent-primary);
+}
+
+.terms-kind.optional {
   color: var(--text-secondary);
-  font-size: var(--font-size-xs);
+}
+
+.terms-chevron-btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  display: inline-flex;
+  font-size: 20px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+}
+
+.terms-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
