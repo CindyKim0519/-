@@ -12339,7 +12339,9 @@ function openLoginModal(provider = "이메일") {
       }
       return;
     }
-    openFirstSetupPage();
+    const account = registerSocialLoginAccount(provider);
+    state.currentLoginEmail = account.email;
+    completeEmailLogin();
   });
 }
 
@@ -12400,6 +12402,27 @@ function getSignupAccount(email = "") {
   const normalized = normalizeSignupEmail(email);
   const accounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
   return accounts.find((account) => account.email === normalized) || null;
+}
+
+function socialAccountKey(provider = "") {
+  return `social:${String(provider).trim().toLowerCase()}`;
+}
+
+function registerSocialLoginAccount(provider = "") {
+  const key = socialAccountKey(provider);
+  state.registeredAccounts = Array.isArray(state.registeredAccounts) ? state.registeredAccounts : [];
+  let account = state.registeredAccounts.find((item) => item.email === key);
+  if (!account) {
+    account = {
+      email: key,
+      provider,
+      type: "social",
+      setupComplete: false,
+    };
+    state.registeredAccounts.push(account);
+    saveRegisteredAccounts();
+  }
+  return account;
 }
 
 async function makeSignupPasswordHash(email = "", password = "") {
