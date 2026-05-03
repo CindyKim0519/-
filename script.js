@@ -12412,8 +12412,8 @@ function openSignupModal() {
         </div>
         <div class="form-field">
           <label>비밀번호</label>
-          <input data-signup-password type="password" autocomplete="new-password" value="${signupAttr(draft.password)}" />
-          <p class="tiny-note">영문, 숫자 포함 8자 이상을 권장해요.</p>
+          <input class="signup-password-input" data-signup-password type="password" autocomplete="new-password" value="${signupAttr(draft.password)}" />
+          <p class="signup-password-rule" data-signup-password-rule>영문과 숫자를 포함해 8자 이상 입력해 주세요.</p>
         </div>
         <div class="form-field">
           <label>비밀번호 확인</label>
@@ -12448,7 +12448,23 @@ function openSignupModal() {
   const emailInput = qs("[data-signup-email]");
   const passwordInput = qs("[data-signup-password]");
   const confirmInput = qs("[data-signup-password-confirm]");
+  const passwordRule = qs("[data-signup-password-rule]");
   const passwordMessage = qs("[data-signup-password-message]");
+  const passwordIsValid = (password = "") => password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password);
+  const updatePasswordRule = () => {
+    const password = passwordInput?.value || "";
+    if (!password) {
+      passwordRule.textContent = "영문과 숫자를 포함해 8자 이상 입력해 주세요.";
+      passwordRule.className = "signup-password-rule";
+      passwordInput?.classList.remove("is-match", "is-mismatch");
+      return;
+    }
+    const valid = passwordIsValid(password);
+    passwordRule.textContent = valid ? "사용할 수 있는 비밀번호예요." : "영문과 숫자를 포함해 8자 이상이어야 해요.";
+    passwordRule.className = `signup-password-rule ${valid ? "is-match" : "is-mismatch"}`;
+    passwordInput?.classList.toggle("is-match", valid);
+    passwordInput?.classList.toggle("is-mismatch", !valid);
+  };
   const updatePasswordMessage = () => {
     const password = passwordInput?.value || "";
     const confirm = confirmInput?.value || "";
@@ -12464,7 +12480,12 @@ function openSignupModal() {
     confirmInput?.classList.toggle("is-match", matched);
     confirmInput?.classList.toggle("is-mismatch", !matched);
   };
-  [passwordInput, confirmInput].forEach((input) => input?.addEventListener("input", updatePasswordMessage));
+  passwordInput?.addEventListener("input", () => {
+    updatePasswordRule();
+    updatePasswordMessage();
+  });
+  confirmInput?.addEventListener("input", updatePasswordMessage);
+  updatePasswordRule();
   updatePasswordMessage();
   const updateAllTerms = () => {
     const items = qsa("[data-terms-item]");
@@ -12495,6 +12516,10 @@ function openSignupModal() {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showToast("이메일 형식을 확인해 주세요.");
+      return;
+    }
+    if (!passwordIsValid(password)) {
+      showToast("비밀번호는 영문과 숫자를 포함해 8자 이상이어야 해요.");
       return;
     }
     if (password !== confirm) {

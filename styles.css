@@ -976,11 +976,28 @@ h3 {
   color: var(--accent-primary);
 }
 
+.signup-password-rule {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-sm);
+  margin: 6px 0 0;
+}
+
+.signup-password-rule.is-match {
+  color: #2f827a;
+}
+
+.signup-password-rule.is-mismatch {
+  color: var(--accent-primary);
+}
+
+.signup-password-input.is-match,
 .signup-password-confirm.is-match {
   border-color: #2f827a;
   box-shadow: 0 0 0 2px rgba(47, 130, 122, 0.12);
 }
 
+.signup-password-input.is-mismatch,
 .signup-password-confirm.is-mismatch {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(234, 91, 117, 0.12);
