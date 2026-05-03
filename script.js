@@ -4141,10 +4141,6 @@ function openNotificationPage() {
 
 renderOnboarding();
 
-qsa(".login-grid .ghost-btn").forEach((button) => {
-  button.addEventListener("click", () => openLoginModal(button.textContent.trim()));
-});
-
 qs("#startApp")?.addEventListener("click", startSetup);
 qs("#openNotifications").addEventListener("click", () => {
   openModal(`<div class="modal-sheet"><div class="between"><h3>알림</h3><button class="icon-btn" data-close>닫기</button></div><div class="tabs" style="margin:10px 0">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}">${item}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card"><div class="between"><strong>${item.type}</strong><span class="meta">알림</span></div><p>${item.text}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent">요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
