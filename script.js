@@ -10583,7 +10583,10 @@ function openMemoryEditPageLatest(index, backAction = null) {
         <div class="form-field"><label>기록 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         <section class="card"><div class="between"><h3>사진 관리</h3><span class="meta">7장</span></div><div class="photo-order-grid compact">${memoryPhotoCardsLatest(7)}</div><button class="ghost-btn full" data-photo-order-page style="margin-top:12px">사진 순서 변경</button><button class="ghost-btn full" data-photo-add-choice style="margin-top:8px">사진 추가</button></section>
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}<button class="ghost-btn full" data-linked-diary-select style="margin-top:12px">연결한 일기 선택</button><button class="ghost-btn full" data-linked-diary-add style="margin-top:8px">일기 추가</button></section>
-        <button class="primary-btn full" data-save-memory-edit>저장</button>
+        <div class="diary-detail-actions">
+          <button class="primary-btn" data-save-memory-edit>저장</button>
+          <button class="ghost-btn" data-delete-memory-edit>삭제</button>
+        </div>
       </div>
     </div>
   `);
@@ -10595,9 +10598,11 @@ function openMemoryEditPageLatest(index, backAction = null) {
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
   qs("[data-save-memory-edit]").addEventListener("click", () => {
+    duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
   });
+  qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
   qs("[data-photo-order-page]").addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack)));
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(index));
@@ -10606,6 +10611,40 @@ function openMemoryEditPageLatest(index, backAction = null) {
   bindPhotoRoleSelectionLatest(qs(".modal-sheet"));
   bindPhotoDragLatest(qs(".modal-sheet"));
   bindActions(qs(".modal-sheet"));
+}
+
+function openMemoryDeleteConfirmOverlay(index, backAction = null) {
+  const page = qs(".memory-edit-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  const memory = state.memories[index] || state.memories[0];
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>기록을 삭제할까요?</h3>
+        <p>삭제한 기록은 복구할 수 없어요. 연결된 일기는 유지되고, 기록 연결만 해제됩니다.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-memory-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-memory-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-memory-delete-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-memory-delete-confirm]", page)?.addEventListener("click", () => {
+    const deletedTitle = memory?.title || "";
+    state.memories.splice(index, 1);
+    (state.diaries || []).forEach((diary) => {
+      if (diary.linked === deletedTitle) diary.linked = "관련 기록 없음";
+      if (diary.linkedMemoryTitle === deletedTitle) delete diary.linkedMemoryTitle;
+    });
+    if (memoryLinkedAddedDiaries?.[index]) delete memoryLinkedAddedDiaries[index];
+    state.activeMemoryIndex = 0;
+    duariSavePersistentContent();
+    qs(".ai-confirm-overlay", page)?.remove();
+    closeModal();
+    setTab(state.tab === "album" ? "album" : "home");
+    showToast("기록을 삭제했어요.");
+  });
 }
 
 function openMemoryCreatePage(backAction = null) {
@@ -10811,7 +10850,10 @@ function openMemoryEditPageLatest(index, backAction = null) {
         <div class="form-field"><label>기록 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         <section class="card"><div class="between"><h3>사진 관리</h3><span class="meta">7장</span></div><div class="photo-order-grid compact">${memoryPhotoCardsLatest(7)}</div>${recordPhotoActionsHtml()}</section>
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
-        <button class="primary-btn full" data-save-memory-edit>저장</button>
+        <div class="diary-detail-actions">
+          <button class="primary-btn" data-save-memory-edit>저장</button>
+          <button class="ghost-btn" data-delete-memory-edit>삭제</button>
+        </div>
       </div>
     </div>
   `);
@@ -10823,9 +10865,11 @@ function openMemoryEditPageLatest(index, backAction = null) {
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
   qs("[data-save-memory-edit]").addEventListener("click", () => {
+    duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
   });
+  qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
   qs("[data-photo-order-page]").addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack)));
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(index));
