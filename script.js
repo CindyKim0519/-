@@ -13406,6 +13406,13 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
   });
 }
 
+function duariEmptyDiaryMessage() {
+  if (state.diaryView === "mineShared") return "아직 공유한 일기가 없어요.";
+  if (state.diaryView === "private") return "아직 나만 보기 일기가 없어요.";
+  if (state.diaryView === "draft") return "아직 임시 저장한 일기가 없어요.";
+  return "아직 일기가 없어요.";
+}
+
 renderDiary = function renderDiary() {
   normalizeDiaryView();
   const diary = qs("#diary");
@@ -13446,7 +13453,7 @@ renderDiary = function renderDiary() {
             </div>
             ${duariDiaryDateMeta(entry)}
           </article>
-        `).join("") : `<p class="linked-record-empty">조건에 맞는 일기가 없습니다.</p>`}
+        `).join("") : `<p class="linked-record-empty">${duariEmptyDiaryMessage()}</p>`}
       </div>
       ${hasMoreEntries ? `<button class="ghost-btn full diary-load-more" type="button" data-diary-load-more>더보기</button>` : ""}
     </div>
