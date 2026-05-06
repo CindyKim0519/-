@@ -12090,11 +12090,16 @@ function duariCurrentDiaryDraft(fallback = {}) {
       fallback.linked ||
       "관련 기록 없음"
     );
+  const currentLinkedMemoryIndex = !forceNoLinkedRecord && diaryHasLinkedRecord?.(linkedTitle)
+    ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0)
+    : null;
   const linkedMemoryIndex = forceNoLinkedRecord
     ? null
-    : (typeof fallback.linkedMemoryIndex === "number"
+    : (typeof currentLinkedMemoryIndex === "number"
+      ? currentLinkedMemoryIndex
+      : typeof fallback.linkedMemoryIndex === "number"
       ? fallback.linkedMemoryIndex
-      : (diaryHasLinkedRecord?.(linkedTitle) ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0) : null));
+      : null);
 
   return {
     heading: duariNormalizeDiaryHeading(qs(".notification-header h3", page)?.textContent || fallback.heading),
@@ -13480,7 +13485,11 @@ renderDiary = function renderDiary() {
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
     const openEntry = () => {
       const entry = filteredEntries[Number(card.dataset.diaryEntryIndex)] || filteredEntries[0] || entries[0];
-      renderDiaryDetailReadOnly(entry, () => renderDiary());
+      renderDiaryDetailReadOnly(entry, () => {
+        state.diaryView = duariDiaryViewFromScope(entry.scope || entry.type);
+        closeModal();
+        setTab("diary");
+      });
     };
     card.addEventListener("click", openEntry);
     card.addEventListener("keydown", (event) => {
