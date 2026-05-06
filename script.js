@@ -12036,7 +12036,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
           <label>내 감정</label>
           ${emotionChipRow(["고마움", "안정", "서운함", "그리움", "기대"], feelings, "data-diary-feelings")}
         </div>
-        ${duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
+        ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
           <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 정리하기</button>
           ${isEditMode ? `<button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
