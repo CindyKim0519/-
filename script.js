@@ -10841,6 +10841,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
   const editTitle = limitMemoryEditTitle(memory.title);
   const resolvedBack = backAction || (() => openMemoryDetailLatestV3(index));
   const diarySelection = selectedLinkedDiaryCardsHtml("edit", index);
+  const photoCount = duariPhotoCountForMemory(index);
   openModal(`
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page">
       <header class="notification-header">
