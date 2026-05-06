@@ -10287,6 +10287,13 @@ function memoryScopeFieldHtml(activeScope = null) {
 }
 
 function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
+  if (mode === "create" && memoryLinkedDiarySelection.createDiary) {
+    const diary = memoryLinkedDiarySelection.createDiary;
+    return {
+      count: 1,
+      html: `<div class="linked-diary-list"><article class="linked-diary-card"><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
+    };
+  }
   const selectedIndex = mode === "create" ? memoryLinkedDiarySelection.create : memoryLinkedDiarySelection.edit[index];
   if (typeof selectedIndex === "number") {
     const diary = linkedDiariesLatest()[selectedIndex] || linkedDiariesLatest()[0];
@@ -10446,6 +10453,7 @@ function openMemoryCreatePage(backAction = null) {
     const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
     state.memories.unshift({ title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" });
     memoryLinkedDiarySelection.create = null;
+    memoryLinkedDiarySelection.createDiary = null;
     closeModal();
     render();
     showToast("기록이 저장됐어요.");
@@ -10685,6 +10693,7 @@ function openMemoryCreatePage(backAction = null) {
     const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
     state.memories.unshift({ title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" });
     memoryLinkedDiarySelection.create = null;
+    memoryLinkedDiarySelection.createDiary = null;
     state.memoryCreateDraft = null;
     closeModal();
     render();
@@ -11971,6 +11980,23 @@ function duariBindDiaryEditor(args = {}) {
     event.preventDefault();
     event.stopPropagation();
     const draft = duariCurrentDiaryDraft(args);
+    if (args.forceNoLinkedRecord === true) {
+      const savedDiary = {
+        title: draft.title || "제목 없는 일기",
+        body: draft.body || "작성한 내용이 없습니다.",
+        scope: draft.scope,
+        type: diaryScopeLabel?.(draft.scope) || (draft.scope === "공유" ? "내 공유" : "나만 보기"),
+        feelings: draft.feelings.length ? draft.feelings : ["고마움"],
+        linked: "기록 추가 중",
+        author: "나",
+        editable: true
+      };
+      memoryLinkedDiarySelection.createDiary = savedDiary;
+      memoryLinkedDiarySelection.create = null;
+      runWithoutModalHistory(() => (typeof args.backAction === "function" ? args.backAction() : openMemoryCreatePage()));
+      showToast("새 일기를 기록 추가에 연결했어요.");
+      return;
+    }
     if (!diaryHasLinkedRecord?.(draft.linked)) {
       openRequiredLinkedRecordOverlay({ missingScope: false });
       return;
