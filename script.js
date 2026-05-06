@@ -12867,43 +12867,29 @@ function openPhotoAddChoiceModal(options = {}) {
           <button class="icon-btn" type="button" data-photo-add-close aria-label="닫기">×</button>
         </div>
         <input type="file" accept="image/*" multiple hidden data-photo-album-input />
+        <input type="file" accept="image/*" capture="environment" hidden data-photo-camera-input />
         <div class="photo-add-actions">
           <button class="primary-btn" type="button" data-photo-capture>사진 촬영</button>
           <button class="ghost-btn" type="button" data-photo-album-open>앨범 보기</button>
         </div>
-        <p class="meta" data-photo-upload-status style="margin-top:10px">업로드할 사진을 선택해 주세요.</p>
         <div class="photo-add-actions">
           <button class="ghost-btn" type="button" data-photo-add-close>취소</button>
-          <button class="primary-btn" type="button" data-photo-upload disabled>업로드</button>
         </div>
       </div>
     </div>
   `);
   const overlay = qs(".photo-add-overlay");
-  const input = qs("[data-photo-album-input]", overlay);
-  const uploadButton = qs("[data-photo-upload]", overlay);
-  const status = qs("[data-photo-upload-status]", overlay);
-  qsa("[data-photo-add-close]", overlay).forEach((button) => {
-    button.addEventListener("click", () => overlay.remove());
-  });
-  qs("[data-photo-capture]", overlay)?.addEventListener("click", () => {
-    showToast("사진 촬영 권한을 확인했어요. 앨범 보기에서 사진을 추가할 수 있어요.");
-  });
-  qs("[data-photo-album-open]", overlay)?.addEventListener("click", () => input?.click());
-  input?.addEventListener("change", () => {
-    const selectedCount = input.files?.length || 0;
-    if (status) status.textContent = selectedCount ? `${selectedCount}장을 선택했어요.` : "업로드할 사진을 선택해 주세요.";
-    if (uploadButton) uploadButton.disabled = selectedCount <= 0;
-  });
-  uploadButton?.addEventListener("click", () => {
-    const selectedCount = input.files?.length || 0;
+  const albumInput = qs("[data-photo-album-input]", overlay);
+  const cameraInput = qs("[data-photo-camera-input]", overlay);
+  const addSelectedPhotos = (input) => {
+    const selectedCount = input?.files?.length || 0;
     if (!selectedCount) return;
     const memory = state.memories?.[memoryIndex];
     const currentCount = duariPhotoCountForMemory(memoryIndex);
     const nextCount = Math.min(30, currentCount + selectedCount);
     const addedCount = nextCount - currentCount;
     if (addedCount <= 0) {
-      if (status) status.textContent = "한 기록에는 사진을 최대 30장까지 추가할 수 있어요.";
+      showToast("한 기록에는 사진을 최대 30장까지 추가할 수 있어요.");
       return;
     }
     if (memory) {
@@ -12913,7 +12899,16 @@ function openPhotoAddChoiceModal(options = {}) {
     duariRefreshPhotoManageCard(nextCount);
     overlay.remove();
     showToast(`사진 ${addedCount}장을 추가했어요.`);
+  };
+  qsa("[data-photo-add-close]", overlay).forEach((button) => {
+    button.addEventListener("click", () => overlay.remove());
   });
+  qs("[data-photo-capture]", overlay)?.addEventListener("click", () => {
+    cameraInput?.click();
+  });
+  qs("[data-photo-album-open]", overlay)?.addEventListener("click", () => albumInput?.click());
+  albumInput?.addEventListener("change", () => addSelectedPhotos(albumInput));
+  cameraInput?.addEventListener("change", () => addSelectedPhotos(cameraInput));
 }
 
 // Final entry flow: onboarding -> login/signup -> nickname/PIN -> start method -> home.
