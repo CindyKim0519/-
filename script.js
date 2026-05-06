@@ -10397,6 +10397,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
 }
 
 function openMemoryCreatePage(backAction = null) {
+  const draft = state.memoryCreateDraft || {};
   const diarySelection = selectedLinkedDiaryCardsHtml("create");
   openModal(`
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page memory-create-page">
@@ -10616,6 +10617,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
 }
 
 function openMemoryCreatePage(backAction = null) {
+  const draft = state.memoryCreateDraft || {};
   const diarySelection = selectedLinkedDiaryCardsHtml("create");
   openModal(`
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page memory-create-page">
@@ -10625,10 +10627,10 @@ function openMemoryCreatePage(backAction = null) {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        ${memoryScopeFieldHtml(state.connected ? "우리 둘이 보기" : "나만 보기")}
-        <div class="form-field"><div class="field-label-row"><label>제목</label><span class="input-count">0/24</span></div><input class="memory-title-input" id="memoryTitle" value="" maxlength="24" /></div>
-        <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="" /></div>
-        <div class="form-field"><label>장소</label><input id="memoryPlace" value="" /></div>
+        ${memoryScopeFieldHtml(draft.scope || (state.connected ? "우리 둘이 보기" : "나만 보기"))}
+        <div class="form-field"><div class="field-label-row"><label>제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
+        <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
+        <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>기록 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         <section class="card"><div class="between"><h3>사진 관리</h3><span class="meta">0장</span></div><div class="photo-order-grid compact is-empty"><p class="linked-record-empty photo-empty-line">추가된 사진이 없습니다.</p></div>${recordPhotoActionsHtml()}</section>
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
@@ -10637,14 +10639,30 @@ function openMemoryCreatePage(backAction = null) {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
+  if (draft.type) qs("#memoryType").value = draft.type;
   qs("[data-memory-create-back]").addEventListener("click", () => runFlowBack(backAction));
   const titleInput = qs(".memory-title-input");
   const titleCount = qs(".input-count");
   syncMemoryTitleLimit(titleInput, titleCount);
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
-  qs("[data-photo-order-page]").addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryCreatePage(backAction)));
-  qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
+  const saveMemoryCreateDraft = () => {
+    state.memoryCreateDraft = {
+      title: limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || ""),
+      date: qs("#memoryDate")?.value || "",
+      place: qs("#memoryPlace")?.value.trim() || "",
+      type: qs("#memoryType")?.value || "",
+      scope: qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || (state.connected ? "우리 둘이 보기" : "나만 보기"),
+    };
+  };
+  qs("[data-photo-order-page]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openPhotoOrderManagerPageLatest(() => openMemoryCreatePage(backAction));
+  });
+  qs("[data-photo-add-choice]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openPhotoAddChoiceModal();
+  });
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(null));
   qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "create", backAction }));
   qs("[data-save-memory-create]").addEventListener("click", () => {
@@ -10655,6 +10673,7 @@ function openMemoryCreatePage(backAction = null) {
     const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
     state.memories.unshift({ title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" });
     memoryLinkedDiarySelection.create = null;
+    state.memoryCreateDraft = null;
     closeModal();
     render();
     showToast("기록이 저장됐어요.");
