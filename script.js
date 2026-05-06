@@ -12276,6 +12276,14 @@ function duariBindDiaryEditor(args = {}) {
     event.stopPropagation();
     openDiaryEditDeleteConfirmOverlay(args);
   });
+  qs("[data-save-diary]", sheet)?.addEventListener("click", (event) => {
+    const heading = duariNormalizeDiaryHeading(args.heading);
+    if (heading !== "일기 수정" || args.forceNoLinkedRecord === true) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    duariUpdateEditedDiaryAndOpenTab(args);
+  }, { capture: true });
 }
 
 function duariFindEditableDiaryIndex(diary = {}) {
@@ -12325,6 +12333,40 @@ function openDiaryEditDeleteConfirmOverlay(args = {}) {
     }
     showToast("일기를 삭제했어요.");
   });
+}
+
+function duariDiaryViewFromScope(scope = "개인") {
+  const normalized = normalizeDiaryScopeValue?.(scope) || scope;
+  if (normalized === "공유") return "mineShared";
+  if (normalized === "draft") return "draft";
+  return "private";
+}
+
+function duariUpdateEditedDiaryAndOpenTab(args = {}) {
+  const draft = duariCurrentDiaryDraft(args);
+  const original = args.diary || {};
+  const index = duariFindEditableDiaryIndex(original);
+  const nextDiary = {
+    ...original,
+    title: draft.title || "제목 없는 일기",
+    body: draft.body || "작성한 내용이 없습니다.",
+    scope: draft.scope,
+    type: diaryScopeLabel?.(draft.scope) || original.type || "나만 보기",
+    originalScope: draft.scope,
+    feelings: draft.feelings.length ? draft.feelings : (original.feelings || ["고마움"]),
+    linked: draft.linked || original.linked || "관련 기록 없음",
+    linkedMemoryIndex: draft.linkedMemoryIndex,
+    author: original.author || "나",
+    editable: original.editable !== false,
+    date: original.date || original.createdAt || duariTodayDateText(),
+  };
+  if (index >= 0) state.diaries[index] = nextDiary;
+  else state.diaries.unshift(nextDiary);
+  duariSavePersistentContent();
+  state.diaryView = duariDiaryViewFromScope(nextDiary.scope);
+  closeModal();
+  setTab("diary");
+  showToast("일기를 수정했어요.");
 }
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
