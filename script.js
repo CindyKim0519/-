@@ -10430,8 +10430,14 @@ function openMemoryCreatePage(backAction = null) {
   bindMemoryScopeButtons(qs(".modal-sheet"));
   qs("[data-photo-order-page]").addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryCreatePage(backAction)));
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
-  qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(null));
-  qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "create", backAction }));
+  qs("[data-linked-diary-add]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openDiaryModal(null);
+  });
+  qs("[data-linked-diary-select]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openLinkedDiarySelectPage({ mode: "create", backAction });
+  });
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
@@ -10663,8 +10669,14 @@ function openMemoryCreatePage(backAction = null) {
     saveMemoryCreateDraft();
     openPhotoAddChoiceModal();
   });
-  qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(null));
-  qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "create", backAction }));
+  qs("[data-linked-diary-add]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openDiaryModal(null);
+  });
+  qs("[data-linked-diary-select]").addEventListener("click", () => {
+    saveMemoryCreateDraft();
+    openLinkedDiarySelectPage({ mode: "create", backAction });
+  });
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
