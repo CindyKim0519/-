@@ -10291,7 +10291,7 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
     const diary = memoryLinkedDiarySelection.createDiary;
     return {
       count: 1,
-      html: `<div class="linked-diary-list"><article class="linked-diary-card"><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
+      html: `<div class="linked-diary-list"><article class="linked-diary-card" role="button" tabindex="0" data-memory-create-linked-diary><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
     };
   }
   const selectedIndex = mode === "create" ? memoryLinkedDiarySelection.create : memoryLinkedDiarySelection.edit[index];
@@ -10351,6 +10351,113 @@ function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backActi
       runWithoutModalHistory(returnToOwner);
       showToast("연결할 일기를 선택했어요.");
     });
+  });
+}
+
+function bindMemoryCreateLinkedDiaryCard(root, backAction = null, beforeOpen = null) {
+  qsa("[data-memory-create-linked-diary]", root).forEach((card) => {
+    card.addEventListener("click", () => {
+      if (typeof beforeOpen === "function") beforeOpen();
+      openMemoryCreateLinkedDiaryDetail(backAction);
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      if (typeof beforeOpen === "function") beforeOpen();
+      openMemoryCreateLinkedDiaryDetail(backAction);
+    });
+  });
+}
+
+function openMemoryCreateLinkedDiaryDetail(backAction = null) {
+  const diary = memoryLinkedDiarySelection.createDiary;
+  if (!diary) {
+    openMemoryCreatePage(backAction);
+    return;
+  }
+  const feelings = (diary.feelings || []).slice(0, 2);
+  openModal(`
+    <div class="modal-sheet notification-page diary-detail-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-create-diary-detail-back aria-label="뒤로가기">←</button>
+        <h3>일기 상세</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card diary-detail-summary">
+          <div class="between"><h3>${duariEscapeHtml(diary.title || "제목 없는 일기")}</h3><span class="linked-diary-type">${duariEscapeHtml(diary.type || diaryScopeLabel(diary.scope))}</span></div>
+          <p class="diary-detail-body">${duariEscapeHtml(diary.body || "작성한 내용이 없습니다.")}</p>
+          <div class="tag-row diary-detail-feelings">${feelings.map((feeling) => `<span class="chip-btn">${duariEscapeHtml(feeling)}</span>`).join("")}</div>
+        </section>
+        <div class="diary-detail-actions">
+          <button class="primary-btn" type="button" data-create-diary-edit>수정</button>
+          <button class="ghost-btn" type="button" data-create-diary-delete>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-create-diary-detail-back]")?.addEventListener("click", () => runWithoutModalHistory(() => openMemoryCreatePage(backAction)));
+  qs("[data-create-diary-edit]")?.addEventListener("click", () => openMemoryCreateLinkedDiaryEdit(backAction));
+  qs("[data-create-diary-delete]")?.addEventListener("click", () => openMemoryCreateDiaryDeleteOverlay(backAction));
+}
+
+function openMemoryCreateLinkedDiaryEdit(backAction = null) {
+  const diary = memoryLinkedDiarySelection.createDiary;
+  if (!diary) {
+    openMemoryCreatePage(backAction);
+    return;
+  }
+  renderDiaryEditor({
+    heading: "일기 수정",
+    diary: { ...diary, forceNoLinkedRecord: true },
+    linkedMemoryIndex: null,
+    forceNoLinkedRecord: true,
+    backAction: () => openMemoryCreateLinkedDiaryDetail(backAction)
+  });
+  const saveButton = qs("[data-save-diary]");
+  if (saveButton) {
+    saveButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const draft = duariCurrentDiaryDraft({ ...diary, forceNoLinkedRecord: true });
+      memoryLinkedDiarySelection.createDiary = {
+        ...diary,
+        title: draft.title || "제목 없는 일기",
+        body: draft.body || "작성한 내용이 없습니다.",
+        scope: draft.scope,
+        type: diaryScopeLabel(draft.scope),
+        feelings: draft.feelings.length ? draft.feelings : ["고마움"],
+        linked: "기록 추가 중"
+      };
+      runWithoutModalHistory(() => openMemoryCreateLinkedDiaryDetail(backAction));
+      showToast("일기를 수정했어요.");
+    }, { capture: true });
+  }
+}
+
+function openMemoryCreateDiaryDeleteOverlay(backAction = null) {
+  const page = qs(".diary-detail-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>삭제할까요?</h3>
+        <p>기록 추가에 연결한 이 일기가 삭제돼요.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-create-diary-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-create-diary-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-create-diary-delete-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-create-diary-delete-confirm]", page)?.addEventListener("click", () => {
+    memoryLinkedDiarySelection.createDiary = null;
+    memoryLinkedDiarySelection.create = null;
+    qs(".ai-confirm-overlay", page)?.remove();
+    runWithoutModalHistory(() => openMemoryCreatePage(backAction));
+    showToast("연결된 일기를 삭제했어요.");
   });
 }
 
@@ -10445,6 +10552,7 @@ function openMemoryCreatePage(backAction = null) {
     saveMemoryCreateDraft();
     openLinkedDiarySelectPage({ mode: "create", backAction });
   });
+  bindMemoryCreateLinkedDiaryCard(qs(".modal-sheet"), backAction, saveMemoryCreateDraft);
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
@@ -10685,6 +10793,7 @@ function openMemoryCreatePage(backAction = null) {
     saveMemoryCreateDraft();
     openLinkedDiarySelectPage({ mode: "create", backAction });
   });
+  bindMemoryCreateLinkedDiaryCard(qs(".modal-sheet"), backAction, saveMemoryCreateDraft);
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
