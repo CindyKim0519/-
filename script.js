@@ -14335,6 +14335,22 @@ function duariPhotoCountForMemory(index) {
   return Number(index) === 0 ? 7 : 4;
 }
 
+if (!window.__duariMemoryEditButtonGuard) {
+  window.__duariMemoryEditButtonGuard = true;
+  window.addEventListener("click", (event) => {
+    const editButton = event.target.closest?.(".memory-detail-page:not(.memory-edit-page) [data-memory-edit-page]");
+    if (!editButton) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const memoryIndex = Number(editButton.dataset.index);
+    const safeIndex = Number.isFinite(memoryIndex)
+      ? memoryIndex
+      : (typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0);
+    openMemoryEditPageLatest(safeIndex, () => openMemoryDetailLatestV3(safeIndex));
+  }, true);
+}
+
 function openPhotoDetail(trigger = null) {
   const requestedMemoryIndex = Number(trigger?.dataset?.memoryIndex);
   const requestedPhotoIndex = Number(trigger?.dataset?.photoIndex);
