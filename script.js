@@ -69,6 +69,75 @@ const state = {
   ],
 };
 
+const DUARI_CONTENT_STORAGE_PREFIX = "duariContent:";
+
+function duariCurrentStorageUserKey() {
+  const raw = state.currentLoginEmail || "local";
+  return typeof normalizeSignupEmail === "function" ? (normalizeSignupEmail(raw) || "local") : String(raw || "local").trim().toLowerCase();
+}
+
+function duariContentStorageKey(email = state.currentLoginEmail) {
+  const raw = email || "local";
+  const key = typeof normalizeSignupEmail === "function" ? (normalizeSignupEmail(raw) || "local") : String(raw || "local").trim().toLowerCase();
+  return `${DUARI_CONTENT_STORAGE_PREFIX}${key}`;
+}
+
+function duariSavePersistentContent() {
+  try {
+    localStorage.setItem(duariContentStorageKey(), JSON.stringify({
+      memories: state.memories,
+      diaries: state.diaries,
+    }));
+  } catch {
+    // Keep the prototype usable even when browser storage is unavailable.
+  }
+}
+
+function duariLoadPersistentContent() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(duariContentStorageKey()) || "null");
+    if (Array.isArray(saved?.memories)) state.memories = saved.memories;
+    if (Array.isArray(saved?.diaries)) state.diaries = saved.diaries;
+  } catch {
+    // Leave the bundled sample data in place if saved data is unreadable.
+  }
+  duariInstallContentPersistenceHooks();
+}
+
+function duariDeletePersistentContentForCurrentUser() {
+  try {
+    localStorage.removeItem(duariContentStorageKey());
+  } catch {
+    // Nothing else to do in the prototype fallback.
+  }
+}
+
+function duariTodayDateText() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
+}
+
+function duariWrapPersistentArray(array) {
+  if (!Array.isArray(array) || array.__duariPersistWrapped) return;
+  Object.defineProperty(array, "__duariPersistWrapped", { value: true, configurable: true });
+  Object.defineProperty(array, "unshift", {
+    configurable: true,
+    value: function persistentUnshift(...items) {
+      const result = Array.prototype.unshift.apply(this, items);
+      duariSavePersistentContent();
+      return result;
+    }
+  });
+}
+
+function duariInstallContentPersistenceHooks() {
+  duariWrapPersistentArray(state.memories);
+  duariWrapPersistentArray(state.diaries);
+}
+
 const titles = { home: "홈", album: "기록", diary: "일기", questions: "질문", my: "마이" };
 
 function qs(selector, root = document) {
@@ -3876,6 +3945,7 @@ function openAccountModal() {
 }
 
 function logoutToLogin() {
+  duariSavePersistentContent();
   closeModal();
   state.slide = 0;
   state.currentLoginEmail = "";
@@ -3889,6 +3959,7 @@ function logoutToLogin() {
 function deleteCurrentLoginAccount() {
   const currentKey = normalizeSignupEmail(state.currentLoginEmail || "");
   if (!currentKey) return;
+  duariDeletePersistentContentForCurrentUser();
   state.registeredAccounts = Array.isArray(state.registeredAccounts)
     ? state.registeredAccounts.filter((account) => account.email !== currentKey)
     : [];
@@ -10296,7 +10367,9 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
   }
   const selectedIndex = mode === "create" ? memoryLinkedDiarySelection.create : memoryLinkedDiarySelection.edit[index];
   if (typeof selectedIndex === "number") {
-    const diary = linkedDiariesLatest()[selectedIndex] || linkedDiariesLatest()[0];
+    const diary = mode === "create"
+      ? (state.diaries[selectedIndex] || state.diaries[0])
+      : (linkedDiariesLatest()[selectedIndex] || linkedDiariesLatest()[0]);
     return {
       count: 1,
       html: `<div class="linked-diary-list"><article class="linked-diary-card" role="button" tabindex="0" data-memory-create-linked-diary data-memory-create-diary-index="${selectedIndex}"><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
@@ -10309,7 +10382,7 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
 }
 
 function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backAction = null } = {}) {
-  const diaries = linkedDiariesLatest();
+  const diaries = mode === "create" ? (state.diaries || []) : linkedDiariesLatest();
   openModal(`
     <div class="modal-sheet notification-page diary-record-picker-page">
       <header class="notification-header">
@@ -10371,7 +10444,7 @@ function bindMemoryCreateLinkedDiaryCard(root, backAction = null, beforeOpen = n
 
 function memoryCreateSelectedDiaryCopy(selectedIndex = null) {
   const index = typeof selectedIndex === "number" ? selectedIndex : memoryLinkedDiarySelection.create;
-  const diary = memoryLinkedDiarySelection.createDiary || (typeof index === "number" ? linkedDiariesLatest()[index] : null);
+  const diary = memoryLinkedDiarySelection.createDiary || (typeof index === "number" ? state.diaries[index] : null);
   return diary ? { ...diary, editable: true } : null;
 }
 
@@ -10441,6 +10514,24 @@ function openMemoryCreateLinkedDiaryEdit(backAction = null) {
       showToast("일기를 수정했어요.");
     }, { capture: true });
   }
+}
+
+function duariAttachCreateDiaryToMemory(memory = {}) {
+  const sourceDiary = memoryLinkedDiarySelection.createDiary || (
+    typeof memoryLinkedDiarySelection.create === "number" ? state.diaries[memoryLinkedDiarySelection.create] : null
+  );
+  if (!sourceDiary || !memory.title) return null;
+  const linkedDiary = {
+    ...sourceDiary,
+    linked: memory.title,
+    linkedMemoryTitle: memory.title,
+    date: sourceDiary.date || duariTodayDateText(),
+    editable: true,
+    author: sourceDiary.author || "나",
+    type: sourceDiary.type || diaryScopeLabel?.(sourceDiary.scope) || "나만 보기",
+  };
+  state.diaries.unshift(linkedDiary);
+  return linkedDiary;
 }
 
 function openMemoryCreateDiaryDeleteOverlay(backAction = null) {
@@ -10807,10 +10898,13 @@ function openMemoryCreatePage(backAction = null) {
     const place = qs("#memoryPlace")?.value.trim() || "";
     const type = qs("#memoryType")?.value || "일상";
     const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
-    state.memories.unshift({ title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" });
+    const newMemory = { title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" };
+    state.memories.unshift(newMemory);
+    duariAttachCreateDiaryToMemory(newMemory);
     memoryLinkedDiarySelection.create = null;
     memoryLinkedDiarySelection.createDiary = null;
     state.memoryCreateDraft = null;
+    duariSavePersistentContent();
     closeModal();
     render();
     showToast("기록이 저장됐어요.");
@@ -12370,8 +12464,12 @@ const duariDefaultLinkedDiaries = [
 
 function linkedDiariesLatest() {
   const activeIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+  const activeMemory = state.memories?.[activeIndex] || state.memories?.[0];
+  const activeTitle = activeMemory?.title || "";
   const added = typeof memoryLinkedAddedDiaries !== "undefined" ? (memoryLinkedAddedDiaries[activeIndex] || []) : [];
-  return [...added, ...duariDefaultLinkedDiaries].slice(0, 6);
+  const saved = (state.diaries || []).filter((diary) => diary.linked === activeTitle);
+  const fallback = saved.length || added.length ? [] : duariDefaultLinkedDiaries.filter((diary) => diary.linked === activeTitle);
+  return [...added, ...saved, ...fallback].slice(0, 6);
 }
 
 window.linkedDiariesLatest = linkedDiariesLatest;
@@ -12710,6 +12808,8 @@ function markCurrentAccountSetupComplete() {
   account.setupComplete = true;
   account.currentRelation = { ...currentRelationInfo() };
   account.connected = !!state.connected;
+  duariInstallContentPersistenceHooks();
+  duariSavePersistentContent();
   try {
     localStorage.setItem("duariLastCurrentRelation", JSON.stringify(account.currentRelation));
   } catch {
@@ -12943,6 +13043,7 @@ function completeEmailLogin() {
     return;
   }
   applyCurrentAccountRelation();
+  duariLoadPersistentContent();
   if (account && account.setupComplete && account.connected !== false && !account.currentRelation) {
     account.setupComplete = false;
     saveRegisteredAccounts();
