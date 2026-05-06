@@ -10299,7 +10299,7 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
     const diary = linkedDiariesLatest()[selectedIndex] || linkedDiariesLatest()[0];
     return {
       count: 1,
-      html: `<div class="linked-diary-list"><article class="linked-diary-card" data-linked-diary-index="${selectedIndex}"><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
+      html: `<div class="linked-diary-list"><article class="linked-diary-card" role="button" tabindex="0" data-memory-create-linked-diary data-memory-create-diary-index="${selectedIndex}"><div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div><p>${diary.body}</p>${linkedDiaryEmotionRow(diary)}</article></div>`
     };
   }
   if (mode === "edit") {
@@ -10358,19 +10358,25 @@ function bindMemoryCreateLinkedDiaryCard(root, backAction = null, beforeOpen = n
   qsa("[data-memory-create-linked-diary]", root).forEach((card) => {
     card.addEventListener("click", () => {
       if (typeof beforeOpen === "function") beforeOpen();
-      openMemoryCreateLinkedDiaryDetail(backAction);
+      openMemoryCreateLinkedDiaryDetail(backAction, Number.isNaN(Number(card.dataset.memoryCreateDiaryIndex)) ? null : Number(card.dataset.memoryCreateDiaryIndex));
     });
     card.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
       if (typeof beforeOpen === "function") beforeOpen();
-      openMemoryCreateLinkedDiaryDetail(backAction);
+      openMemoryCreateLinkedDiaryDetail(backAction, Number.isNaN(Number(card.dataset.memoryCreateDiaryIndex)) ? null : Number(card.dataset.memoryCreateDiaryIndex));
     });
   });
 }
 
-function openMemoryCreateLinkedDiaryDetail(backAction = null) {
-  const diary = memoryLinkedDiarySelection.createDiary;
+function memoryCreateSelectedDiaryCopy(selectedIndex = null) {
+  const index = typeof selectedIndex === "number" ? selectedIndex : memoryLinkedDiarySelection.create;
+  const diary = memoryLinkedDiarySelection.createDiary || (typeof index === "number" ? linkedDiariesLatest()[index] : null);
+  return diary ? { ...diary, editable: true } : null;
+}
+
+function openMemoryCreateLinkedDiaryDetail(backAction = null, selectedIndex = null) {
+  const diary = memoryCreateSelectedDiaryCopy(selectedIndex);
   if (!diary) {
     openMemoryCreatePage(backAction);
     return;
@@ -10403,7 +10409,7 @@ function openMemoryCreateLinkedDiaryDetail(backAction = null) {
 }
 
 function openMemoryCreateLinkedDiaryEdit(backAction = null) {
-  const diary = memoryLinkedDiarySelection.createDiary;
+  const diary = memoryCreateSelectedDiaryCopy();
   if (!diary) {
     openMemoryCreatePage(backAction);
     return;
@@ -10430,6 +10436,7 @@ function openMemoryCreateLinkedDiaryEdit(backAction = null) {
         feelings: draft.feelings.length ? draft.feelings : ["고마움"],
         linked: "기록 추가 중"
       };
+      memoryLinkedDiarySelection.create = null;
       runWithoutModalHistory(() => openMemoryCreateLinkedDiaryDetail(backAction));
       showToast("일기를 수정했어요.");
     }, { capture: true });
