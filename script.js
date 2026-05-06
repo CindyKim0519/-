@@ -9573,6 +9573,12 @@ function currentDiaryEditorStateForUnlink() {
   const page = qs(".diary-write-page");
   const selectedScopeText = qs("[data-diary-scope] .chip-btn.active", page)?.textContent || "";
   const originalScope = qs("[data-diary-scope]", page)?.dataset.originalScope || (page?.dataset.draftEditor === "true" ? "draft" : "개인");
+  const originalIdentity = {
+    title: page?.dataset.originalTitle || "",
+    body: page?.dataset.originalBody || "",
+    linked: page?.dataset.originalLinked || "",
+    date: page?.dataset.originalDate || ""
+  };
   return {
     heading: qs(".notification-header h3", page)?.textContent || "일기 수정",
     diary: {
@@ -9582,7 +9588,8 @@ function currentDiaryEditorStateForUnlink() {
       originalScope,
       finalScope: selectedScopeText ? normalizeDiaryScopeValue(selectedScopeText) : null,
       feelings: qsa("[data-diary-feelings] .chip-btn.active", page).map((button) => button.textContent.trim()).slice(0, 2),
-      linked: "관련 기록 없음"
+      linked: "관련 기록 없음",
+      _duariOriginal: originalIdentity
     },
     selectedScopeText
   };
@@ -10137,6 +10144,7 @@ function addRecordToDiaryDraft(index, draft = {}) {
       finalScope: draft.finalScope,
       feelings: draft.feelings,
       linked: memory.title,
+      _duariOriginal: draft._duariOriginal,
       backAction: draft.backAction || diaryEditorFlowBackAction
     },
     linkedMemoryIndex: index,
@@ -12082,6 +12090,12 @@ function duariCurrentDiaryDraft(fallback = {}) {
   const page = qs(".diary-write-page");
   const activeScope = qs("[data-diary-scope] .chip-btn.active", page)?.textContent?.trim();
   const forceNoLinkedRecord = fallback.forceNoLinkedRecord === true;
+  const originalIdentity = fallback._duariOriginal || {
+    title: page?.dataset.originalTitle || fallback.title || "",
+    body: page?.dataset.originalBody || fallback.body || "",
+    linked: page?.dataset.originalLinked || fallback.linked || "",
+    date: page?.dataset.originalDate || fallback.date || fallback.createdAt || ""
+  };
   const linkedTitle = forceNoLinkedRecord
     ? "관련 기록 없음"
     : (
@@ -12110,7 +12124,8 @@ function duariCurrentDiaryDraft(fallback = {}) {
     linked: linkedTitle,
     linkedMemoryIndex,
     backAction: fallback.backAction || diaryEditorFlowBackAction,
-    forceNoLinkedRecord
+    forceNoLinkedRecord,
+    _duariOriginal: originalIdentity
   };
 }
 
@@ -12292,17 +12307,35 @@ function duariBindDiaryEditor(args = {}) {
 }
 
 function duariFindEditableDiaryIndex(diary = {}) {
+  const original = diary._duariOriginal || diary;
   const title = diary.title || qs("#diaryTitle")?.value || "";
   const body = diary.body || qs("#diaryBody")?.value || "";
   const linked = diary.linked || "";
   const date = diary.date || diary.createdAt || "";
+  const originalTitle = original.title || "";
+  const originalBody = original.body || "";
+  const originalLinked = original.linked || "";
+  const originalDate = original.date || original.createdAt || "";
   return (state.diaries || []).findIndex((entry) => (
     entry === diary ||
+    (entry.id && diary.id && entry.id === diary.id) ||
     (
       (!title || entry.title === title) &&
       (!body || entry.body === body) &&
       (!linked || entry.linked === linked) &&
       (!date || entry.date === date || entry.createdAt === date)
+    ) ||
+    (
+      !!originalTitle &&
+      entry.title === originalTitle &&
+      (!originalDate || entry.date === originalDate || entry.createdAt === originalDate) &&
+      (!originalLinked || entry.linked === originalLinked)
+    ) ||
+    (
+      !!originalTitle &&
+      !!originalBody &&
+      entry.title === originalTitle &&
+      entry.body === originalBody
     )
   ));
 }
@@ -12349,10 +12382,10 @@ function duariDiaryViewFromScope(scope = "개인") {
 
 function duariUpdateEditedDiaryAndOpenTab(args = {}) {
   const draft = duariCurrentDiaryDraft(args);
-  const original = args.diary || {};
+  const original = draft._duariOriginal || args.diary?._duariOriginal || args.diary || {};
   const index = duariFindEditableDiaryIndex(original);
   const nextDiary = {
-    ...original,
+    ...(args.diary || {}),
     title: draft.title || "제목 없는 일기",
     body: draft.body || "작성한 내용이 없습니다.",
     scope: draft.scope,
@@ -12367,6 +12400,14 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
   };
   if (index >= 0) state.diaries[index] = nextDiary;
   else state.diaries.unshift(nextDiary);
+  state.diaries = (state.diaries || []).filter((entry, entryIndex) => {
+    if (entry === nextDiary || entryIndex === index) return true;
+    const sameOriginalTitle = original.title && entry.title === original.title;
+    const sameOriginalDate = original.date && (entry.date === original.date || entry.createdAt === original.date);
+    const sameOriginalBody = original.body && entry.body === original.body;
+    const sameOriginalLink = original.linked && entry.linked === original.linked;
+    return !(sameOriginalTitle && (sameOriginalDate || sameOriginalBody) && sameOriginalLink);
+  });
   duariSavePersistentContent();
   state.diaryView = duariDiaryViewFromScope(nextDiary.scope);
   closeModal();
@@ -12377,6 +12418,12 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const heading = duariNormalizeDiaryHeading(args.heading);
   const diary = args.diary || {};
+  const originalIdentity = diary._duariOriginal || {
+    title: diary.title || "",
+    body: diary.body || "",
+    linked: diary.linked || "",
+    date: diary.date || diary.createdAt || ""
+  };
   const isEditMode = heading === "일기 수정";
   const forceNoLinkedRecord = args.forceNoLinkedRecord === true || diary.forceNoLinkedRecord === true;
   const linkedMemory = !forceNoLinkedRecord && typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
@@ -12388,7 +12435,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const feelings = diary.feelings || [];
 
   openModal(`
-    <div class="modal-sheet notification-page diary-write-page">
+    <div class="modal-sheet notification-page diary-write-page" data-original-title="${duariEscapeHtml(originalIdentity.title)}" data-original-body="${duariEscapeHtml(originalIdentity.body)}" data-original-linked="${duariEscapeHtml(originalIdentity.linked)}" data-original-date="${duariEscapeHtml(originalIdentity.date)}">
       <header class="notification-header">
         <button class="notification-nav-btn" data-duari-diary-back aria-label="뒤로가기">←</button>
         <h3>${heading}</h3>
