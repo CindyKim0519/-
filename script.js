@@ -10432,7 +10432,7 @@ function openMemoryCreatePage(backAction = null) {
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
   qs("[data-linked-diary-add]").addEventListener("click", () => {
     saveMemoryCreateDraft();
-    openDiaryModal(null);
+    openDiaryModal(null, { forceNoLinkedRecord: true, backAction: () => openMemoryCreatePage(backAction) });
   });
   qs("[data-linked-diary-select]").addEventListener("click", () => {
     saveMemoryCreateDraft();
@@ -10671,7 +10671,7 @@ function openMemoryCreatePage(backAction = null) {
   });
   qs("[data-linked-diary-add]").addEventListener("click", () => {
     saveMemoryCreateDraft();
-    openDiaryModal(null);
+    openDiaryModal(null, { forceNoLinkedRecord: true, backAction: () => openMemoryCreatePage(backAction) });
   });
   qs("[data-linked-diary-select]").addEventListener("click", () => {
     saveMemoryCreateDraft();
@@ -10828,11 +10828,12 @@ function linkedDiariesLatest() {
 }
 
 function currentDiaryEditorLinkedContext(args = {}) {
-  const linkedMemory = typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
-  const linkedTitle = linkedMemory?.title || args.diary?.linked || qs(".linked-record-title-text")?.textContent?.trim() || "관련 기록 없음";
-  const linkedMemoryIndex = typeof args.linkedMemoryIndex === "number"
+  const forceNoLinkedRecord = args.forceNoLinkedRecord === true || args.diary?.forceNoLinkedRecord === true;
+  const linkedMemory = !forceNoLinkedRecord && typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
+  const linkedTitle = forceNoLinkedRecord ? "관련 기록 없음" : (linkedMemory?.title || args.diary?.linked || qs(".linked-record-title-text")?.textContent?.trim() || "관련 기록 없음");
+  const linkedMemoryIndex = forceNoLinkedRecord ? null : (typeof args.linkedMemoryIndex === "number"
     ? args.linkedMemoryIndex
-    : (diaryHasLinkedRecord(linkedTitle) ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0) : null);
+    : (diaryHasLinkedRecord(linkedTitle) ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0) : null));
   return { linkedTitle, linkedMemoryIndex };
 }
 
@@ -11820,14 +11821,20 @@ function duariEscapeHtml(value = "") {
 function duariCurrentDiaryDraft(fallback = {}) {
   const page = qs(".diary-write-page");
   const activeScope = qs("[data-diary-scope] .chip-btn.active", page)?.textContent?.trim();
-  const linkedTitle =
-    qs(".linked-record-title-text", page)?.textContent?.trim() ||
-    qs(".linked-record-pill span", page)?.textContent?.trim() ||
-    fallback.linked ||
-    "관련 기록 없음";
-  const linkedMemoryIndex = typeof fallback.linkedMemoryIndex === "number"
-    ? fallback.linkedMemoryIndex
-    : (diaryHasLinkedRecord?.(linkedTitle) ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0) : null);
+  const forceNoLinkedRecord = fallback.forceNoLinkedRecord === true;
+  const linkedTitle = forceNoLinkedRecord
+    ? "관련 기록 없음"
+    : (
+      qs(".linked-record-title-text", page)?.textContent?.trim() ||
+      qs(".linked-record-pill span", page)?.textContent?.trim() ||
+      fallback.linked ||
+      "관련 기록 없음"
+    );
+  const linkedMemoryIndex = forceNoLinkedRecord
+    ? null
+    : (typeof fallback.linkedMemoryIndex === "number"
+      ? fallback.linkedMemoryIndex
+      : (diaryHasLinkedRecord?.(linkedTitle) ? recordIndexByTitle(linkedTitle, typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0) : null));
 
   return {
     heading: duariNormalizeDiaryHeading(qs(".notification-header h3", page)?.textContent || fallback.heading),
@@ -11837,7 +11844,8 @@ function duariCurrentDiaryDraft(fallback = {}) {
     feelings: qsa("[data-diary-feelings] .chip-btn.active", page).map((button) => button.textContent.trim()).slice(0, 2),
     linked: linkedTitle,
     linkedMemoryIndex,
-    backAction: fallback.backAction || diaryEditorFlowBackAction
+    backAction: fallback.backAction || diaryEditorFlowBackAction,
+    forceNoLinkedRecord
   };
 }
 
@@ -11992,8 +12000,10 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const heading = duariNormalizeDiaryHeading(args.heading);
   const diary = args.diary || {};
   const isEditMode = heading === "일기 수정";
-  const linkedMemory = typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
-  const linkedTitle = linkedMemory?.title || diary.linked || "관련 기록 없음";
+  const forceNoLinkedRecord = args.forceNoLinkedRecord === true || diary.forceNoLinkedRecord === true;
+  const linkedMemory = !forceNoLinkedRecord && typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
+  const linkedTitle = forceNoLinkedRecord ? "관련 기록 없음" : (linkedMemory?.title || diary.linked || "관련 기록 없음");
+  const linkedMemoryIndex = forceNoLinkedRecord ? null : args.linkedMemoryIndex;
   const title = String(diary.title || "").slice(0, 24);
   const body = diary.body || "";
   const scope = normalizeDiaryScopeValue?.(diary.scope || diary.originalScope || "개인") || "개인";
@@ -12026,7 +12036,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
           <label>내 감정</label>
           ${emotionChipRow(["고마움", "안정", "서운함", "그리움", "기대"], feelings, "data-diary-feelings")}
         </div>
-        ${duariLinkedRecordEditorHtml(linkedTitle, args.linkedMemoryIndex)}
+        ${duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
           <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 정리하기</button>
           ${isEditMode ? `<button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
@@ -12035,7 +12045,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  duariBindDiaryEditor({ ...args, heading });
+  duariBindDiaryEditor({ ...args, heading, linkedMemoryIndex, forceNoLinkedRecord });
 };
 
 function returnToDiaryEditorFromAi(bodyOverride = null) {
@@ -12146,15 +12156,19 @@ function openAiResultPage(draft = {}) {
   });
 }
 
-function openDiaryModal(linkedMemoryIndex = null) {
-  const linkedMemory = typeof linkedMemoryIndex === "number" ? state.memories[linkedMemoryIndex] : null;
+function openDiaryModal(linkedMemoryIndex = null, options = {}) {
+  const forceNoLinkedRecord = options.forceNoLinkedRecord === true;
+  const linkedMemory = !forceNoLinkedRecord && typeof linkedMemoryIndex === "number" ? state.memories[linkedMemoryIndex] : null;
   renderDiaryEditor({
     heading: "일기 추가",
-    diary: linkedMemory ? { linked: linkedMemory.title, scope: "개인" } : { scope: "개인" },
-    linkedMemoryIndex,
-    backAction: typeof linkedMemoryIndex === "number"
+    diary: linkedMemory ? { linked: linkedMemory.title, scope: "개인" } : { scope: "개인", linked: "관련 기록 없음", forceNoLinkedRecord },
+    linkedMemoryIndex: forceNoLinkedRecord ? null : linkedMemoryIndex,
+    forceNoLinkedRecord,
+    backAction: typeof options.backAction === "function"
+      ? options.backAction
+      : (typeof linkedMemoryIndex === "number"
       ? (() => openMemoryEditPageLatest(linkedMemoryIndex, () => openMemoryDetailLatestV3(linkedMemoryIndex)))
-      : diaryEditorFlowBackAction
+      : diaryEditorFlowBackAction)
   });
 }
 
