@@ -9435,10 +9435,7 @@ function diaryEntriesForCurrentView() {
   const source = state.diaries || [];
   if (state.diaryView === "mineShared") return source.filter((entry) => normalizeDiaryScopeValue(entry.scope || entry.type) === "공유");
   if (state.diaryView === "private") return source.filter((entry) => normalizeDiaryScopeValue(entry.scope || entry.type) === "개인");
-  const drafts = source.filter((entry) => normalizeDiaryScopeValue(entry.scope || entry.type) === "draft");
-  return drafts.length ? drafts : [
-    { title: "아직 저장만 해둔 일기", body: "공개 범위와 관련 기록은 저장할 때 다시 선택할 수 있어요.", scope: "draft", type: "임시 저장", feelings: ["고마움"], linked: "관련 기록 없음", author: "나" }
-  ];
+  return source.filter((entry) => normalizeDiaryScopeValue(entry.scope || entry.type) === "draft");
 }
 
 function isDiaryEditSaveHeading(heading) {
