@@ -12274,6 +12274,60 @@ function duariBindDiaryEditor(args = {}) {
     event.stopPropagation();
     saveDiaryFromEditor(args.heading || "일기 추가", "관련 기록 없음", "일기를 임시 저장했어요.");
   }, { capture: true });
+  qs("[data-delete-diary-edit]", sheet)?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openDiaryEditDeleteConfirmOverlay(args);
+  });
+}
+
+function duariFindEditableDiaryIndex(diary = {}) {
+  const title = diary.title || qs("#diaryTitle")?.value || "";
+  const body = diary.body || qs("#diaryBody")?.value || "";
+  const linked = diary.linked || "";
+  const date = diary.date || diary.createdAt || "";
+  return (state.diaries || []).findIndex((entry) => (
+    entry === diary ||
+    (
+      (!title || entry.title === title) &&
+      (!body || entry.body === body) &&
+      (!linked || entry.linked === linked) &&
+      (!date || entry.date === date || entry.createdAt === date)
+    )
+  ));
+}
+
+function openDiaryEditDeleteConfirmOverlay(args = {}) {
+  const page = qs(".diary-write-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>일기를 삭제할까요?</h3>
+        <p>삭제한 일기는 복구할 수 없어요.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-diary-edit-delete-cancel>취소</button>
+          <button class="primary-btn" type="button" data-diary-edit-delete-confirm>삭제</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-diary-edit-delete-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-diary-edit-delete-confirm]", page)?.addEventListener("click", () => {
+    const index = duariFindEditableDiaryIndex(args.diary || {});
+    if (index >= 0) state.diaries.splice(index, 1);
+    duariSavePersistentContent();
+    qs(".ai-confirm-overlay", page)?.remove();
+    const linkedTitle = args.diary?.linked || "";
+    const linkedIndex = diaryHasLinkedRecord?.(linkedTitle) ? recordIndexByTitle(linkedTitle, args.linkedMemoryIndex || 0) : null;
+    if (typeof linkedIndex === "number") {
+      runWithoutModalHistory(() => openMemoryDetailLatestV3(linkedIndex));
+    } else {
+      closeModal();
+      setTab("diary");
+    }
+    showToast("일기를 삭제했어요.");
+  });
 }
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
@@ -12319,7 +12373,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
           <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 정리하기</button>
-          ${isEditMode ? `<button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
+          ${isEditMode ? `<button class="ghost-btn" type="button" data-delete-diary-edit>삭제</button><button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
         </div>
       </div>
     </div>
