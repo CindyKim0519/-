@@ -11027,7 +11027,11 @@ function openMemoryCreatePage(backAction = null) {
     state.memoryCreateDraft = null;
     duariSavePersistentContent();
     closeModal();
-    render();
+    state.tab = "home";
+    setTab("home");
+    renderHome();
+    renderAlbum();
+    renderDiary();
     showToast("기록이 저장됐어요.");
   });
   bindActions(qs(".modal-sheet"));
