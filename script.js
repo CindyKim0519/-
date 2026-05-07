@@ -10902,6 +10902,14 @@ function recordPhotoActionsHtml() {
   );
 }
 
+function recordPhotoManageHtml(photoCount = 0, { title = "사진 관리" } = {}) {
+  const safeCount = Math.max(0, Number(photoCount) || 0);
+  const photoBody = safeCount > 0
+    ? `<div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount)}</div>${recordPhotoActionsHtml()}`
+    : `<div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
+  return `<section class="card" data-photo-manage-card><div class="between"><h3>${title}</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div>${photoBody}</section>`;
+}
+
 function recordLinkedDiaryActionsHtml() {
   return actionPairHtml(
     `<button class="ghost-btn" data-linked-diary-select>연결한 일기 선택</button>`,
@@ -10929,7 +10937,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
         <div class="form-field"><label>날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
         <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
         <div class="form-field"><label>기록 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
-        <section class="card" data-photo-manage-card><div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${photoCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(photoCount)}</div>${recordPhotoActionsHtml()}</section>
+        ${recordPhotoManageHtml(photoCount)}
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <div class="diary-detail-actions">
           <button class="primary-btn" data-save-memory-edit>저장</button>
@@ -10977,7 +10985,7 @@ function openMemoryCreatePage(backAction = null) {
         <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
         <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>기록 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
-        <section class="card"><div class="between"><h3>사진 관리</h3><span class="meta">0장</span></div><div class="photo-order-grid compact is-empty"><p class="linked-record-empty photo-empty-line">추가된 사진이 없습니다.</p></div>${recordPhotoActionsHtml()}</section>
+        ${recordPhotoManageHtml(0)}
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <button class="primary-btn full" data-save-memory-create>저장</button>
       </div>
@@ -13044,12 +13052,16 @@ function duariRefreshPhotoManageCard(count) {
   const grid = qs("[data-photo-manage-grid]", card);
   const counter = qs("[data-photo-manage-count]", card);
   if (counter) counter.textContent = `${count}장`;
-  if (grid) {
-    grid.classList.remove("is-empty");
-    grid.innerHTML = memoryPhotoCardsLatest(count);
-    bindPhotoRoleSelectionLatest?.(card);
-    bindPhotoDragLatest?.(card);
+  if (count <= 0) {
+    card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
+    qs("[data-photo-add-choice]", card)?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0 }));
+    return;
   }
+  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${count}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(count)}</div>${recordPhotoActionsHtml()}`;
+  qs("[data-photo-order-page]", card)?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0)));
+  qs("[data-photo-add-choice]", card)?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0 }));
+  bindPhotoRoleSelectionLatest?.(card);
+  bindPhotoDragLatest?.(card);
 }
 
 function openPhotoAddChoiceModal(options = {}) {
@@ -14507,7 +14519,7 @@ function duariPhotoCountForMemory(index) {
   const memory = state.memories?.[Number(index)];
   const savedCount = Number(memory?.photoCount);
   if (Number.isFinite(savedCount) && savedCount >= 0) return savedCount;
-  return Number(index) === 0 ? 7 : 4;
+  return 0;
 }
 
 if (!window.__duariMemoryEditButtonGuard) {

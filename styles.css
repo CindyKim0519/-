@@ -3802,6 +3802,17 @@ h3 {
   width: 100%;
 }
 
+.photo-empty-state {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 64px;
+}
+
+.photo-empty-state + .primary-btn {
+  margin-top: 12px;
+}
+
 .inline-action-pair {
   display: grid;
   gap: 8px;
