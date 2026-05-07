@@ -10039,7 +10039,7 @@ function bindLinkedDiaryCardsLatest(root, backAction = null) {
   });
   qsa("[data-linked-diary-index]", root).forEach((card) => {
     card.addEventListener("click", (event) => {
-      if (event.target.closest("[data-linked-diary-menu], [data-linked-diary-dropdown]")) return;
+      if (event.target.closest("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap")) return;
       openLinkedDiaryDetailLatest(Number(card.dataset.linkedDiaryIndex), backAction);
     });
   });
@@ -10672,7 +10672,8 @@ function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backActi
 
 function bindMemoryCreateLinkedDiaryCard(root, backAction = null, beforeOpen = null) {
   qsa("[data-memory-create-linked-diary]", root).forEach((card) => {
-    card.addEventListener("click", () => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap")) return;
       if (typeof beforeOpen === "function") beforeOpen();
       openMemoryCreateLinkedDiaryDetail(backAction, Number.isNaN(Number(card.dataset.memoryCreateDiaryIndex)) ? null : Number(card.dataset.memoryCreateDiaryIndex));
     });
@@ -14384,6 +14385,11 @@ openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction =
 
 if (!window.__duariLinkedDiaryMenuGlobalGuard) {
   window.__duariLinkedDiaryMenuGlobalGuard = true;
+  window.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap")) return;
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
   window.addEventListener("click", (event) => {
     const menuButton = event.target.closest?.("[data-linked-diary-menu]");
     const detailButton = event.target.closest?.("[data-linked-diary-menu-detail]");
