@@ -13164,16 +13164,15 @@ function openPhotoManageDeleteConfirm(options = {}) {
   const createMode = options.createMode === true;
   const memoryIndex = Number(options.memoryIndex) || 0;
   const photoIndex = Number(options.photoIndex) || 0;
-  const isMine = duariPhotoIsOwnedByMe(memoryIndex, photoIndex, createMode);
   const modal = qs("#modal") || document.body;
   qs(".photo-delete-overlay", modal)?.remove();
   modal.insertAdjacentHTML("beforeend", `
     <div class="photo-delete-overlay" role="dialog" aria-modal="true">
       <section class="photo-delete-sheet">
         <h3>사진을 삭제할까요?</h3>
-        <p>${isMine ? "삭제하면 양쪽에서 사라지고 복구할 수 없어요." : "상대가 올린 사진은 삭제할 수 없어요. 내 화면에서 숨기기만 가능해요."}</p>
+        <p>삭제하면 사진 관리에서 사라지고 복구할 수 없어요.</p>
         <div class="inline-action-pair">
-          ${isMine ? `<button class="primary-btn" type="button" data-photo-manage-delete-confirm>삭제</button>` : ""}
+          <button class="primary-btn" type="button" data-photo-manage-delete-confirm>삭제</button>
           <button class="ghost-btn" type="button" data-photo-manage-delete-cancel>취소</button>
         </div>
       </section>
