@@ -12774,10 +12774,7 @@ function duariIsBundledSampleDiary(diary = {}) {
 
 function duariHomeSharedDiaries() {
   const source = (state.diaries || []).filter((diary) => !duariIsBundledSampleDiary(diary));
-  return ["공유", "개인", "draft"]
-    .map((scope) => source.find((diary) => normalizeDiaryScopeValue(diary.scope) === scope))
-    .filter(Boolean)
-    .slice(0, 2);
+  return source.slice(0, 2);
 }
 
 function openHomeSharedDiaryDetail(index = 0) {
