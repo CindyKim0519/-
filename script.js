@@ -10743,6 +10743,18 @@ function openMemoryEditPageLatest(index, backAction = null) {
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
   qs("[data-save-memory-edit]").addEventListener("click", () => {
+    const sheet = qs(".memory-edit-page");
+    const fields = qsa(".form-field", sheet);
+    const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
+    const editedDate = fields[1]?.querySelector("input")?.value || toDateInputValue(memory.date);
+    const editedPlace = fields[2]?.querySelector("input")?.value.trim() || "";
+    const editedType = fields[3]?.querySelector("select")?.value || memory.type || "일상";
+    const editedScope = qs("[data-memory-scope] .chip-btn.active", sheet)?.textContent.trim() || memory.scope || "나만 보기";
+    memory.title = editedTitle;
+    memory.date = editedDate ? editedDate.replaceAll("-", ".") : memory.date;
+    memory.place = editedPlace;
+    memory.type = editedType;
+    memory.scope = editedScope;
     duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
@@ -11065,6 +11077,18 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
   qs("[data-save-memory-edit]").addEventListener("click", () => {
+    const sheet = qs(".memory-edit-page");
+    const fields = qsa(".form-field", sheet);
+    const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
+    const editedDate = fields[1]?.querySelector("input")?.value || toDateInputValue(memory.date);
+    const editedPlace = fields[2]?.querySelector("input")?.value.trim() || "";
+    const editedType = fields[3]?.querySelector("select")?.value || memory.type || "일상";
+    const editedScope = qs("[data-memory-scope] .chip-btn.active", sheet)?.textContent.trim() || memory.scope || "나만 보기";
+    memory.title = editedTitle;
+    memory.date = editedDate ? editedDate.replaceAll("-", ".") : memory.date;
+    memory.place = editedPlace;
+    memory.type = editedType;
+    memory.scope = editedScope;
     duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
