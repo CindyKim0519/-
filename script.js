@@ -248,7 +248,7 @@ function openMemoryDetailLatest(index) {
         <section class="memory-photo-gallery" aria-label="사진 영역">
           <div class="memory-photo-main">
             <div class="memory-photo-scroll">${memoryPhotoScrollerLatest(photoCount)}</div>
-            <span class="memory-photo-count">${photoCount}/30</span>
+            <span class="memory-photo-count">${photoCount}장</span>
           </div>
         </section>
         <section class="card">
@@ -464,7 +464,7 @@ function openMemoryEditPageLatest(index) {
         <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
         <div class="form-field"><label>한 줄 메모</label><textarea>${memory.note}</textarea></div>
         <section class="card">
-          <div class="between"><h3>사진 관리</h3><span class="meta">7/30</span></div>
+          <div class="between"><h3>사진 관리</h3><span class="meta">7장</span></div>
           <div class="photo-order-grid compact">${memoryPhotoCardsLatest(7)}</div>
           <button class="ghost-btn full" data-action="photo-order-manager" style="margin-top:12px">사진 순서 변경</button>
         </section>
@@ -4488,7 +4488,7 @@ function openMemoryDetail(index) {
       </header>
       <div class="section-stack">
         <section class="memory-photo-gallery" aria-label="사진 영역">
-          <div class="memory-photo-main"><span class="memory-photo-count">${photoCount}/30</span></div>
+          <div class="memory-photo-main"><span class="memory-photo-count">${photoCount}장</span></div>
           <div class="memory-photo-strip">${memoryPhotoStripFinal(photoCount)}</div>
         </section>
         <section class="card">
