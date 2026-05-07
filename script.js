@@ -148,7 +148,7 @@ function duariSavePersistentContent() {
       questionHistory: state.questionHistory,
     }));
   } catch {
-    // Keep the prototype usable even when browser storage is unavailable.
+    showToast?.("저장 공간이 부족해요. 사진을 줄여 다시 저장해 주세요.");
   }
 }
 
@@ -10742,7 +10742,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
   syncMemoryTitleLimit(titleInput, titleCount);
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
-  qs("[data-save-memory-edit]").addEventListener("click", () => {
+  qs("[data-save-memory-edit]").addEventListener("click", async () => {
     const sheet = qs(".memory-edit-page");
     const fields = qsa(".form-field", sheet);
     const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
@@ -10755,6 +10755,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
     memory.place = editedPlace;
     memory.type = editedType;
     memory.scope = editedScope;
+    await duariCompactMemoryPhotos(memory);
     duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
@@ -11076,7 +11077,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
   syncMemoryTitleLimit(titleInput, titleCount);
   titleInput.addEventListener("input", () => syncMemoryTitleLimit(titleInput, titleCount));
   bindMemoryScopeButtons(qs(".modal-sheet"));
-  qs("[data-save-memory-edit]").addEventListener("click", () => {
+  qs("[data-save-memory-edit]").addEventListener("click", async () => {
     const sheet = qs(".memory-edit-page");
     const fields = qsa(".form-field", sheet);
     const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
@@ -11089,6 +11090,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     memory.place = editedPlace;
     memory.type = editedType;
     memory.scope = editedScope;
+    await duariCompactMemoryPhotos(memory);
     duariSavePersistentContent();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
     showToast("기록 수정 내용이 저장됐어요.");
@@ -13359,10 +13361,66 @@ function readSelectedPhotoFiles(input) {
   const files = Array.from(input?.files || []).filter((file) => file.type.startsWith("image/"));
   return Promise.all(files.map((file) => new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = () => resolve({ src: String(reader.result || ""), name: file.name, owner: "나" });
+    reader.onload = async () => {
+      const src = await duariCompressImageDataUrl(String(reader.result || ""));
+      resolve({ src, name: file.name, owner: "나" });
+    };
     reader.onerror = () => resolve(null);
     reader.readAsDataURL(file);
   }))).then((items) => items.filter(Boolean));
+}
+
+function duariCompressImageDataUrl(dataUrl, maxSide = 1280, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!dataUrl) {
+      resolve("");
+      return;
+    }
+    const image = new Image();
+    image.onload = () => {
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      if (!width || !height) {
+        resolve(dataUrl);
+        return;
+      }
+      const scale = Math.min(1, maxSide / Math.max(width, height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) {
+        resolve(dataUrl);
+        return;
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    image.onerror = () => resolve(dataUrl);
+    image.src = dataUrl;
+  });
+}
+
+async function duariCompactMemoryPhotos(memory = {}) {
+  if (!Array.isArray(memory.photos)) return;
+  let changed = false;
+  const representativeSrc = duariPhotoSource(memory.representativePhoto);
+  memory.photos = await Promise.all(memory.photos.map(async (photo) => {
+    const src = duariPhotoSource(photo);
+    if (!src || src.length < 700000) return photo;
+    const nextSrc = await duariCompressImageDataUrl(src);
+    changed = changed || nextSrc !== src;
+    return typeof photo === "string" ? nextSrc : { ...photo, src: nextSrc };
+  }));
+  if (changed) {
+    const representativeIndex = Number(memory.representativePhotoIndex) || 0;
+    if (memory.photos[representativeIndex]) {
+      memory.representativePhoto = memory.photos[representativeIndex];
+    } else if (representativeSrc) {
+      memory.representativePhoto = memory.photos.find((photo) => duariPhotoSource(photo) === representativeSrc) || memory.photos[0] || null;
+      memory.representativePhotoIndex = Math.max(0, memory.photos.indexOf(memory.representativePhoto));
+    }
+  }
 }
 
 function openPhotoAddChoiceModal(options = {}) {
