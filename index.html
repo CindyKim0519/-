@@ -76,6 +76,41 @@
     window.__duariFinalRecordFlowGuard = true;
     window.__duariFinalAlbumAndRecordRestore = true;
   </script>
+  <script>
+    (() => {
+      if (window.__duariLinkedDiaryEarlyRouter) return;
+      window.__duariLinkedDiaryEarlyRouter = true;
+
+      const openLinkedDiary = (event) => {
+        const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
+        if (!card || typeof window.duariOpenLinkedDiaryCard !== "function") return false;
+        window.duariOpenLinkedDiaryCard(card, event);
+        return true;
+      };
+
+      const openDiaryEntry = (event) => {
+        const card = event.target.closest?.("#diary [data-diary-entry-index]");
+        if (!card || typeof window.duariOpenDiaryEntryCard !== "function") return false;
+        window.duariOpenDiaryEntryCard(card, event);
+        return true;
+      };
+
+      const openHomeDiary = (event) => {
+        const card = event.target.closest?.("[data-home-shared-diary-index]");
+        if (!card || typeof window.duariOpenHomeDiaryCard !== "function") return false;
+        window.duariOpenHomeDiaryCard(card, event);
+        return true;
+      };
+
+      window.addEventListener("click", (event) => {
+        openLinkedDiary(event) || openDiaryEntry(event) || openHomeDiary(event);
+      }, true);
+      window.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        openLinkedDiary(event) || openDiaryEntry(event) || openHomeDiary(event);
+      }, true);
+    })();
+  </script>
   <script src="script.js"></script>
   <script>
     (() => {

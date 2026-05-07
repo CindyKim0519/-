@@ -48,12 +48,7 @@
   bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
     qsa("[data-linked-diary-index]", root).forEach((card) => {
       const open = () => {
-        const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
-        openLinkedDiaryDetailLatest(
-          Number(card.dataset.linkedDiaryIndex || 0),
-          backAction,
-          Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex
-        );
+        window.duariOpenLinkedDiaryCard(card, null, backAction);
       };
       card.addEventListener("click", open);
       card.addEventListener("keydown", (event) => {
@@ -61,6 +56,60 @@
         event.preventDefault();
         open();
       });
+    });
+  };
+
+  window.duariOpenLinkedDiaryCard = function duariOpenLinkedDiaryCard(card, event = null, backAction = null) {
+    if (!card) return;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+    const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
+    const safeMemoryIndex = Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex;
+    openLinkedDiaryDetailLatest(
+      Number(card.dataset.linkedDiaryIndex || 0),
+      backAction || (() => openMemoryDetailLatestV3(safeMemoryIndex)),
+      safeMemoryIndex
+    );
+  };
+
+  window.duariOpenDiaryEntryCard = function duariOpenDiaryEntryCard(card, event = null) {
+    if (!card) return;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+    const entries = typeof diaryEntriesForCurrentView === "function"
+      ? diaryEntriesForCurrentView()
+      : (state.diaries || []);
+    const filter = typeof duariDiaryFilterForCurrentView === "function" ? duariDiaryFilterForCurrentView() : null;
+    const filteredEntries = typeof duariFilterDiaryEntries === "function"
+      ? duariFilterDiaryEntries(entries, filter)
+      : entries;
+    const index = Number(card.dataset.diaryEntryIndex || 0);
+    const entry = filteredEntries[index] || entries[index] || filteredEntries[0] || entries[0];
+    if (!entry || typeof renderDiaryDetailReadOnly !== "function") return;
+    renderDiaryDetailReadOnly(entry, () => {
+      if (typeof duariDiaryViewFromScope === "function") state.diaryView = duariDiaryViewFromScope(entry.scope || entry.type);
+      if (typeof closeModal === "function") closeModal();
+      if (typeof setTab === "function") setTab("diary");
+    });
+  };
+
+  window.duariOpenHomeDiaryCard = function duariOpenHomeDiaryCard(card, event = null) {
+    if (!card) return;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    event?.stopImmediatePropagation?.();
+    if (typeof openHomeSharedDiaryDetail === "function") {
+      openHomeSharedDiaryDetail(card.dataset.homeSharedDiaryIndex || 0);
+      return;
+    }
+    const diaries = typeof duariHomeSharedDiaries === "function" ? duariHomeSharedDiaries() : (state.diaries || []);
+    const entry = diaries[Number(card.dataset.homeSharedDiaryIndex || 0)] || diaries[0];
+    if (!entry || typeof renderDiaryDetailReadOnly !== "function") return;
+    renderDiaryDetailReadOnly(entry, () => {
+      if (typeof closeModal === "function") closeModal();
+      if (typeof setTab === "function") setTab("home");
     });
   };
 
@@ -131,30 +180,14 @@
     window.addEventListener("click", (event) => {
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
       if (!card) return;
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
-      openLinkedDiaryDetailLatest(
-        Number(card.dataset.linkedDiaryIndex || 0),
-        () => openMemoryDetailLatestV3(Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex),
-        Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex
-      );
+      window.duariOpenLinkedDiaryCard(card, event);
     }, true);
 
     window.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") return;
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
       if (!card) return;
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
-      openLinkedDiaryDetailLatest(
-        Number(card.dataset.linkedDiaryIndex || 0),
-        () => openMemoryDetailLatestV3(Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex),
-        Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex
-      );
+      window.duariOpenLinkedDiaryCard(card, event);
     }, true);
   }
 })();
