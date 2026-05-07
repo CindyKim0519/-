@@ -10451,7 +10451,11 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
     };
   }
   if (mode === "edit") {
-    return { count: 3, html: `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` };
+    const diaries = linkedDiariesLatest();
+    return {
+      count: diaries.length,
+      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+    };
   }
   return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
 }
@@ -11168,7 +11172,18 @@ function linkedDiariesLatest() {
   const base = linkedDiariesLatestSaveFlowBase();
   const activeIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
   const added = memoryLinkedAddedDiaries[activeIndex] || [];
-  return [...added, ...base];
+  const seen = new Set();
+  return [...base, ...added].filter((diary) => {
+    const key = [
+      diary.id || "",
+      diary.title || "",
+      diary.body || "",
+      diary.linked || diary.linkedMemoryTitle || "",
+    ].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function currentDiaryEditorLinkedContext(args = {}) {
