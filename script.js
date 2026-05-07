@@ -12742,7 +12742,19 @@ function linkedDiariesLatest() {
   const added = typeof memoryLinkedAddedDiaries !== "undefined" ? (memoryLinkedAddedDiaries[activeIndex] || []) : [];
   const saved = (state.diaries || []).filter((diary) => diary.linked === activeTitle);
   const fallback = saved.length || added.length ? [] : duariDefaultLinkedDiaries.filter((diary) => diary.linked === activeTitle);
-  return [...added, ...saved, ...fallback].slice(0, 6);
+  const seen = new Set();
+  return [...added, ...saved, ...fallback].filter((diary) => {
+    const key = [
+      diary.id || "",
+      diary.title || "",
+      diary.body || "",
+      diary.linked || activeTitle,
+      diary.date || diary.createdAt || ""
+    ].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 6);
 }
 
 window.linkedDiariesLatest = linkedDiariesLatest;
