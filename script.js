@@ -10981,6 +10981,28 @@ function recordLinkedDiaryActionsHtml() {
   );
 }
 
+function openMemoryEditBackConfirm(resolvedBack) {
+  const modal = qs("#modal") || document.body;
+  qs(".photo-delete-overlay", modal)?.remove();
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="photo-delete-overlay" role="dialog" aria-modal="true">
+      <section class="photo-delete-sheet">
+        <h3>저장하지 않고 나갈까요?</h3>
+        <p>수정한 내용이 있다면 저장해야 반영돼요. 나가면 저장하지 않은 변경사항은 사라질 수 있어요.</p>
+        <div class="inline-action-pair">
+          <button class="primary-btn" type="button" data-memory-edit-leave>나가기</button>
+          <button class="ghost-btn" type="button" data-memory-edit-stay>취소</button>
+        </div>
+      </section>
+    </div>
+  `);
+  qs("[data-memory-edit-stay]", modal)?.addEventListener("click", () => qs(".photo-delete-overlay", modal)?.remove());
+  qs("[data-memory-edit-leave]", modal)?.addEventListener("click", () => {
+    qs(".photo-delete-overlay", modal)?.remove();
+    runFlowBack(resolvedBack);
+  });
+}
+
 function openMemoryEditPageLatest(index, backAction = null) {
   state.activeMemoryIndex = index;
   const memory = state.memories[index] || state.memories[0];
@@ -11011,7 +11033,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-back-memory]").addEventListener("click", () => runFlowBack(resolvedBack));
+  qs("[data-back-memory]").addEventListener("click", () => openMemoryEditBackConfirm(resolvedBack));
   const titleInput = qs(".memory-title-input");
   const titleCount = qs(".input-count");
   syncMemoryTitleLimit(titleInput, titleCount);
