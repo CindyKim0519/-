@@ -12999,6 +12999,40 @@ function duariRestoreLoggedInSession() {
 
 window.setTimeout(duariRestoreLoggedInSession, 0);
 
+function duariDiaryBelongsToMemory(diary = {}, memoryTitle = "") {
+  if (!memoryTitle) return false;
+  return diary.linked === memoryTitle || diary.linkedMemoryTitle === memoryTitle;
+}
+
+function duariDeduplicateLinkedDiaries(diaries = [], memoryTitle = "") {
+  const seen = new Set();
+  return diaries.filter((diary) => {
+    if (!duariDiaryBelongsToMemory(diary, memoryTitle)) return false;
+    const key = [
+      diary.id || "",
+      diary.title || "",
+      diary.body || "",
+      diary.scope || "",
+      memoryTitle
+    ].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+linkedDiariesLatest = function linkedDiariesLatest() {
+  const activeIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+  const activeMemory = state.memories?.[activeIndex];
+  const activeTitle = activeMemory?.title || "";
+  if (!activeTitle) return [];
+  const added = typeof memoryLinkedAddedDiaries !== "undefined" ? (memoryLinkedAddedDiaries[activeIndex] || []) : [];
+  const saved = state.diaries || [];
+  return duariDeduplicateLinkedDiaries([...saved, ...added], activeTitle).slice(0, 6);
+};
+
+window.linkedDiariesLatest = linkedDiariesLatest;
+
 function duariRefreshPhotoManageCard(count) {
   const card = qs("[data-photo-manage-card]");
   if (!card) return;
