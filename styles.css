@@ -3195,6 +3195,16 @@ h3 {
   margin-top: 14px;
 }
 
+.photo-add-actions .ghost-btn,
+.photo-add-actions .primary-btn,
+.photo-add-cancel-action .ghost-btn {
+  width: 100%;
+}
+
+.photo-add-cancel-action {
+  margin-top: 8px;
+}
+
 /* Final overlay/card corrections */
 .photo-add-overlay {
   position: fixed;

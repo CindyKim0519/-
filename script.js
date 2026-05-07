@@ -13067,10 +13067,10 @@ function openPhotoAddChoiceModal(options = {}) {
         <input type="file" accept="image/*" multiple hidden data-photo-album-input />
         <input type="file" accept="image/*" capture="environment" hidden data-photo-camera-input />
         <div class="photo-add-actions">
-          <button class="primary-btn" type="button" data-photo-capture>사진 촬영</button>
-          <button class="ghost-btn" type="button" data-photo-album-open>앨범 보기</button>
+          <button class="ghost-btn" type="button" data-photo-capture>사진 촬영</button>
+          <button class="primary-btn" type="button" data-photo-album-open>앨범 보기</button>
         </div>
-        <div class="photo-add-actions">
+        <div class="photo-add-cancel-action">
           <button class="ghost-btn" type="button" data-photo-add-close>취소</button>
         </div>
       </div>
