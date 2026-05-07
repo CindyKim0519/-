@@ -12369,6 +12369,7 @@ function duariEscapeHtml(value = "") {
 function duariCurrentDiaryDraft(fallback = {}) {
   const page = qs(".diary-write-page");
   const activeScope = qs("[data-diary-scope] .chip-btn.active", page)?.textContent?.trim();
+  const selectedDate = qs("#diaryDate", page)?.value;
   const forceNoLinkedRecord = fallback.forceNoLinkedRecord === true;
   const originalIdentity = fallback._duariOriginal || {
     title: page?.dataset.originalTitle || fallback.title || "",
@@ -12399,6 +12400,7 @@ function duariCurrentDiaryDraft(fallback = {}) {
     heading: duariNormalizeDiaryHeading(qs(".notification-header h3", page)?.textContent || fallback.heading),
     title: qs("#diaryTitle", page)?.value || fallback.title || "",
     body: qs("#diaryBody", page)?.value || fallback.body || "",
+    date: selectedDate ? selectedDate.replaceAll("-", ".") : (fallback.date || fallback.createdAt || originalIdentity.date || duariTodayDateText()),
     scope: activeScope?.includes("상대") ? "공유" : (fallback.scope || "개인"),
     feelings: qsa("[data-diary-feelings] .chip-btn.active", page).map((button) => button.textContent.trim()).slice(0, 2),
     linked: linkedTitle,
@@ -12681,7 +12683,7 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
     linkedMemoryIndex: draft.linkedMemoryIndex,
     author: original.author || "나",
     editable: original.editable !== false,
-    date: original.date || original.createdAt || duariTodayDateText(),
+    date: draft.date || original.date || original.createdAt || duariTodayDateText(),
   };
   if (index >= 0) state.diaries[index] = nextDiary;
   else state.diaries.unshift(nextDiary);
@@ -12718,6 +12720,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const body = diary.body || "";
   const scope = normalizeDiaryScopeValue?.(diary.scope || diary.originalScope || "개인") || "개인";
   const feelings = diary.feelings || [];
+  const dateValue = toDateInputValue(diary.date || diary.createdAt || duariTodayDateText());
 
   openModal(`
     <div class="modal-sheet notification-page diary-write-page" data-original-title="${duariEscapeHtml(originalIdentity.title)}" data-original-body="${duariEscapeHtml(originalIdentity.body)}" data-original-linked="${duariEscapeHtml(originalIdentity.linked)}" data-original-date="${duariEscapeHtml(originalIdentity.date)}">
@@ -12727,9 +12730,12 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <div class="chip-row" data-diary-scope data-original-scope="${scope}">
+        <div class="form-field">
+          <label>공개 범위</label>
+          <div class="chip-row" data-diary-scope data-original-scope="${scope}">
           <button class="chip-btn ${scope !== "공유" ? "active" : ""}" type="button">나만 보기</button>
           <button class="chip-btn ${scope === "공유" ? "active" : ""} ${state.connected ? "" : "is-disabled"}" type="button" ${state.connected ? "" : "disabled"}>상대에게 공유</button>
+          </div>
         </div>
         <div class="form-field">
           <div class="field-label-row">
@@ -12737,6 +12743,10 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
             <span class="input-count" data-diary-title-count>${title.length}/24</span>
           </div>
           <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="24" />
+        </div>
+        <div class="form-field">
+          <label>날짜</label>
+          <input id="diaryDate" type="date" value="${dateValue}" />
         </div>
         <div class="form-field">
           <label>본문</label>
