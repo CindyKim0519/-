@@ -14344,6 +14344,17 @@ bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backActio
   duariBindLinkedDiaryCardsWithMenuBase(root, backAction);
 };
 
+const duariOpenMemoryEditWithLinkedDiaryMenusBase = openMemoryEditPageLatest;
+openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapshot = null) {
+  duariOpenMemoryEditWithLinkedDiaryMenusBase(index, backAction, originalMemorySnapshot);
+  const sheet = qs(".memory-edit-page");
+  if (sheet) duariEnsureLinkedDiaryMenus(sheet);
+  window.setTimeout(() => {
+    const nextSheet = qs(".memory-edit-page");
+    if (nextSheet) duariEnsureLinkedDiaryMenus(nextSheet);
+  }, 0);
+};
+
 const duariRenderDiaryWithDateBase = renderDiary;
 function duariDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};
