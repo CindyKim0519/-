@@ -14078,7 +14078,7 @@ function renderAlbumRecordList(memories = state.memories) {
   const visibleCount = duariAlbumRecordVisibleCount();
   const visibleMemories = memories.slice(0, visibleCount);
   return {
-    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">조건에 맞는 기록이 없습니다.</p>`,
+    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">아직 남긴 기록이 없어요.</p>`,
     hasMore: memories.length > visibleMemories.length
   };
 }
