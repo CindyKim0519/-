@@ -13964,7 +13964,7 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
 }
 
 function duariQuestionHistoryListHtml(history, filtered) {
-  return filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">전달한 질문이 없습니다.</p>`;
+  return filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
 }
 
 function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
