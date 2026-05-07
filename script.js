@@ -115,6 +115,7 @@ function duariStripBundledSamplesFromAccountContent() {
 function duariInitializeEmptyContentForCurrentAccount() {
   state.memories = [];
   state.diaries = [];
+  state.questionHistory = [];
   duariSavePersistentContent();
 }
 
@@ -123,6 +124,7 @@ function duariSavePersistentContent() {
     localStorage.setItem(duariContentStorageKey(), JSON.stringify({
       memories: state.memories,
       diaries: state.diaries,
+      questionHistory: state.questionHistory,
     }));
   } catch {
     // Keep the prototype usable even when browser storage is unavailable.
@@ -136,6 +138,7 @@ function duariLoadPersistentContent() {
     if (raw) {
       state.memories = Array.isArray(saved?.memories) ? saved.memories : [];
       state.diaries = Array.isArray(saved?.diaries) ? saved.diaries : [];
+      state.questionHistory = Array.isArray(saved?.questionHistory) ? saved.questionHistory : [];
       duariStripBundledSamplesFromAccountContent();
       duariSavePersistentContent();
     } else if (state.currentLoginEmail) {
@@ -179,6 +182,7 @@ function duariWrapPersistentArray(array) {
 function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.memories);
   duariWrapPersistentArray(state.diaries);
+  duariWrapPersistentArray(state.questionHistory);
 }
 
 const titles = { home: "홈", album: "기록", diary: "일기", questions: "질문", my: "마이" };
@@ -13141,8 +13145,10 @@ function markCurrentAccountSetupComplete() {
   if (!duariHasStoredContentForCurrentUser()) {
     state.memories = [];
     state.diaries = [];
+    state.questionHistory = [];
   } else {
     duariStripBundledSamplesFromAccountContent();
+    if (!Array.isArray(state.questionHistory)) state.questionHistory = [];
   }
   account.setupComplete = true;
   account.currentRelation = { ...currentRelationInfo() };
@@ -13795,42 +13801,8 @@ window.setTimeout(() => {
 }, 0);
 
 function duariQuestionHistorySeed() {
-  if (!Array.isArray(state.questionHistory)) {
-    state.questionHistory = [
-      {
-        question: "요즘 나에게 가장 힘이 되는 말은 뭐야?",
-        original: "네가 괜찮다고 말해줄 때 마음이 놓여.",
-        sent: "네가 괜찮다고 말해줄 때 마음이 놓여. 그 말이 요즘 나한테 큰 힘이 돼.",
-        method: "AI 다듬음",
-        status: "읽음",
-        date: "2026.05.02"
-      },
-      {
-        question: "최근에 고마웠던 순간은 언제야?",
-        original: "늦게까지 기다려준 게 고마웠어.",
-        sent: "늦게까지 기다려준 게 고마웠어.",
-        method: "원문",
-        status: "전달됨",
-        date: "2026.05.01"
-      },
-      {
-        question: "우리의 작은 습관 중 좋아하는 건?",
-        original: "걷다가 손 잡는 거.",
-        sent: "걷다가 자연스럽게 손 잡는 순간이 좋아.",
-        method: "AI 다듬음",
-        status: "읽음",
-        date: "2026.04.29"
-      },
-      {
-        question: "요즘 가장 자주 떠오르는 감정은 뭐야?",
-        original: "기대감이 커.",
-        sent: "요즘은 기대감이 커. 앞으로 같이 할 것들이 자주 떠올라.",
-        method: "AI 다듬음",
-        status: "전달됨",
-        date: "2026.04.27"
-      }
-    ];
-  }
+  if (!Array.isArray(state.questionHistory)) state.questionHistory = [];
+  duariWrapPersistentArray(state.questionHistory);
   return state.questionHistory;
 }
 
@@ -13846,6 +13818,7 @@ function duariAddQuestionHistory({ method = "원문" } = {}) {
     status: "전달됨",
     date: duariTodayDiaryDate()
   });
+  duariSavePersistentContent();
 }
 
 function duariQuestionHistoryCard(item, index) {
