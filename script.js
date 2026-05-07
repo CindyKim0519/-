@@ -14238,7 +14238,7 @@ function duariLinkedDiaryCardHtml(diary, index, options = {}) {
           <span class="linked-diary-type">${duariEscapeHtml(diary?.type || diaryScopeLabel?.(diary?.scope) || "나만 보기")}</span>
           ${showMenu ? `
             <span class="linked-record-menu-wrap linked-diary-menu-wrap">
-              <button class="icon-btn linked-record-kebab linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
+              <button class="icon-btn linked-record-kebab linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
                 <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
               </button>
               <span class="linked-record-dropdown linked-diary-dropdown" data-linked-diary-dropdown hidden>
@@ -14303,7 +14303,7 @@ function duariLinkedDiaryMenuHtml(index, diary = {}) {
   const canEdit = diary?.editable !== false && !diaryType.includes("상대");
   return `
     <span class="linked-diary-menu-wrap">
-      <button class="icon-btn linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
+      <button class="icon-btn linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
         <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
       </button>
       <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
@@ -14385,8 +14385,8 @@ openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction =
 
 if (!window.__duariLinkedDiaryMenuGlobalGuard) {
   window.__duariLinkedDiaryMenuGlobalGuard = true;
-  const toggleLinkedDiaryDropdown = (target) => {
-    const tools = target.closest?.(".memory-edit-page .linked-diary-right-tools, .memory-edit-page .linked-diary-menu-wrap");
+  window.duariToggleLinkedDiaryDropdownFromButton = (target) => {
+    const tools = target.closest?.(".linked-diary-right-tools, .linked-diary-menu-wrap");
     const menuButton = target.closest?.("[data-linked-diary-menu]") || tools?.querySelector?.("[data-linked-diary-menu]");
     if (!menuButton) return false;
     const page = menuButton.closest(".modal-sheet") || qs(".modal-sheet") || document;
@@ -14410,7 +14410,7 @@ if (!window.__duariLinkedDiaryMenuGlobalGuard) {
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      toggleLinkedDiaryDropdown(event.target);
+      window.duariToggleLinkedDiaryDropdownFromButton(event.target);
       return;
     }
     const menuButton = event.target.closest?.("[data-linked-diary-menu]");
