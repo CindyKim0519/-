@@ -125,4 +125,36 @@
   };
 
   window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
+
+  if (!window.__duariLinkedDiaryFinalClickGuard) {
+    window.__duariLinkedDiaryFinalClickGuard = true;
+    window.addEventListener("click", (event) => {
+      const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
+      if (!card) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
+      openLinkedDiaryDetailLatest(
+        Number(card.dataset.linkedDiaryIndex || 0),
+        () => openMemoryDetailLatestV3(Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex),
+        Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex
+      );
+    }, true);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
+      if (!card) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const memoryIndex = Number(card.dataset.linkedDiaryMemoryIndex);
+      openLinkedDiaryDetailLatest(
+        Number(card.dataset.linkedDiaryIndex || 0),
+        () => openMemoryDetailLatestV3(Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex),
+        Number.isFinite(memoryIndex) ? memoryIndex : state.activeMemoryIndex
+      );
+    }, true);
+  }
 })();
