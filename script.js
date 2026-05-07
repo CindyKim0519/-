@@ -226,6 +226,14 @@ function duariPhotoSource(photo) {
   return typeof photo === "string" ? photo : (photo.src || "");
 }
 
+function duariActualPhotosForMemory(index) {
+  return duariPhotoListForMemory(index).filter((photo) => !!duariPhotoSource(photo));
+}
+
+function duariActualPhotoCountForMemory(index) {
+  return duariActualPhotosForMemory(index).length;
+}
+
 function memoryPhotoScrollerLatest(count = 7, memoryIndex = Number(state.activeMemoryIndex) || 0) {
   const photos = duariPhotoListForMemory(memoryIndex);
   return Array.from({ length: count }, (_, index) => `
@@ -14611,15 +14619,19 @@ function renderAlbumRecordList(memories = state.memories) {
 }
 
 function renderAlbumPhotoGroups(memories = state.memories) {
-  if (!memories.length) return `<p class="linked-record-empty">아직 남긴 사진이 없어요.</p>`;
-  const groups = memories.reduce((acc, memory) => {
+  const memoriesWithPhotos = memories.filter((memory) => {
+    const memoryIndex = state.memories.indexOf(memory);
+    return duariActualPhotoCountForMemory(memoryIndex) > 0;
+  });
+  if (!memoriesWithPhotos.length) return `<p class="linked-record-empty">아직 남긴 사진이 없어요.</p>`;
+  const groups = memoriesWithPhotos.reduce((acc, memory) => {
     const date = memory.date || "날짜 없음";
     if (!acc.has(date)) acc.set(date, []);
     acc.get(date).push(memory);
     return acc;
   }, new Map());
   return Array.from(groups.entries()).map(([date, groupMemories]) => {
-    const groupPhotoCount = groupMemories.reduce((sum, memory) => sum + duariPhotoCountForMemory(state.memories.indexOf(memory)), 0);
+    const groupPhotoCount = groupMemories.reduce((sum, memory) => sum + duariActualPhotoCountForMemory(state.memories.indexOf(memory)), 0);
     return `
       <section class="album-photo-date-group">
         <div class="album-photo-date-head">
@@ -14628,7 +14640,7 @@ function renderAlbumPhotoGroups(memories = state.memories) {
         </div>
         ${groupMemories.map((memory) => {
           const memoryIndex = state.memories.indexOf(memory);
-          const photoCount = duariPhotoCountForMemory(memoryIndex);
+          const photos = duariActualPhotosForMemory(memoryIndex);
           return `
             <div class="album-photo-record-group">
               <div class="album-photo-record-head">
@@ -14639,8 +14651,9 @@ function renderAlbumPhotoGroups(memories = state.memories) {
                 <span class="linked-record-scope">${scopeLabelForRecord(memory)}</span>
               </div>
               <div class="album-photo-grid">
-                ${Array.from({ length: photoCount }, (_, photoIndex) => `
-                  <button class="album-photo-thumb" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${photoIndex}" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
+                ${photos.map((photo, photoIndex) => `
+                  <button class="album-photo-thumb has-photo" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${photoIndex}" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
+                    <img src="${signupAttr(duariPhotoSource(photo))}" alt="" />
                     <span>${photoIndex + 1}</span>
                   </button>
                 `).join("")}
@@ -14806,7 +14819,7 @@ function renderAlbum() {
   if (currentView === "photo") {
     content = `
       <div class="album-photo-summary">
-        <span class="meta" data-photo-count>총 ${state.memories.reduce((sum, _memory, index) => sum + duariPhotoCountForMemory(index), 0)}장</span>
+        <span class="meta" data-photo-count>총 ${state.memories.reduce((sum, _memory, index) => sum + duariActualPhotoCountForMemory(index), 0)}장</span>
       </div>
       <div class="album-photo-groups" data-album-photo-groups>${renderAlbumPhotoGroups(state.memories)}</div>
     `;
@@ -14874,7 +14887,7 @@ function renderAlbum() {
         renderRecordList(filtered);
       }
       if (currentView === "photo") {
-        const totalPhotos = filtered.reduce((sum, memory) => sum + duariPhotoCountForMemory(state.memories.indexOf(memory)), 0);
+        const totalPhotos = filtered.reduce((sum, memory) => sum + duariActualPhotoCountForMemory(state.memories.indexOf(memory)), 0);
         qs("[data-album-photo-groups]", album).innerHTML = renderAlbumPhotoGroups(filtered);
         qs("[data-photo-count]", album).textContent = `총 ${totalPhotos}장`;
       }
