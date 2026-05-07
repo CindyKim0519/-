@@ -14297,6 +14297,53 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
   return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
 };
 
+function duariLinkedDiaryMenuHtml(index, diary = {}) {
+  const diaryType = String(diary?.type || "");
+  const canEdit = diary?.editable !== false && !diaryType.includes("상대");
+  return `
+    <span class="linked-diary-menu-wrap">
+      <button class="icon-btn linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
+        <button type="button" data-linked-diary-menu-detail="${index}">상세 보기</button>
+        ${canEdit ? `<button type="button" data-linked-diary-menu-edit="${index}">수정</button><button type="button" data-linked-diary-menu-unlink="${index}">연결 해제</button>` : ""}
+      </span>
+    </span>
+  `;
+}
+
+function duariEnsureLinkedDiaryMenus(root = document) {
+  qsa(".linked-diary-card", root).forEach((card, fallbackIndex) => {
+    if (qs("[data-linked-diary-menu]", card)) return;
+    const index = Number(card.dataset.linkedDiaryIndex ?? card.dataset.memoryCreateDiaryIndex ?? fallbackIndex);
+    const diary = linkedDiariesLatest()[index] || state.diaries?.[index] || {};
+    const titleRow = qs(".linked-diary-title-row", card) || qs(".between", card);
+    if (!titleRow) return;
+    titleRow.classList.add("linked-diary-title-row");
+    let tools = qs(".linked-diary-right-tools", titleRow);
+    if (!tools) {
+      tools = document.createElement("span");
+      tools.className = "linked-diary-right-tools";
+      const typeBadge = qs(".linked-diary-type", titleRow);
+      if (typeBadge) {
+        typeBadge.replaceWith(tools);
+        tools.appendChild(typeBadge);
+      } else {
+        titleRow.appendChild(tools);
+      }
+    }
+    tools.insertAdjacentHTML("beforeend", duariLinkedDiaryMenuHtml(index, diary));
+  });
+}
+
+const duariBindLinkedDiaryCardsWithMenuBase = bindLinkedDiaryCardsLatest;
+bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
+  if (!root) return;
+  duariEnsureLinkedDiaryMenus(root);
+  duariBindLinkedDiaryCardsWithMenuBase(root, backAction);
+};
+
 const duariRenderDiaryWithDateBase = renderDiary;
 function duariDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};

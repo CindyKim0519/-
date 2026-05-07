@@ -2980,6 +2980,11 @@ h3 {
   border-top: 1px solid var(--border-default);
 }
 
+.modal-sheet .linked-diary-kebab {
+  background: transparent;
+  border-color: var(--border-default);
+}
+
 .card :is(.card, .memory-card, .diary-card, .question-card) {
   background: var(--color-white);
   border: 1px solid var(--border-default);
