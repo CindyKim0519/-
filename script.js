@@ -14237,11 +14237,11 @@ function duariLinkedDiaryCardHtml(diary, index, options = {}) {
         <span class="linked-diary-right-tools">
           <span class="linked-diary-type">${duariEscapeHtml(diary?.type || diaryScopeLabel?.(diary?.scope) || "나만 보기")}</span>
           ${showMenu ? `
-            <span class="linked-record-menu-wrap linked-diary-menu-wrap">
-              <button class="icon-btn linked-record-kebab linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
+            <span class="linked-diary-menu-wrap">
+              <button class="linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
                 <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
               </button>
-              <span class="linked-record-dropdown linked-diary-dropdown" data-linked-diary-dropdown hidden>
+              <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
                 <button type="button" ${detailAction}>상세 보기</button>
                 ${canEdit ? `<button type="button" ${editAction}>수정</button><button type="button" ${unlinkAction}>삭제</button>` : ""}
               </span>
@@ -14281,7 +14281,7 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
     return {
       count: 1,
       html: `<div class="linked-diary-list">${duariLinkedDiaryCardHtml(diary, selectedIndex, {
-        dataAttr: `data-memory-create-linked-diary data-memory-create-diary-index="${selectedIndex}"`,
+        dataAttr: mode === "edit" ? `data-linked-diary-index="${selectedIndex}"` : `data-memory-create-linked-diary data-memory-create-diary-index="${selectedIndex}"`,
         detailAction: `data-linked-diary-menu-detail="${selectedIndex}"`,
         editAction: `data-linked-diary-menu-edit="${selectedIndex}"`,
         unlinkAction: `data-linked-diary-menu-unlink="${selectedIndex}"`
@@ -14314,6 +14314,56 @@ function duariLinkedDiaryMenuHtml(index, diary = {}) {
   `;
 }
 
+duariLinkedDiaryCardHtml = function duariLinkedDiaryCardHtml(diary, index, options = {}) {
+  const showMenu = options.showMenu !== false;
+  const diaryType = String(diary?.type || "");
+  const canEdit = diary?.editable !== false && !diaryType.includes("상대");
+  const dataAttr = options.dataAttr || `data-linked-diary-index="${index}"`;
+  const detailAction = options.detailAction || `data-linked-diary-menu-detail="${index}"`;
+  const editAction = options.editAction || `data-linked-diary-menu-edit="${index}"`;
+  const unlinkAction = options.unlinkAction || `data-linked-diary-menu-unlink="${index}"`;
+  return `
+    <article class="linked-diary-card" role="button" tabindex="0" ${dataAttr}>
+      <div class="linked-diary-title-row">
+        <strong>${duariEscapeHtml(diary?.title || "제목 없는 일기")}</strong>
+        <span class="linked-diary-right-tools">
+          <span class="linked-diary-type">${duariEscapeHtml(diary?.type || diaryScopeLabel?.(diary?.scope) || "나만 보기")}</span>
+          ${showMenu ? `
+            <span class="linked-diary-menu-wrap">
+              <button class="linked-diary-kebab" type="button" data-linked-diary-menu aria-label="more" title="more">
+                <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+              </button>
+              <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
+                <button type="button" ${detailAction}>상세 보기</button>
+                ${canEdit ? `<button type="button" ${editAction}>수정</button><button type="button" ${unlinkAction}>삭제</button>` : ""}
+              </span>
+            </span>
+          ` : ""}
+        </span>
+      </div>
+      <p>${duariEscapeHtml(diary?.body || "")}</p>
+      ${linkedDiaryEmotionRow(diary || {})}
+      ${duariDiaryDateMeta(diary || {})}
+    </article>
+  `;
+};
+
+duariLinkedDiaryMenuHtml = function duariLinkedDiaryMenuHtml(index, diary = {}) {
+  const diaryType = String(diary?.type || "");
+  const canEdit = diary?.editable !== false && !diaryType.includes("상대");
+  return `
+    <span class="linked-diary-menu-wrap">
+      <button class="linked-diary-kebab" type="button" data-linked-diary-menu aria-label="more" title="more">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
+        <button type="button" data-linked-diary-menu-detail="${index}">상세 보기</button>
+        ${canEdit ? `<button type="button" data-linked-diary-menu-edit="${index}">수정</button><button type="button" data-linked-diary-menu-unlink="${index}">삭제</button>` : ""}
+      </span>
+    </span>
+  `;
+};
+
 function duariEnsureLinkedDiaryMenus(root = document) {
   qsa(".linked-diary-card", root).forEach((card, fallbackIndex) => {
     if (qs("[data-linked-diary-menu]", card)) return;
@@ -14338,7 +14388,25 @@ function duariEnsureLinkedDiaryMenus(root = document) {
   });
 }
 
+function duariNormalizeLinkedDiaryMenus(root = document) {
+  qsa(".linked-diary-menu-wrap", root).forEach((wrap) => {
+    wrap.classList.remove("linked-record-menu-wrap");
+  });
+  qsa("[data-linked-diary-menu]", root).forEach((button) => {
+    button.classList.remove("icon-btn", "linked-record-kebab");
+    button.classList.add("linked-diary-kebab");
+    button.setAttribute("type", "button");
+    button.setAttribute("aria-label", "more");
+    button.setAttribute("title", "more");
+  });
+  qsa("[data-linked-diary-dropdown]", root).forEach((dropdown) => {
+    dropdown.classList.remove("linked-record-dropdown");
+    dropdown.classList.add("linked-diary-dropdown");
+  });
+}
+
 function duariBindLinkedDiaryDropdowns(root = document) {
+  duariNormalizeLinkedDiaryMenus(root);
   qsa("[data-linked-diary-menu]", root).forEach((button) => {
     if (button.dataset.duariDropdownBound === "true") return;
     button.dataset.duariDropdownBound = "true";
