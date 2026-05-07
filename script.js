@@ -13189,13 +13189,37 @@ function openPhotoManageDeleteConfirm(options = {}) {
 
 function bindPhotoManageDeleteButtons(root, options = {}) {
   qsa("[data-photo-manage-delete]", root).forEach((button) => {
+    if (button.dataset.photoDeleteBound === "true") return;
+    button.dataset.photoDeleteBound = "true";
     button.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
       const photoIndex = Number(button.dataset.photoManageDelete) || 0;
       openPhotoManageDeleteConfirm({ ...options, photoIndex });
     });
   });
+}
+
+if (!window.__duariPhotoManageDeleteGuard) {
+  window.__duariPhotoManageDeleteGuard = true;
+  window.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-photo-manage-delete]");
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const createMode = !!button.closest(".memory-create-page");
+    const editPage = button.closest(".memory-edit-page");
+    const memoryIndex = createMode
+      ? 0
+      : (typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0);
+    openPhotoManageDeleteConfirm({
+      createMode,
+      memoryIndex,
+      photoIndex: Number(button.dataset.photoManageDelete) || 0
+    });
+  }, true);
 }
 
 function readSelectedPhotoFiles(input) {

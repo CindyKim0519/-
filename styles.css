@@ -2988,6 +2988,11 @@ h3 {
   display: none;
 }
 
+[data-photo-manage-card] .photo-order-number,
+[data-photo-manage-card] .photo-identity {
+  display: none;
+}
+
 .photo-order-card.is-thumbnail {
   border-color: var(--color-mint-100);
   box-shadow: 0 0 0 3px rgb(135 194 174 / 0.18);
