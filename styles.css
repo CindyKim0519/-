@@ -3022,6 +3022,11 @@ h3 {
   top: 8px;
 }
 
+.photo-order-grid:not(.compact) .photo-order-number,
+.photo-order-grid:not(.compact) .photo-identity {
+  display: none;
+}
+
 .photo-delete-chip {
   align-items: center;
   background: rgb(255 255 255 / 0.94);
