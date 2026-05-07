@@ -2036,6 +2036,7 @@ function handleAction(action, element) {
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": () => openRelationAddPage(1),
     "download-photo": duariDownloadCurrentPhotoAsPng,
+    "download-all-photos": duariDownloadAllCurrentPhotosAsPng,
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     logout: logoutToLogin,
     "settings-toggle": (element) => {
@@ -14943,11 +14944,14 @@ function openPhotoDetail(trigger = null) {
           ${photos.length
             ? photos.map((photo, index) => {
               const src = duariPhotoSource(photo);
-              return `<div class="photo-detail-image" data-photo-detail-item="${index}">${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}</div>`;
+              return `<div class="photo-detail-image" data-photo-detail-item="${index}">
+                ${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}
+                ${src ? `<button class="photo-detail-download" type="button" data-photo-download-one="${index}" aria-label="${index + 1}번째 사진 다운로드">↓</button>` : ""}
+              </div>`;
             }).join("")
             : `<div class="photo-detail-image"></div>`}
         </section>
-        <button class="primary-btn full" type="button" data-action="download-photo">다운로드</button>
+        <button class="primary-btn full" type="button" data-action="download-all-photos">${photos.length > 1 ? "전체 사진 다운로드" : "사진 다운로드"}</button>
       </div>
     </div>
   `);
@@ -14967,12 +14971,17 @@ function openPhotoDetail(trigger = null) {
       state.activePhotoIndex = Number(item.dataset.photoDetailItem) || 0;
     });
   });
+  qsa("[data-photo-download-one]", qs("#modal")).forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      duariDownloadPhotoAsPng(memoryIndex, Number(button.dataset.photoDownloadOne) || 0);
+    });
+  });
   bindActions(qs("#modal"));
 }
 
-function duariDownloadCurrentPhotoAsPng() {
-  const memoryIndex = Number(state.activeMemoryIndex) || 0;
-  const photoIndex = Number(state.activePhotoIndex) || 0;
+function duariDownloadPhotoAsPng(memoryIndex = Number(state.activeMemoryIndex) || 0, photoIndex = Number(state.activePhotoIndex) || 0, { showDoneToast = true } = {}) {
   const memory = state.memories?.[memoryIndex] || {};
   const photoSrc = duariPhotoSource(duariPhotoListForMemory(memoryIndex)[photoIndex]);
   if (!photoSrc) {
@@ -15002,10 +15011,29 @@ function duariDownloadCurrentPhotoAsPng() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    showToast("PNG로 다운로드했어요.");
+    if (showDoneToast) showToast("PNG로 다운로드했어요.");
   };
   image.onerror = () => showToast("사진을 불러오지 못했어요.");
   image.src = photoSrc;
+}
+
+function duariDownloadCurrentPhotoAsPng() {
+  duariDownloadPhotoAsPng();
+}
+
+function duariDownloadAllCurrentPhotosAsPng() {
+  const memoryIndex = Number(state.activeMemoryIndex) || 0;
+  const photos = duariPhotoListForMemory(memoryIndex);
+  if (!photos.length) {
+    showToast("다운로드할 사진이 없어요.");
+    return;
+  }
+  photos.forEach((_photo, index) => {
+    window.setTimeout(() => {
+      duariDownloadPhotoAsPng(memoryIndex, index, { showDoneToast: false });
+    }, index * 180);
+  });
+  showToast(`사진 ${photos.length}장을 다운로드했어요.`);
 }
 
 function duariPhotoIsMine(memoryIndex, photoIndex) {
