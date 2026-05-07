@@ -14217,7 +14217,7 @@ function renderAlbumCalendar() {
         <span class="meta">${selectedMemories.length}개</span>
       </div>
       <div class="list">
-        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">선택한 날짜에 기록이 없습니다.</p>`}
+        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날짜에 남긴 기록이 없어요.</p>`}
       </div>
     </section>
   `;
