@@ -12300,7 +12300,7 @@ function duariBindDiaryEditor(args = {}) {
     memoryLinkedDiarySelection.createDiary = null;
     openMemoryCreatePage(
       () => renderDiaryEditor({ heading: draft.heading, diary: draft, linkedMemoryIndex: draft.linkedMemoryIndex, backAction: draft.backAction }),
-      { hideLinkedDiaries: true }
+      { hideLinkedDiaries: true, returnToDiaryDraft: draft }
     );
   });
   sheet.addEventListener("click", (event) => {
@@ -14768,4 +14768,42 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
   duariOpenMemoryCreatePageWithoutLinkedDiaryBase(backAction);
   if (options.hideLinkedDiaries !== true) return;
   qs(".memory-create-page .linked-diary-section")?.remove();
+  if (!options.returnToDiaryDraft) return;
+
+  qs("[data-save-memory-create]")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
+    const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
+    const place = qs("#memoryPlace")?.value.trim() || "";
+    const type = qs("#memoryType")?.value || "일상";
+    const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
+    const newMemory = {
+      title,
+      date: dateValue.replaceAll("-", "."),
+      place,
+      type,
+      note: "",
+      scope,
+      feelings: [],
+      reaction: "",
+      author: "나"
+    };
+    state.memories.unshift(newMemory);
+    state.activeMemoryIndex = 0;
+    state.memoryCreateDraft = null;
+    duariSavePersistentContent();
+    runWithoutModalHistory(() => renderDiaryEditor({
+      heading: options.returnToDiaryDraft.heading || "일기 추가",
+      diary: {
+        ...options.returnToDiaryDraft,
+        linked: newMemory.title,
+        linkedMemoryIndex: 0
+      },
+      linkedMemoryIndex: 0,
+      backAction: options.returnToDiaryDraft.backAction || diaryEditorFlowBackAction
+    }));
+    showToast("기록을 저장하고 일기에 연결했어요.");
+  }, { capture: true });
 };
