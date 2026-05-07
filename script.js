@@ -1881,6 +1881,11 @@ function renderAlbum() {
   qsa("[data-album-view]", album).forEach((button) => {
     button.addEventListener("click", () => {
       state.albumView = button.dataset.albumView;
+      if (state.albumView === "calendar") {
+        state.calendarTouched = false;
+        state.calendarMonth = "";
+        state.calendarSelectedDate = "";
+      }
       renderAlbum();
     });
   });
@@ -12345,6 +12350,11 @@ function renderAlbum() {
   qsa("[data-album-view]", album).forEach((button) => {
     button.addEventListener("click", () => {
       state.albumView = button.dataset.albumView;
+      if (state.albumView === "calendar") {
+        state.calendarTouched = false;
+        state.calendarMonth = "";
+        state.calendarSelectedDate = "";
+      }
       renderAlbum();
     });
   });
@@ -14666,17 +14676,21 @@ function renderAlbumPhotoGroups(memories = state.memories) {
 }
 
 function duariMemoryDateValue(memory) {
-  const raw = String(memory?.date || "");
+  const raw = String(memory?.date || memory?.createdAt || "");
   const match = raw.match(/(\d{4})[.-](\d{1,2})[.-](\d{1,2})/);
   if (!match) return "";
   return `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}`;
 }
 
 function duariCalendarState() {
-  const fallback = duariMemoryDateValue(state.memories[0]) || "2026-04-01";
+  const recordDates = (state.memories || []).map(duariMemoryDateValue).filter(Boolean);
+  const fallback = recordDates[0] || "2026-04-01";
   const fallbackMonth = fallback.slice(0, 7);
-  if (!state.calendarMonth) state.calendarMonth = fallbackMonth;
-  if (!state.calendarSelectedDate) state.calendarSelectedDate = fallback;
+  const monthHasRecord = recordDates.some((date) => date.startsWith(state.calendarMonth || ""));
+  if (!state.calendarMonth || (!monthHasRecord && !state.calendarTouched)) state.calendarMonth = fallbackMonth;
+  if (!state.calendarSelectedDate || !state.calendarSelectedDate.startsWith(state.calendarMonth)) {
+    state.calendarSelectedDate = recordDates.find((date) => date.startsWith(state.calendarMonth)) || `${state.calendarMonth}-01`;
+  }
   return {
     month: state.calendarMonth,
     selectedDate: state.calendarSelectedDate
@@ -14696,6 +14710,7 @@ function duariCalendarShiftMonth(amount) {
   const firstMemory = state.memories.find((memory) => duariMemoryDateValue(memory).startsWith(nextMonth));
   state.calendarMonth = nextMonth;
   state.calendarSelectedDate = duariMemoryDateValue(firstMemory) || `${nextMonth}-01`;
+  state.calendarTouched = true;
 }
 
 function renderAlbumCalendar() {
@@ -14859,6 +14874,11 @@ function renderAlbum() {
   qsa("[data-album-view]", album).forEach((button) => {
     button.addEventListener("click", () => {
       state.albumView = button.dataset.albumView;
+      if (state.albumView === "calendar") {
+        state.calendarTouched = false;
+        state.calendarMonth = "";
+        state.calendarSelectedDate = "";
+      }
       renderAlbum();
     });
   });
