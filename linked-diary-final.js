@@ -123,6 +123,56 @@
     );
   };
 
+  function validLinkedRecordIndex(linkedTitle, linkedMemoryIndex = null) {
+    const normalizedTitle = String(linkedTitle || "").trim();
+    if (!normalizedTitle || normalizedTitle.includes("관련 기록 없음")) return null;
+    const byTitle = (state.memories || []).findIndex((memory) => memory.title === normalizedTitle);
+    if (byTitle >= 0) return byTitle;
+    if (typeof linkedMemoryIndex === "number") {
+      const memory = state.memories?.[linkedMemoryIndex];
+      if (memory?.title === normalizedTitle) return linkedMemoryIndex;
+    }
+    return null;
+  }
+
+  const renderEmptyLinkedRecordSectionSafe = (showPicker = false) => {
+    if (typeof renderEmptyLinkedRecordSection === "function") return renderEmptyLinkedRecordSection(showPicker);
+    return `
+      <section class="card linked-record-card">
+        <div class="between"><h3>연결된 기록</h3><span class="meta">0개</span></div>
+        <p class="linked-record-empty">연결된 기록이 없습니다.</p>
+      </section>
+    `;
+  };
+
+  fallbackDiaryRecordIndex = function fallbackDiaryRecordIndex(linkedTitle, linkedMemoryIndex = null) {
+    return validLinkedRecordIndex(linkedTitle, linkedMemoryIndex);
+  };
+
+  renderLinkedRecordCards = function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null, options = {}) {
+    const showMenu = options.showMenu ?? true;
+    const index = validLinkedRecordIndex(linkedTitle, linkedMemoryIndex);
+    if (index === null) return renderEmptyLinkedRecordSectionSafe(options.showPicker !== false);
+    const record = state.memories[index];
+    return `
+      <section class="card linked-record-card">
+        <div class="between"><h3>연결된 기록</h3><span class="meta">1개</span></div>
+        <div class="linked-record-list">
+          <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
+            <div class="linked-record-title-row title-between">
+              <span class="linked-record-title-text">${duariEscapeHtml(record.title || "제목 없는 기록")}</span>
+              <div class="linked-record-right-tools">
+                <em class="linked-record-scope">${scopeLabelForRecord(record)}</em>
+                ${showMenu ? `<div class="linked-record-menu-wrap"><button class="icon-btn linked-record-kebab" data-linked-record-menu aria-label="더보기" title="더보기"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button><div class="linked-record-dropdown" data-linked-record-dropdown hidden><button data-linked-record-detail="${index}">상세 보기</button><button data-diary-unlink-record>삭제</button></div></div>` : ""}
+              </div>
+            </div>
+          </article>
+        </div>
+        ${options.showPicker === false ? "" : `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>`}
+      </section>
+    `;
+  };
+
   openMemoryDetailLatestV3 = function openMemoryDetailLatestV3(index, backAction = null) {
     const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
     state.activeMemoryIndex = safeIndex;
