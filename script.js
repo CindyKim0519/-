@@ -13272,7 +13272,7 @@ function openSignupModal() {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-entry-login-back]")?.addEventListener("click", () => openLoginModal("이메일"));
+  qs("[data-entry-login-back]")?.addEventListener("click", () => returnToEntryScreen());
   qs("[data-entry-signup-login]")?.addEventListener("click", () => openLoginModal("이메일"));
   const emailInput = qs("[data-signup-email]");
   const passwordInput = qs("[data-signup-password]");
