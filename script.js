@@ -12668,8 +12668,33 @@ function linkedDiariesLatest() {
 
 window.linkedDiariesLatest = linkedDiariesLatest;
 
+const duariBundledDiarySignatures = new Set([
+  "오늘 고마웠던 것|작은 말에도 내 편이 있다는 느낌이 들었다.",
+  "천천히 걸었던 길|별말 없이 걸어도 마음이 편해지는 하루였다.",
+  "기억하고 싶은 말|무심코 건넨 말이 오래 남아서 함께 적어두고 싶었다.",
+  "같이 웃었던 순간|사소한 농담에도 한참 웃던 장면이 자꾸 떠오른다.",
+  "다시 가고 싶은 곳|오늘의 공기와 온도가 우리 기록에 오래 남았으면 좋겠다.",
+  "마음을 건넨 밤|조금 늦게 말했지만 그래도 전할 수 있어서 다행이었다.",
+  "아직 정리 중인 마음|서운했던 일을 바로 말하기보다 조금 더 내 마음을 들여다보기.",
+  "말하지 못한 이유|상대가 싫어서가 아니라 내가 아직 정리하지 못한 마음이었다.",
+  "혼자 남겨둔 생각|오늘 느낀 감정을 조금 더 자세히 적어두고 싶었다.",
+  "내가 바랐던 것|크게 바란 건 아니지만 알아주면 좋겠다고 생각했다.",
+  "괜찮아지는 중|시간이 조금 지나니 마음이 부드럽게 가라앉았다.",
+  "다음엔 이렇게 말하기|내 마음을 탓하지 않고 짧고 솔직하게 말해보기.",
+  "고마운 마음|오늘 고마웠던 장면을 조금 더 다듬어서 전하고 싶다.",
+  "서운했던 순간|서운함을 탓처럼 들리지 않게 정리해보고 있다.",
+  "다음 데이트|다음에 같이 가고 싶은 곳과 이유를 적어두었다.",
+  "미안한 마음|내가 놓쳤던 부분을 인정하고 부드럽게 말해보고 싶다.",
+  "오래 남은 말|상대가 해준 말 중 오래 남은 문장을 정리 중이다.",
+  "오늘의 마음|지금 바로 보내기보다 조금 더 생각해보고 싶다.",
+]);
+
+function duariIsBundledSampleDiary(diary = {}) {
+  return duariBundledDiarySignatures.has(`${diary.title || ""}|${diary.body || ""}`);
+}
+
 function duariHomeSharedDiaries() {
-  const source = state.diaries || [];
+  const source = (state.diaries || []).filter((diary) => !duariIsBundledSampleDiary(diary));
   return ["공유", "개인", "draft"]
     .map((scope) => source.find((diary) => normalizeDiaryScopeValue(diary.scope) === scope))
     .filter(Boolean)
