@@ -14337,10 +14337,31 @@ function duariEnsureLinkedDiaryMenus(root = document) {
   });
 }
 
+function duariBindLinkedDiaryDropdowns(root = document) {
+  qsa("[data-linked-diary-menu]", root).forEach((button) => {
+    if (button.dataset.duariDropdownBound === "true") return;
+    button.dataset.duariDropdownBound = "true";
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const menu = button.closest(".linked-diary-menu-wrap")?.querySelector("[data-linked-diary-dropdown]");
+      const willOpen = !!menu?.hidden;
+      qsa("[data-linked-diary-dropdown]", root).forEach((item) => { item.hidden = true; });
+      qsa("[data-linked-diary-menu]", root).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        button.classList.add("active");
+      }
+    }, true);
+  });
+}
+
 const duariBindLinkedDiaryCardsWithMenuBase = bindLinkedDiaryCardsLatest;
 bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
   if (!root) return;
   duariEnsureLinkedDiaryMenus(root);
+  duariBindLinkedDiaryDropdowns(root);
   duariBindLinkedDiaryCardsWithMenuBase(root, backAction);
 };
 
@@ -14348,10 +14369,16 @@ const duariOpenMemoryEditWithLinkedDiaryMenusBase = openMemoryEditPageLatest;
 openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapshot = null) {
   duariOpenMemoryEditWithLinkedDiaryMenusBase(index, backAction, originalMemorySnapshot);
   const sheet = qs(".memory-edit-page");
-  if (sheet) duariEnsureLinkedDiaryMenus(sheet);
+  if (sheet) {
+    duariEnsureLinkedDiaryMenus(sheet);
+    duariBindLinkedDiaryDropdowns(sheet);
+  }
   window.setTimeout(() => {
     const nextSheet = qs(".memory-edit-page");
-    if (nextSheet) duariEnsureLinkedDiaryMenus(nextSheet);
+    if (nextSheet) {
+      duariEnsureLinkedDiaryMenus(nextSheet);
+      duariBindLinkedDiaryDropdowns(nextSheet);
+    }
   }, 0);
 };
 
