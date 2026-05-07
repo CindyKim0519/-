@@ -2085,6 +2085,11 @@ h3 {
   width: 22%;
 }
 
+.photo-detail-image:has(> img) {
+  background: none;
+  box-shadow: none;
+}
+
 .photo-delete-overlay {
   align-items: center;
   background: rgba(48, 48, 48, 0.32);
@@ -2466,6 +2471,11 @@ h3 {
   position: relative;
   scroll-snap-align: start;
   text-align: left;
+}
+
+.memory-photo-main:has(.memory-photo-slide > img),
+.memory-photo-slide:has(> img) {
+  background: none;
 }
 
 .memory-photo-slide:has(> img)::before,
