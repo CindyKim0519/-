@@ -2035,7 +2035,7 @@ function handleAction(action, element) {
     "send-ai-result": () => (state.connected ? showToast("최종 메시지만 상대에게 보냈어요.") : openConnectModal()),
     "invite-link": () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."),
     "relation-add": () => openRelationAddPage(1),
-    "download-photo": () => showToast("다운로드가 완료됐어요."),
+    "download-photo": duariDownloadCurrentPhotoAsPng,
     "external-share": () => showToast("공유할 수 있어요. 상대 콘텐츠가 포함되면 동의가 필요합니다."),
     logout: logoutToLogin,
     "settings-toggle": (element) => {
@@ -14861,6 +14861,44 @@ function openPhotoDetail(trigger = null) {
   qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1), photoBack: backTarget } }));
   qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1), photoBack: backTarget } }));
   bindActions(qs("#modal"));
+}
+
+function duariDownloadCurrentPhotoAsPng() {
+  const memoryIndex = Number(state.activeMemoryIndex) || 0;
+  const photoIndex = Number(state.activePhotoIndex) || 0;
+  const memory = state.memories?.[memoryIndex] || {};
+  const photoSrc = duariPhotoSource(duariPhotoListForMemory(memoryIndex)[photoIndex]);
+  if (!photoSrc) {
+    showToast("다운로드할 사진이 없어요.");
+    return;
+  }
+
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth || image.width;
+    canvas.height = image.naturalHeight || image.height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      showToast("다운로드를 준비하지 못했어요.");
+      return;
+    }
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const link = document.createElement("a");
+    const safeTitle = String(memory.title || "duari-photo")
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g, "")
+      .replace(/\s+/g, "-")
+      .slice(0, 40) || "duari-photo";
+    link.href = canvas.toDataURL("image/png");
+    link.download = `${safeTitle}-${photoIndex + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showToast("PNG로 다운로드했어요.");
+  };
+  image.onerror = () => showToast("사진을 불러오지 못했어요.");
+  image.src = photoSrc;
 }
 
 function duariPhotoIsMine(memoryIndex, photoIndex) {
