@@ -70,6 +70,16 @@ const state = {
 };
 
 const DUARI_CONTENT_STORAGE_PREFIX = "duariContent:";
+const duariBundledMemorySignatures = new Set([
+  "성수에서 보낸 오후|2026.04.26",
+  "비 오는 날의 통화|2026.04.21",
+  "한강에서 먹은 저녁|2026.04.18",
+  "첫 봄 산책|2026.04.12",
+  "기념일 케이크|2026.04.05",
+  "늦은 밤 메시지|2026.03.29",
+  "주말 짧은 여행|2026.03.22",
+  "조용한 화해|2026.03.16",
+]);
 
 function duariCurrentStorageUserKey() {
   const raw = state.currentLoginEmail || "local";
@@ -80,6 +90,32 @@ function duariContentStorageKey(email = state.currentLoginEmail) {
   const raw = email || "local";
   const key = typeof normalizeSignupEmail === "function" ? (normalizeSignupEmail(raw) || "local") : String(raw || "local").trim().toLowerCase();
   return `${DUARI_CONTENT_STORAGE_PREFIX}${key}`;
+}
+
+function duariIsBundledSampleMemory(memory = {}) {
+  return duariBundledMemorySignatures.has(`${memory.title || ""}|${memory.date || ""}`);
+}
+
+function duariHasStoredContentForCurrentUser() {
+  try {
+    return localStorage.getItem(duariContentStorageKey()) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function duariStripBundledSamplesFromAccountContent() {
+  state.memories = (state.memories || []).filter((memory) => !duariIsBundledSampleMemory(memory));
+  state.diaries = (state.diaries || []).filter((diary) => {
+    if (typeof duariIsBundledSampleDiary !== "function") return true;
+    return !duariIsBundledSampleDiary(diary);
+  });
+}
+
+function duariInitializeEmptyContentForCurrentAccount() {
+  state.memories = [];
+  state.diaries = [];
+  duariSavePersistentContent();
 }
 
 function duariSavePersistentContent() {
@@ -95,11 +131,18 @@ function duariSavePersistentContent() {
 
 function duariLoadPersistentContent() {
   try {
-    const saved = JSON.parse(localStorage.getItem(duariContentStorageKey()) || "null");
-    if (Array.isArray(saved?.memories)) state.memories = saved.memories;
-    if (Array.isArray(saved?.diaries)) state.diaries = saved.diaries;
+    const raw = localStorage.getItem(duariContentStorageKey());
+    const saved = JSON.parse(raw || "null");
+    if (raw) {
+      state.memories = Array.isArray(saved?.memories) ? saved.memories : [];
+      state.diaries = Array.isArray(saved?.diaries) ? saved.diaries : [];
+      duariStripBundledSamplesFromAccountContent();
+      duariSavePersistentContent();
+    } else if (state.currentLoginEmail) {
+      duariInitializeEmptyContentForCurrentAccount();
+    }
   } catch {
-    // Leave the bundled sample data in place if saved data is unreadable.
+    if (state.currentLoginEmail) duariInitializeEmptyContentForCurrentAccount();
   }
   duariInstallContentPersistenceHooks();
 }
@@ -13095,6 +13138,12 @@ function saveRegisteredAccounts() {
 function markCurrentAccountSetupComplete() {
   const account = getSignupAccount(state.currentLoginEmail);
   if (!account) return;
+  if (!duariHasStoredContentForCurrentUser()) {
+    state.memories = [];
+    state.diaries = [];
+  } else {
+    duariStripBundledSamplesFromAccountContent();
+  }
   account.setupComplete = true;
   account.currentRelation = { ...currentRelationInfo() };
   account.connected = !!state.connected;
