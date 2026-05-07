@@ -2900,6 +2900,86 @@ h3 {
   padding: 12px;
 }
 
+.linked-diary-title-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  position: relative;
+}
+
+.linked-diary-title-row > strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linked-diary-right-tools {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.linked-diary-menu-wrap {
+  position: relative;
+}
+
+.linked-diary-kebab {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+}
+
+.linked-diary-kebab span {
+  background: var(--text-secondary);
+  border-radius: 50%;
+  display: block;
+  height: 3px;
+  width: 3px;
+}
+
+.linked-diary-dropdown {
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  min-width: 112px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 5;
+}
+
+.linked-diary-dropdown[hidden] {
+  display: none;
+}
+
+.linked-diary-dropdown button {
+  background: var(--color-white);
+  border: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.linked-diary-dropdown button + button {
+  border-top: 1px solid var(--border-default);
+}
+
 .card :is(.card, .memory-card, .diary-card, .question-card) {
   background: var(--color-white);
   border: 1px solid var(--border-default);

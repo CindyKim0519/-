@@ -9994,8 +9994,93 @@ function runFlowBack(action) {
 }
 
 function bindLinkedDiaryCardsLatest(root, backAction = null) {
+  root.addEventListener("click", (event) => {
+    const menuButton = event.target.closest("[data-linked-diary-menu]");
+    if (menuButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      const menu = menuButton.closest(".linked-diary-menu-wrap")?.querySelector("[data-linked-diary-dropdown]");
+      const willOpen = !!menu?.hidden;
+      qsa("[data-linked-diary-dropdown]", root).forEach((item) => { item.hidden = true; });
+      qsa("[data-linked-diary-menu]", root).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        menuButton.classList.add("active");
+      }
+      return;
+    }
+
+    const detailButton = event.target.closest("[data-linked-diary-menu-detail]");
+    if (detailButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      qsa("[data-linked-diary-dropdown]", root).forEach((item) => { item.hidden = true; });
+      openLinkedDiaryDetailLatest(Number(detailButton.dataset.linkedDiaryMenuDetail), backAction);
+      return;
+    }
+
+    const editButton = event.target.closest("[data-linked-diary-menu-edit]");
+    if (editButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      qsa("[data-linked-diary-dropdown]", root).forEach((item) => { item.hidden = true; });
+      const diary = linkedDiariesLatest()[Number(editButton.dataset.linkedDiaryMenuEdit)];
+      if (diary) openLinkedDiaryEditLatest(normalizeDiaryForDetail(diary), () => runWithoutModalHistory(backAction || (() => openMemoryEditPageLatest(state.activeMemoryIndex || 0))));
+      return;
+    }
+
+    const unlinkButton = event.target.closest("[data-linked-diary-menu-unlink]");
+    if (unlinkButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      qsa("[data-linked-diary-dropdown]", root).forEach((item) => { item.hidden = true; });
+      openLinkedDiaryUnlinkConfirm(Number(unlinkButton.dataset.linkedDiaryMenuUnlink), backAction);
+    }
+  });
   qsa("[data-linked-diary-index]", root).forEach((card) => {
-    card.addEventListener("click", () => openLinkedDiaryDetailLatest(Number(card.dataset.linkedDiaryIndex), backAction));
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-linked-diary-menu], [data-linked-diary-dropdown]")) return;
+      openLinkedDiaryDetailLatest(Number(card.dataset.linkedDiaryIndex), backAction);
+    });
+  });
+}
+
+function openLinkedDiaryUnlinkConfirm(index, backAction = null) {
+  const page = qs(".memory-detail-page") || qs("#modal");
+  const diary = linkedDiariesLatest()[index];
+  if (!page || !diary) return;
+  qs(".ai-confirm-overlay", page)?.remove();
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <section class="ai-confirm-card">
+        <h3>연결을 해제할까요?</h3>
+        <p>이 일기는 삭제되지 않고 현재 기록과의 연결만 해제돼요.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-linked-diary-unlink-cancel>취소</button>
+          <button class="primary-btn" type="button" data-linked-diary-unlink-confirm>연결 해제</button>
+        </div>
+      </section>
+    </div>
+  `);
+  qs("[data-linked-diary-unlink-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+  qs("[data-linked-diary-unlink-confirm]", page)?.addEventListener("click", () => {
+    const memoryIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+    const memoryTitle = state.memories?.[memoryIndex]?.title || diary.linked;
+    const savedIndex = (state.diaries || []).indexOf(diary);
+    const nextDiary = { ...diary, linked: "관련 기록 없음" };
+    if (nextDiary.linkedMemoryTitle === memoryTitle) delete nextDiary.linkedMemoryTitle;
+    if (savedIndex >= 0) state.diaries[savedIndex] = nextDiary;
+    if (typeof memoryLinkedAddedDiaries !== "undefined" && Array.isArray(memoryLinkedAddedDiaries[memoryIndex])) {
+      memoryLinkedAddedDiaries[memoryIndex] = memoryLinkedAddedDiaries[memoryIndex].filter((item) => item !== diary);
+    }
+    duariInstallContentPersistenceHooks();
+    duariSavePersistentContent();
+    qs(".ai-confirm-overlay", page)?.remove();
+    runWithoutModalHistory(() => {
+      if (qs(".memory-edit-page")) openMemoryEditPageLatest(memoryIndex, backAction || (() => openMemoryDetailLatestV3(memoryIndex)));
+      else openMemoryDetailLatestV3(memoryIndex, backAction);
+    });
+    showToast("일기 연결을 해제했어요.");
   });
 }
 
@@ -14136,15 +14221,80 @@ if (typeof duariSaveDiaryDraftWithDateBase === "function") {
 }
 
 const duariLinkedDiaryCardsWithDateBase = linkedDiaryCardsLatest;
-linkedDiaryCardsLatest = function linkedDiaryCardsLatest() {
-  return linkedDiariesLatest().map((diary, index) => `
-    <article class="linked-diary-card" role="button" tabindex="0" data-linked-diary-index="${index}">
-      <div class="between"><strong>${diary.title}</strong><span class="linked-diary-type">${diary.type}</span></div>
-      <p>${diary.body}</p>
-      ${linkedDiaryEmotionRow(diary)}
-      ${duariDiaryDateMeta(diary)}
+function duariLinkedDiaryCardHtml(diary, index, options = {}) {
+  const showMenu = options.showMenu !== false;
+  const diaryType = String(diary?.type || "");
+  const canEdit = diary?.editable !== false && !diaryType.includes("상대");
+  const dataAttr = options.dataAttr || `data-linked-diary-index="${index}"`;
+  const detailAction = options.detailAction || `data-linked-diary-menu-detail="${index}"`;
+  const editAction = options.editAction || `data-linked-diary-menu-edit="${index}"`;
+  const unlinkAction = options.unlinkAction || `data-linked-diary-menu-unlink="${index}"`;
+  return `
+    <article class="linked-diary-card" role="button" tabindex="0" ${dataAttr}>
+      <div class="linked-diary-title-row">
+        <strong>${duariEscapeHtml(diary?.title || "제목 없는 일기")}</strong>
+        <span class="linked-diary-right-tools">
+          <span class="linked-diary-type">${duariEscapeHtml(diary?.type || diaryScopeLabel?.(diary?.scope) || "나만 보기")}</span>
+          ${showMenu ? `
+            <span class="linked-record-menu-wrap linked-diary-menu-wrap">
+              <button class="icon-btn linked-record-kebab linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
+                <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+              </button>
+              <span class="linked-record-dropdown linked-diary-dropdown" data-linked-diary-dropdown hidden>
+                <button type="button" ${detailAction}>상세 보기</button>
+                ${canEdit ? `<button type="button" ${editAction}>수정</button><button type="button" ${unlinkAction}>연결 해제</button>` : ""}
+              </span>
+            </span>
+          ` : ""}
+        </span>
+      </div>
+      <p>${duariEscapeHtml(diary?.body || "")}</p>
+      ${linkedDiaryEmotionRow(diary || {})}
+      ${duariDiaryDateMeta(diary || {})}
     </article>
-  `).join("");
+  `;
+}
+
+linkedDiaryCardsLatest = function linkedDiaryCardsLatest() {
+  return linkedDiariesLatest().map((diary, index) => duariLinkedDiaryCardHtml(diary, index)).join("");
+};
+
+selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
+  if (mode === "create" && memoryLinkedDiarySelection.createDiary) {
+    const diary = memoryLinkedDiarySelection.createDiary;
+    return {
+      count: 1,
+      html: `<div class="linked-diary-list">${duariLinkedDiaryCardHtml(diary, 0, {
+        dataAttr: "data-memory-create-linked-diary",
+        detailAction: "data-memory-create-linked-diary",
+        editAction: "data-memory-create-linked-diary-edit",
+        unlinkAction: "data-memory-create-linked-diary-unlink"
+      })}</div>`
+    };
+  }
+  const selectedIndex = mode === "create" ? memoryLinkedDiarySelection.create : memoryLinkedDiarySelection.edit[index];
+  if (typeof selectedIndex === "number") {
+    const diary = mode === "create"
+      ? (state.diaries[selectedIndex] || state.diaries[0])
+      : (linkedDiariesLatest()[selectedIndex] || linkedDiariesLatest()[0]);
+    return {
+      count: 1,
+      html: `<div class="linked-diary-list">${duariLinkedDiaryCardHtml(diary, selectedIndex, {
+        dataAttr: `data-memory-create-linked-diary data-memory-create-diary-index="${selectedIndex}"`,
+        detailAction: `data-linked-diary-menu-detail="${selectedIndex}"`,
+        editAction: `data-linked-diary-menu-edit="${selectedIndex}"`,
+        unlinkAction: `data-linked-diary-menu-unlink="${selectedIndex}"`
+      })}</div>`
+    };
+  }
+  if (mode === "edit") {
+    const diaries = linkedDiariesLatest();
+    return {
+      count: diaries.length,
+      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+    };
+  }
+  return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
 };
 
 const duariRenderDiaryWithDateBase = renderDiary;
