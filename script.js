@@ -14084,7 +14084,7 @@ function renderAlbumRecordList(memories = state.memories) {
 }
 
 function renderAlbumPhotoGroups(memories = state.memories) {
-  if (!memories.length) return `<p class="linked-record-empty">조건에 맞는 사진이 없습니다.</p>`;
+  if (!memories.length) return `<p class="linked-record-empty">아직 남긴 사진이 없어요.</p>`;
   const groups = memories.reduce((acc, memory) => {
     const date = memory.date || "날짜 없음";
     if (!acc.has(date)) acc.set(date, []);
