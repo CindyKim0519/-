@@ -14843,10 +14843,7 @@ function openPhotoDetail(trigger = null) {
           <button class="photo-detail-chevron" type="button" data-photo-next ${photoIndex >= photoCount - 1 ? "disabled" : ""} aria-label="다음 사진">›</button>
         </section>
         <p class="photo-detail-count">${photoIndex + 1} / ${photoCount}</p>
-        <div class="inline-action-pair">
-          <button class="primary-btn" type="button" data-action="download-photo">다운로드</button>
-          <button class="ghost-btn" type="button" data-action="delete-photo-confirm">삭제</button>
-        </div>
+        <button class="primary-btn full" type="button" data-action="download-photo">다운로드</button>
       </div>
     </div>
   `);
