@@ -11788,6 +11788,7 @@ function renderHome() {
         `}
         <section class="card home-records-card">
           <h3>최근 기록</h3>
+          <p>아직 최근 기록이 없어요.</p>
           <button class="primary-btn full" data-action="new-memory">기록 추가</button>
         </section>
         <section class="diary-card">
@@ -11812,6 +11813,10 @@ function renderHome() {
   const sharedDiaries = typeof duariHomeSharedDiaries === "function"
     ? duariHomeSharedDiaries()
     : (state.diaries || []).slice(0, 3);
+  const recentMemories = (state.memories || []).slice(0, 2);
+  const homeRecentMemoryCards = recentMemories.length
+    ? memoryCards(recentMemories, true)
+    : `<p>아직 최근 기록이 없어요.</p>`;
   const homeSharedDiaryCards = sharedDiaries.length
     ? sharedDiaries.map((diary, index) => `
         <article class="linked-diary-card home-shared-diary-card" role="button" tabindex="0" data-home-shared-diary-index="${index}">
@@ -11842,7 +11847,7 @@ function renderHome() {
           <h3>최근 기록</h3>
           <button class="chip-btn" data-tab-go="album">더보기</button>
         </div>
-        <div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div>
+        <div class="list">${homeRecentMemoryCards}</div>
         <button class="primary-btn full" data-action="new-memory">기록 추가</button>
       </section>
       <section class="diary-card home-shared-diary-section">
@@ -13852,6 +13857,9 @@ function renderQuestions() {
   const questions = qs("#questions");
   if (!questions) return;
   const history = duariQuestionHistorySeed();
+  const recentQuestionHistoryHtml = history.length
+    ? history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")
+    : `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
@@ -13868,7 +13876,7 @@ function renderQuestions() {
           <span class="meta">최근 ${Math.min(history.length, 3)}개</span>
         </div>
         <div class="question-history-list">
-          ${history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")}
+          ${recentQuestionHistoryHtml}
         </div>
         <button class="ghost-btn full" type="button" data-question-history-all>전체 보기</button>
       </section>
