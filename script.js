@@ -10761,9 +10761,9 @@ function openMemoryEditPageLatest(index, backAction = null) {
     const fields = qsa(".form-field", sheet);
     const originalTitle = memory.title;
     const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
-    const editedDate = fields[1]?.querySelector("input")?.value || toDateInputValue(memory.date);
-    const editedPlace = fields[2]?.querySelector("input")?.value.trim() || "";
-    const editedType = fields[3]?.querySelector("select")?.value || memory.type || "일상";
+    const editedDate = fields[2]?.querySelector("input")?.value || toDateInputValue(memory.date);
+    const editedPlace = fields[3]?.querySelector("input")?.value.trim() || "";
+    const editedType = fields[4]?.querySelector("select")?.value || memory.type || "일상";
     const editedScope = qs("[data-memory-scope] .chip-btn.active", sheet)?.textContent.trim() || memory.scope || "나만 보기";
     const nextMemory = {
       ...memory,
@@ -11108,9 +11108,9 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     const fields = qsa(".form-field", sheet);
     const originalTitle = memory.title;
     const editedTitle = limitMemoryEditTitle(qs(".memory-title-input", sheet)?.value.trim() || "") || memory.title;
-    const editedDate = fields[1]?.querySelector("input")?.value || toDateInputValue(memory.date);
-    const editedPlace = fields[2]?.querySelector("input")?.value.trim() || "";
-    const editedType = fields[3]?.querySelector("select")?.value || memory.type || "일상";
+    const editedDate = fields[2]?.querySelector("input")?.value || toDateInputValue(memory.date);
+    const editedPlace = fields[3]?.querySelector("input")?.value.trim() || "";
+    const editedType = fields[4]?.querySelector("select")?.value || memory.type || "일상";
     const editedScope = qs("[data-memory-scope] .chip-btn.active", sheet)?.textContent.trim() || memory.scope || "나만 보기";
     const nextMemory = {
       ...memory,
