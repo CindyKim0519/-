@@ -2057,8 +2057,8 @@ h3 {
   box-shadow: inset 0 0 0 1px rgba(228, 112, 142, 0.16);
   display: flex;
   justify-content: center;
-  max-height: min(300px, calc(100vh - 280px));
-  min-height: 220px;
+  max-height: min(420px, calc(100vh - 260px));
+  min-height: 280px;
   width: 100%;
   overflow: hidden;
   position: relative;
