@@ -1387,14 +1387,20 @@ function openPhotoOrderManagerPageLatest(backAction = restorePreviousModal) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   const savePhotoOrder = () => {
-    const orderedPhotos = qsa("[data-photo-order-card]", sheet)
+    const orderedCards = qsa("[data-photo-order-card]", sheet);
+    const representativeCard = orderedCards.find((card) => card.classList.contains("is-representative")) || orderedCards[0];
+    const representativePhoto = representativeCard ? photos[Number(representativeCard.dataset.photoIndex)] : null;
+    const orderedPhotos = orderedCards
       .map((card) => photos[Number(card.dataset.photoIndex)])
       .filter(Boolean);
+    const representativePhotoIndex = Math.max(0, orderedPhotos.indexOf(representativePhoto));
     if (createMode) {
       state.memoryCreateDraft = {
         ...(state.memoryCreateDraft || {}),
         photos: orderedPhotos,
-        photoCount: orderedPhotos.length
+        photoCount: orderedPhotos.length,
+        representativePhoto,
+        representativePhotoIndex
       };
       return;
     }
@@ -1402,6 +1408,8 @@ function openPhotoOrderManagerPageLatest(backAction = restorePreviousModal) {
     if (!memory) return;
     memory.photos = orderedPhotos;
     memory.photoCount = orderedPhotos.length;
+    memory.representativePhoto = representativePhoto || orderedPhotos[0] || null;
+    memory.representativePhotoIndex = representativePhotoIndex;
     duariSavePersistentContent();
   };
   qsa("[data-photo-order-back]", sheet).forEach((button) => button.addEventListener("click", () => {
@@ -11066,6 +11074,8 @@ function openMemoryCreatePage(backAction = null) {
       scope: qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || (state.connected ? "우리 둘이 보기" : "나만 보기"),
       photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0),
       photos: Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [],
+      representativePhoto: state.memoryCreateDraft?.representativePhoto || (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos[0] : null),
+      representativePhotoIndex: Number(state.memoryCreateDraft?.representativePhotoIndex) || 0,
     };
   };
   qs("[data-photo-order-page]")?.addEventListener("click", () => {
@@ -11103,7 +11113,9 @@ function openMemoryCreatePage(backAction = null) {
       reaction: "",
       author: "나",
       photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0),
-      photos: Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : []
+      photos: Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [],
+      representativePhoto: state.memoryCreateDraft?.representativePhoto || (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos[0] : null),
+      representativePhotoIndex: Number(state.memoryCreateDraft?.representativePhotoIndex) || 0
     };
     state.memories.unshift(newMemory);
     duariAttachCreateDiaryToMemory(newMemory);
@@ -11770,12 +11782,26 @@ function duariMemoryIndex(memory, fallbackIndex) {
   return found >= 0 ? found : fallbackIndex;
 }
 
+function duariRepresentativePhotoSource(memory = {}) {
+  const photos = Array.isArray(memory.photos) ? memory.photos : [];
+  const savedSrc = duariPhotoSource(memory.representativePhoto);
+  if (savedSrc) return savedSrc;
+  const savedIndex = Number(memory.representativePhotoIndex);
+  if (Number.isFinite(savedIndex) && savedIndex >= 0 && photos[savedIndex]) return duariPhotoSource(photos[savedIndex]);
+  return duariPhotoSource(photos[0]);
+}
+
+function duariMemoryCardPhotoHtml(memory = {}) {
+  const src = duariRepresentativePhotoSource(memory);
+  return `<div class="photo-stack" aria-label="사진 미리보기">${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}</div>`;
+}
+
 function memoryCards(memories, homeCompact = false) {
   return memories.map((memory, fallbackIndex) => {
     const index = duariMemoryIndex(memory, fallbackIndex);
     return `
       <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-index="${index}" data-memory-open="${index}">
-        <div class="photo-stack" aria-label="사진 미리보기"></div>
+        ${duariMemoryCardPhotoHtml(memory)}
         <div>
           <div class="${homeCompact ? "home-memory-title" : "between"}">
             <strong>${memory.title}</strong>
@@ -13179,10 +13205,15 @@ function removePhotoFromManageState({ createMode = false, memoryIndex = 0, photo
   const memory = state.memories?.[memoryIndex];
   if (!memory) return;
   const photos = Array.isArray(memory.photos) ? [...memory.photos] : [];
+  const deletedPhoto = photos[photoIndex] || null;
   if (photos.length > photoIndex) photos.splice(photoIndex, 1);
   const currentCount = duariPhotoCountForMemory(memoryIndex);
   memory.photos = photos;
   memory.photoCount = Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length)));
+  if (duariPhotoSource(memory.representativePhoto) === duariPhotoSource(deletedPhoto)) {
+    memory.representativePhoto = photos[0] || null;
+    memory.representativePhotoIndex = 0;
+  }
   duariSavePersistentContent();
   duariRefreshPhotoManageCard(memory.photoCount, { memoryIndex });
   renderAlbum();
@@ -13309,7 +13340,9 @@ function openPhotoAddChoiceModal(options = {}) {
         photos: [
           ...(Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : []),
           ...photosToAdd
-        ].slice(0, 30)
+        ].slice(0, 30),
+        representativePhoto: state.memoryCreateDraft?.representativePhoto || photosToAdd[0] || null,
+        representativePhotoIndex: Number(state.memoryCreateDraft?.representativePhotoIndex) || 0
       };
     } else if (memory) {
       memory.photoCount = nextCount;
@@ -13317,6 +13350,8 @@ function openPhotoAddChoiceModal(options = {}) {
         ...(Array.isArray(memory.photos) ? memory.photos : []),
         ...photosToAdd
       ].slice(0, 30);
+      memory.representativePhoto = memory.representativePhoto || photosToAdd[0] || null;
+      memory.representativePhotoIndex = Number(memory.representativePhotoIndex) || 0;
       duariSavePersistentContent();
     }
     duariRefreshPhotoManageCard(nextCount, createMode ? { createMode: true } : { memoryIndex });
@@ -15018,7 +15053,9 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       reaction: "",
       author: "나",
       photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0),
-      photos: Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : []
+      photos: Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [],
+      representativePhoto: state.memoryCreateDraft?.representativePhoto || (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos[0] : null),
+      representativePhotoIndex: Number(state.memoryCreateDraft?.representativePhotoIndex) || 0
     };
     state.memories.unshift(newMemory);
     state.activeMemoryIndex = 0;
