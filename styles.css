@@ -2116,38 +2116,14 @@ h3 {
 }
 
 .download-tray-icon {
-  border-bottom: 3px solid currentColor;
-  border-left: 3px solid currentColor;
-  border-right: 3px solid currentColor;
-  border-radius: 0 0 4px 4px;
   display: block;
-  height: 12px;
-  position: relative;
-  width: 18px;
-}
-
-.download-tray-icon::before {
-  background: currentColor;
-  border-radius: 999px;
-  content: "";
-  height: 16px;
-  left: 50%;
-  position: absolute;
-  top: -12px;
-  transform: translateX(-50%);
-  width: 4px;
-}
-
-.download-tray-icon::after {
-  border-bottom: 4px solid currentColor;
-  border-right: 4px solid currentColor;
-  content: "";
-  height: 10px;
-  left: 50%;
-  position: absolute;
-  top: -2px;
-  transform: translateX(-50%) rotate(45deg);
-  width: 10px;
+  fill: none;
+  height: 22px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.8;
+  width: 22px;
 }
 
 .photo-delete-overlay {

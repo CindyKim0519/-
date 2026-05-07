@@ -14946,7 +14946,7 @@ function openPhotoDetail(trigger = null) {
               const src = duariPhotoSource(photo);
               return `<div class="photo-detail-image" data-photo-detail-item="${index}">
                 ${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}
-                ${src ? `<button class="photo-detail-download" type="button" data-photo-download-one="${index}" aria-label="${index + 1}번째 사진 다운로드"><span class="download-tray-icon" aria-hidden="true"></span></button>` : ""}
+                ${src ? `<button class="photo-detail-download" type="button" data-photo-download-one="${index}" aria-label="${index + 1}번째 사진 다운로드"><svg class="download-tray-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11"></path><path d="m7 10 5 5 5-5"></path><path d="M5 16v3h14v-3"></path></svg></button>` : ""}
               </div>`;
             }).join("")
             : `<div class="photo-detail-image"></div>`}
