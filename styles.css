@@ -2916,7 +2916,7 @@ h3 {
 }
 
 .photo-order-grid.compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .photo-order-card {
@@ -2994,8 +2994,8 @@ h3 {
 }
 
 [data-photo-manage-card] .photo-order-card.is-representative {
-  border-color: var(--border-default);
-  box-shadow: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgb(237 114 138 / 0.18);
 }
 
 [data-photo-manage-card] .photo-role-label {
