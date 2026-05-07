@@ -10989,7 +10989,15 @@ function recordLinkedDiaryActionsHtml() {
   );
 }
 
-function openMemoryEditBackConfirm(resolvedBack) {
+function duariCloneMemory(memory) {
+  try {
+    return JSON.parse(JSON.stringify(memory || {}));
+  } catch {
+    return { ...(memory || {}) };
+  }
+}
+
+function openMemoryEditBackConfirm(resolvedBack, memoryIndex = 0, originalMemory = null) {
   const modal = qs("#modal") || document.body;
   qs(".photo-delete-overlay", modal)?.remove();
   modal.insertAdjacentHTML("beforeend", `
@@ -11007,13 +11015,22 @@ function openMemoryEditBackConfirm(resolvedBack) {
   qs("[data-memory-edit-stay]", modal)?.addEventListener("click", () => qs(".photo-delete-overlay", modal)?.remove());
   qs("[data-memory-edit-leave]", modal)?.addEventListener("click", () => {
     qs(".photo-delete-overlay", modal)?.remove();
+    if (originalMemory && state.memories?.[memoryIndex]) {
+      state.memories[memoryIndex] = duariCloneMemory(originalMemory);
+      state.activeMemoryIndex = memoryIndex;
+      duariSavePersistentContent();
+      renderHome();
+      renderAlbum();
+      renderDiary();
+    }
     runFlowBack(resolvedBack);
   });
 }
 
-function openMemoryEditPageLatest(index, backAction = null) {
+function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapshot = null) {
   state.activeMemoryIndex = index;
   const memory = state.memories[index] || state.memories[0];
+  const editOriginalMemory = originalMemorySnapshot || duariCloneMemory(memory);
   const editTitle = limitMemoryEditTitle(memory.title);
   const resolvedBack = backAction || (() => openMemoryDetailLatestV3(index));
   const diarySelection = selectedLinkedDiaryCardsHtml("edit", index);
@@ -11041,7 +11058,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-back-memory]").addEventListener("click", () => openMemoryEditBackConfirm(resolvedBack));
+  qs("[data-back-memory]").addEventListener("click", () => openMemoryEditBackConfirm(resolvedBack, index, editOriginalMemory));
   const titleInput = qs(".memory-title-input");
   const titleCount = qs(".input-count");
   syncMemoryTitleLimit(titleInput, titleCount);
@@ -11053,7 +11070,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
     showToast("기록 수정 내용이 저장됐어요.");
   });
   qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
-  qs("[data-photo-order-page]")?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack)));
+  qs("[data-photo-order-page]")?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack, editOriginalMemory)));
   qs("[data-photo-add-choice]")?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: index }));
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(index));
   qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "edit", memoryIndex: index, backAction: resolvedBack }));
