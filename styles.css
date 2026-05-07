@@ -2487,9 +2487,16 @@ h3 {
   display: block;
   flex: 0 0 100%;
   min-height: 210px;
+  overflow: hidden;
   position: relative;
   scroll-snap-align: start;
   text-align: left;
+}
+
+.memory-photo-slide:has(> img)::before,
+.photo-detail-image:has(> img)::before,
+.photo-detail-image:has(> img)::after {
+  content: none;
 }
 
 .memory-photo-slide::before {
@@ -2912,11 +2919,26 @@ h3 {
   touch-action: none;
 }
 
+.photo-order-card > img,
+.memory-photo-slide > img,
+.photo-detail-image > img {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
 .photo-order-card::after {
   background: linear-gradient(180deg, transparent, rgb(52 39 43 / 0.28));
   content: "";
   inset: 0;
   position: absolute;
+}
+
+.photo-order-card:has(> img)::after {
+  background: linear-gradient(180deg, transparent, rgb(52 39 43 / 0.32));
 }
 
 .photo-order-card.is-dragging {
