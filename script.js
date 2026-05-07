@@ -12296,6 +12296,8 @@ function duariBindDiaryEditor(args = {}) {
   });
   qs("[data-duari-new-record]", sheet)?.addEventListener("click", () => {
     const draft = duariCurrentDiaryDraft(args);
+    memoryLinkedDiarySelection.create = null;
+    memoryLinkedDiarySelection.createDiary = null;
     openMemoryCreatePage(() => renderDiaryEditor({ heading: draft.heading, diary: draft, linkedMemoryIndex: draft.linkedMemoryIndex, backAction: draft.backAction }));
   });
   sheet.addEventListener("click", (event) => {
