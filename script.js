@@ -1363,6 +1363,12 @@ function openMemoryEditPageLatest(index) {
 }
 
 function openPhotoOrderManagerPageLatest(backAction = restorePreviousModal) {
+  const createMode = !!qs(".memory-create-page");
+  const memoryIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+  const photos = createMode
+    ? (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [])
+    : duariPhotoListForMemory(memoryIndex);
+  const photoCount = photos.length;
   openModal(`
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
@@ -1371,14 +1377,37 @@ function openPhotoOrderManagerPageLatest(backAction = restorePreviousModal) {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <div class="photo-order-grid">${memoryPhotoCardsLatest(7)}</div>
+        ${photoCount > 0
+          ? `<div class="photo-order-grid">${memoryPhotoCardsLatest(photoCount, photos)}</div>`
+          : `<section class="card"><p class="linked-record-empty">순서를 변경할 사진이 없어요.</p></section>`}
         <button class="primary-btn full" data-photo-order-back>완료</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
-  qsa("[data-photo-order-back]", sheet).forEach((button) => button.addEventListener("click", () => runWithoutModalHistory(backAction)));
+  const savePhotoOrder = () => {
+    const orderedPhotos = qsa("[data-photo-order-card]", sheet)
+      .map((card) => photos[Number(card.dataset.photoIndex)])
+      .filter(Boolean);
+    if (createMode) {
+      state.memoryCreateDraft = {
+        ...(state.memoryCreateDraft || {}),
+        photos: orderedPhotos,
+        photoCount: orderedPhotos.length
+      };
+      return;
+    }
+    const memory = state.memories?.[memoryIndex];
+    if (!memory) return;
+    memory.photos = orderedPhotos;
+    memory.photoCount = orderedPhotos.length;
+    duariSavePersistentContent();
+  };
+  qsa("[data-photo-order-back]", sheet).forEach((button) => button.addEventListener("click", () => {
+    savePhotoOrder();
+    runWithoutModalHistory(backAction);
+  }));
   bindPhotoRoleSelectionLatest(sheet);
   bindPhotoDragLatest(sheet);
 }
