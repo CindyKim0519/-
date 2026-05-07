@@ -1207,10 +1207,11 @@ function memoryPhotoCardsLatest(count = 7, photos = null, { showDelete = false }
 }
 
 function bindPhotoRoleSelectionLatest(root) {
-  qsa("[data-photo-order-card]", root).forEach((card) => {
+  const cards = qsa("[data-photo-order-card]", root).filter((card) => !card.closest("[data-photo-manage-card]"));
+  cards.forEach((card) => {
     card.addEventListener("click", () => {
       if (card.dataset.dragMoved === "true") return;
-      qsa("[data-photo-order-card]", root).forEach((item) => {
+      cards.forEach((item) => {
         item.classList.remove("is-representative", "is-thumbnail");
         const itemLabel = qs(".photo-role-label", item);
         if (itemLabel) itemLabel.textContent = "";
@@ -1473,6 +1474,7 @@ function bindPhotoDragLatest(root) {
 
 function bindPhotoDragLatest(root) {
   qsa(".photo-order-grid", root).forEach((grid) => {
+    if (grid.closest("[data-photo-manage-card]")) return;
     if (grid.dataset.placeholderDragBound === "true") return;
     grid.dataset.placeholderDragBound = "true";
 
@@ -10706,8 +10708,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(index));
   qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "edit", memoryIndex: index, backAction: resolvedBack }));
   bindLinkedDiaryCardsLatest(qs(".modal-sheet"), () => openMemoryEditPageLatest(index, resolvedBack));
-  bindPhotoRoleSelectionLatest(qs(".modal-sheet"));
-  bindPhotoDragLatest(qs(".modal-sheet"));
+  bindPhotoManageDeleteButtons(qs(".modal-sheet"), { memoryIndex: index });
   bindActions(qs(".modal-sheet"));
 }
 
@@ -11055,6 +11056,7 @@ function openMemoryCreatePage(backAction = null) {
     openLinkedDiarySelectPage({ mode: "create", backAction });
   });
   bindMemoryCreateLinkedDiaryCard(qs(".modal-sheet"), backAction, saveMemoryCreateDraft);
+  bindPhotoManageDeleteButtons(qs(".modal-sheet"), { createMode: true });
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
@@ -13118,8 +13120,6 @@ function duariRefreshPhotoManageCard(count, options = {}) {
     openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(memoryIndex));
   });
   qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
-  bindPhotoRoleSelectionLatest?.(card);
-  bindPhotoDragLatest?.(card);
   bindPhotoManageDeleteButtons(card, createMode ? { createMode: true } : { memoryIndex });
 }
 

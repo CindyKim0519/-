@@ -2974,6 +2974,20 @@ h3 {
   box-shadow: 0 0 0 3px rgb(237 114 138 / 0.18);
 }
 
+[data-photo-manage-card] .photo-order-card {
+  cursor: default;
+  touch-action: auto;
+}
+
+[data-photo-manage-card] .photo-order-card.is-representative {
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+[data-photo-manage-card] .photo-role-label {
+  display: none;
+}
+
 .photo-order-card.is-thumbnail {
   border-color: var(--color-mint-100);
   box-shadow: 0 0 0 3px rgb(135 194 174 / 0.18);
