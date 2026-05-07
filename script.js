@@ -70,6 +70,7 @@ const state = {
 };
 
 const DUARI_CONTENT_STORAGE_PREFIX = "duariContent:";
+const DUARI_ACTIVE_LOGIN_STORAGE_KEY = "duariActiveLogin";
 const duariBundledMemorySignatures = new Set([
   "성수에서 보낸 오후|2026.04.26",
   "비 오는 날의 통화|2026.04.21",
@@ -90,6 +91,26 @@ function duariContentStorageKey(email = state.currentLoginEmail) {
   const raw = email || "local";
   const key = typeof normalizeSignupEmail === "function" ? (normalizeSignupEmail(raw) || "local") : String(raw || "local").trim().toLowerCase();
   return `${DUARI_CONTENT_STORAGE_PREFIX}${key}`;
+}
+
+function duariRememberCurrentLogin() {
+  const key = typeof normalizeSignupEmail === "function"
+    ? normalizeSignupEmail(state.currentLoginEmail || "")
+    : String(state.currentLoginEmail || "").trim().toLowerCase();
+  if (!key) return;
+  try {
+    localStorage.setItem(DUARI_ACTIVE_LOGIN_STORAGE_KEY, key);
+  } catch {
+    // Keep the prototype usable when browser storage is unavailable.
+  }
+}
+
+function duariForgetCurrentLogin() {
+  try {
+    localStorage.removeItem(DUARI_ACTIVE_LOGIN_STORAGE_KEY);
+  } catch {
+    // Nothing else to do in the prototype fallback.
+  }
 }
 
 function duariIsBundledSampleMemory(memory = {}) {
@@ -3993,6 +4014,7 @@ function openAccountModal() {
 
 function logoutToLogin() {
   duariSavePersistentContent();
+  duariForgetCurrentLogin();
   closeModal();
   state.slide = 0;
   state.currentLoginEmail = "";
@@ -4006,6 +4028,7 @@ function logoutToLogin() {
 function deleteCurrentLoginAccount() {
   const currentKey = normalizeSignupEmail(state.currentLoginEmail || "");
   if (!currentKey) return;
+  duariForgetCurrentLogin();
   duariDeletePersistentContentForCurrentUser();
   state.registeredAccounts = Array.isArray(state.registeredAccounts)
     ? state.registeredAccounts.filter((account) => account.email !== currentKey)
@@ -12917,6 +12940,37 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
   });
 }
 
+function duariRestoreLoggedInSession() {
+  let activeLogin = "";
+  try {
+    activeLogin = localStorage.getItem(DUARI_ACTIVE_LOGIN_STORAGE_KEY) || "";
+  } catch {
+    activeLogin = "";
+  }
+  const account = activeLogin ? getSignupAccount(activeLogin) : null;
+  if (!account) {
+    if (activeLogin) duariForgetCurrentLogin();
+    return;
+  }
+
+  state.currentLoginEmail = account.email;
+  if (!account.setupComplete) {
+    openFirstSetupPage();
+    return;
+  }
+
+  applyCurrentAccountRelation();
+  duariLoadPersistentContent();
+  if (typeof state.connected !== "boolean") state.connected = true;
+  qs("#onboarding")?.classList.add("is-hidden");
+  qs("#onboarding")?.classList.remove("is-visible");
+  qs("#app")?.classList.remove("is-hidden");
+  closeModal();
+  setTab("home");
+}
+
+window.setTimeout(duariRestoreLoggedInSession, 0);
+
 function duariRefreshPhotoManageCard(count) {
   const card = qs("[data-photo-manage-card]");
   if (!card) return;
@@ -13158,6 +13212,7 @@ function markCurrentAccountSetupComplete() {
   account.setupComplete = true;
   account.currentRelation = { ...currentRelationInfo() };
   account.connected = !!state.connected;
+  duariRememberCurrentLogin();
   duariInstallContentPersistenceHooks();
   duariSavePersistentContent();
   try {
@@ -13388,6 +13443,7 @@ function returnToEntryScreen(message = "") {
 function completeEmailLogin() {
   const account = getSignupAccount(state.currentLoginEmail);
   if (account && !account.setupComplete) {
+    duariRememberCurrentLogin();
     openFirstSetupPage();
     showToast("처음 로그인이라 첫 설정을 진행해 주세요.");
     return;
@@ -13402,6 +13458,7 @@ function completeEmailLogin() {
     return;
   }
   closeModal();
+  duariRememberCurrentLogin();
   if (typeof state.connected !== "boolean") state.connected = true;
   qs("#onboarding")?.classList.add("is-hidden");
   qs("#app")?.classList.remove("is-hidden");
