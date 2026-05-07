@@ -13186,6 +13186,9 @@ function duariRefreshPhotoManageCard(count, options = {}) {
   const photos = createMode
     ? (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [])
     : duariPhotoListForMemory(memoryIndex);
+  const representativeIndex = createMode
+    ? (Number(state.memoryCreateDraft?.representativePhotoIndex) || 0)
+    : (Number(state.memories?.[memoryIndex]?.representativePhotoIndex) || 0);
   const openAddChoice = () => openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
   if (safeCount <= 0) {
     card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
