@@ -14845,7 +14845,7 @@ function openPhotoDetail(trigger = null) {
   const photoCount = duariPhotoCountForMemory(memoryIndex);
   const photoIndex = Math.min(Math.max(Number.isFinite(requestedPhotoIndex) ? requestedPhotoIndex : Number(state.activePhotoIndex) || 0, 0), photoCount - 1);
   const memory = state.memories[memoryIndex] || state.memories[0];
-  const photoSrc = duariPhotoSource(duariPhotoListForMemory(memoryIndex)[photoIndex]);
+  const photos = duariPhotoListForMemory(memoryIndex);
   state.activeMemoryIndex = memoryIndex;
   state.activePhotoIndex = photoIndex;
 
@@ -14857,12 +14857,14 @@ function openPhotoDetail(trigger = null) {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        <section class="photo-detail-viewer" aria-label="${memory.title} 사진 ${photoIndex + 1}">
-          <button class="photo-detail-chevron" type="button" data-photo-prev ${photoIndex <= 0 ? "disabled" : ""} aria-label="이전 사진">‹</button>
-          <div class="photo-detail-image">${photoSrc ? `<img src="${signupAttr(photoSrc)}" alt="" />` : ""}</div>
-          <button class="photo-detail-chevron" type="button" data-photo-next ${photoIndex >= photoCount - 1 ? "disabled" : ""} aria-label="다음 사진">›</button>
+        <section class="photo-detail-list" aria-label="${memory.title} 사진 목록">
+          ${photos.length
+            ? photos.map((photo, index) => {
+              const src = duariPhotoSource(photo);
+              return `<div class="photo-detail-image" data-photo-detail-item="${index}">${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}</div>`;
+            }).join("")
+            : `<div class="photo-detail-image"></div>`}
         </section>
-        <p class="photo-detail-count">${photoIndex + 1} / ${photoCount}</p>
         <button class="primary-btn full" type="button" data-action="download-photo">다운로드</button>
       </div>
     </div>
@@ -14878,8 +14880,11 @@ function openPhotoDetail(trigger = null) {
     closeModal();
   };
   qs("[data-photo-detail-back]")?.addEventListener("click", goBack);
-  qs("[data-photo-prev]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex - 1), photoBack: backTarget } }));
-  qs("[data-photo-next]")?.addEventListener("click", () => openPhotoDetail({ dataset: { memoryIndex: String(memoryIndex), photoIndex: String(photoIndex + 1), photoBack: backTarget } }));
+  qsa("[data-photo-detail-item]", qs("#modal")).forEach((item) => {
+    item.addEventListener("click", () => {
+      state.activePhotoIndex = Number(item.dataset.photoDetailItem) || 0;
+    });
+  });
   bindActions(qs("#modal"));
 }
 
