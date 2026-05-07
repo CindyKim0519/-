@@ -14242,7 +14242,7 @@ function duariLinkedDiaryCardHtml(diary, index, options = {}) {
               </button>
               <span class="linked-record-dropdown linked-diary-dropdown" data-linked-diary-dropdown hidden>
                 <button type="button" ${detailAction}>상세 보기</button>
-                ${canEdit ? `<button type="button" ${editAction}>수정</button><button type="button" ${unlinkAction}>연결 해제</button>` : ""}
+                ${canEdit ? `<button type="button" ${editAction}>수정</button><button type="button" ${unlinkAction}>삭제</button>` : ""}
               </span>
             </span>
           ` : ""}
@@ -14307,7 +14307,7 @@ function duariLinkedDiaryMenuHtml(index, diary = {}) {
       </button>
       <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
         <button type="button" data-linked-diary-menu-detail="${index}">상세 보기</button>
-        ${canEdit ? `<button type="button" data-linked-diary-menu-edit="${index}">수정</button><button type="button" data-linked-diary-menu-unlink="${index}">연결 해제</button>` : ""}
+        ${canEdit ? `<button type="button" data-linked-diary-menu-edit="${index}">수정</button><button type="button" data-linked-diary-menu-unlink="${index}">삭제</button>` : ""}
       </span>
     </span>
   `;
@@ -14354,6 +14354,57 @@ openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction =
     if (nextSheet) duariEnsureLinkedDiaryMenus(nextSheet);
   }, 0);
 };
+
+if (!window.__duariLinkedDiaryMenuGlobalGuard) {
+  window.__duariLinkedDiaryMenuGlobalGuard = true;
+  window.addEventListener("click", (event) => {
+    const menuButton = event.target.closest?.("[data-linked-diary-menu]");
+    const detailButton = event.target.closest?.("[data-linked-diary-menu-detail]");
+    const editButton = event.target.closest?.("[data-linked-diary-menu-edit]");
+    const unlinkButton = event.target.closest?.("[data-linked-diary-menu-unlink]");
+    const actionButton = menuButton || detailButton || editButton || unlinkButton;
+    if (!actionButton) return;
+
+    const page = actionButton.closest(".modal-sheet") || qs(".modal-sheet") || document;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    if (menuButton) {
+      const menu = menuButton.closest(".linked-diary-menu-wrap")?.querySelector("[data-linked-diary-dropdown]");
+      const willOpen = !!menu?.hidden;
+      qsa("[data-linked-diary-dropdown]", page).forEach((item) => { item.hidden = true; });
+      qsa("[data-linked-diary-menu]", page).forEach((item) => item.classList.remove("active"));
+      if (menu && willOpen) {
+        menu.hidden = false;
+        menuButton.classList.add("active");
+      }
+      return;
+    }
+
+    qsa("[data-linked-diary-dropdown]", page).forEach((item) => { item.hidden = true; });
+    const memoryIndex = typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0;
+    const backToMemoryEdit = () => openMemoryEditPageLatest(memoryIndex, () => openMemoryDetailLatestV3(memoryIndex));
+    const backToMemoryDetail = () => openMemoryDetailLatestV3(memoryIndex);
+
+    if (detailButton) {
+      const index = Number(detailButton.dataset.linkedDiaryMenuDetail);
+      openLinkedDiaryDetailLatest(index, qs(".memory-edit-page") ? backToMemoryEdit : backToMemoryDetail);
+      return;
+    }
+
+    if (editButton) {
+      const index = Number(editButton.dataset.linkedDiaryMenuEdit);
+      const diary = linkedDiariesLatest()[index] || state.diaries?.[index];
+      if (diary) openLinkedDiaryEditLatest(normalizeDiaryForDetail(diary), backToMemoryEdit);
+      return;
+    }
+
+    if (unlinkButton) {
+      openLinkedDiaryUnlinkConfirm(Number(unlinkButton.dataset.linkedDiaryMenuUnlink), qs(".memory-edit-page") ? backToMemoryEdit : backToMemoryDetail);
+    }
+  }, true);
+}
 
 const duariRenderDiaryWithDateBase = renderDiary;
 function duariDiaryVisibleCount() {
