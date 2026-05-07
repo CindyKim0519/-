@@ -14529,6 +14529,53 @@ if (!window.__duariLinkedDiaryMenuGlobalGuard) {
   }, true);
 }
 
+// Last-resort guard for record edit: the linked-diary kebab must only open its dropdown.
+// Older card click handlers exist above, so this capture listener stops them before they
+// can route the click to a diary detail modal.
+if (!window.__duariMemoryEditLinkedDiaryDropdownOnly) {
+  window.__duariMemoryEditLinkedDiaryDropdownOnly = true;
+  window.addEventListener("click", (event) => {
+    const memoryEditPage = event.target.closest?.(".memory-edit-page");
+    if (!memoryEditPage) return;
+
+    const menuButton = event.target.closest?.("[data-linked-diary-menu]");
+    if (!menuButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const menuWrap = menuButton.closest(".linked-diary-menu-wrap");
+    const dropdown = menuWrap?.querySelector("[data-linked-diary-dropdown]");
+    const willOpen = !!dropdown?.hidden;
+    qsa("[data-linked-diary-dropdown]", memoryEditPage).forEach((item) => { item.hidden = true; });
+    qsa("[data-linked-diary-menu]", memoryEditPage).forEach((item) => item.classList.remove("active"));
+    if (dropdown && willOpen) {
+      dropdown.hidden = false;
+      menuButton.classList.add("active");
+    }
+  }, true);
+}
+
+bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
+  if (!root) return;
+  duariEnsureLinkedDiaryMenus(root);
+  duariBindLinkedDiaryDropdowns(root);
+  qsa("[data-linked-diary-index]", root).forEach((card) => {
+    if (card.dataset.duariLinkedDiaryCardBound === "true") return;
+    card.dataset.duariLinkedDiaryCardBound = "true";
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        return;
+      }
+      openLinkedDiaryDetailLatest(Number(card.dataset.linkedDiaryIndex), backAction);
+    });
+  });
+};
+
 const duariRenderDiaryWithDateBase = renderDiary;
 function duariDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};
