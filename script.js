@@ -1191,13 +1191,14 @@ function bindLinkedDiaryCardsLatest(root, backAction = closeModal) {
   });
 }
 
-function memoryPhotoCardsLatest(count = 7, photos = null) {
+function memoryPhotoCardsLatest(count = 7, photos = null, { showDelete = false } = {}) {
   const photoList = Array.isArray(photos)
     ? photos
     : duariPhotoListForMemory(typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0);
   return Array.from({ length: count }, (_, index) => `
     <div class="photo-order-card ${index === 0 ? "is-representative" : ""}" role="button" tabindex="0" data-photo-order-card data-photo-index="${index}">
       ${duariPhotoSource(photoList[index]) ? `<img src="${signupAttr(duariPhotoSource(photoList[index]))}" alt="" />` : ""}
+      ${showDelete ? `<button class="photo-delete-chip" type="button" data-photo-manage-delete="${index}" aria-label="사진 삭제">×</button>` : ""}
       <span class="photo-order-number">${index + 1}</span>
       <span class="photo-identity">사진 ${index + 1}</span>
       <span class="photo-role-label">${index === 0 ? "대표" : ""}</span>
@@ -10097,6 +10098,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
   bindLinkedDiaryCardsLatest(qs(".modal-sheet"), () => openMemoryEditPageLatest(index, resolvedBack));
   bindPhotoRoleSelectionLatest(qs(".modal-sheet"));
   bindPhotoDragLatest(qs(".modal-sheet"));
+  bindPhotoManageDeleteButtons(qs(".modal-sheet"), { memoryIndex: index });
   bindActions(qs(".modal-sheet"));
 }
 
@@ -10786,6 +10788,7 @@ function openMemoryCreatePage(backAction = null) {
     openLinkedDiarySelectPage({ mode: "create", backAction });
   });
   bindMemoryCreateLinkedDiaryCard(qs(".modal-sheet"), backAction, saveMemoryCreateDraft);
+  bindPhotoManageDeleteButtons(qs(".modal-sheet"), { createMode: true });
   qs("[data-save-memory-create]").addEventListener("click", () => {
     const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
@@ -10922,7 +10925,7 @@ function recordPhotoManageHtml(photoCount = 0, { title = "사진 관리", photos
   const photoList = Array.isArray(photos) ? photos : [];
   const safeCount = Math.max(0, Number(photoCount) || photoList.length || 0);
   const photoBody = safeCount > 0
-    ? `<div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photoList)}</div>${recordPhotoActionsHtml()}`
+    ? `<div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photoList, { showDelete: true })}</div>${recordPhotoActionsHtml()}`
     : `<div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
   return `<section class="card" data-photo-manage-card><div class="between"><h3>${title}</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div>${photoBody}</section>`;
 }
@@ -13102,7 +13105,7 @@ function duariRefreshPhotoManageCard(count, options = {}) {
     qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
     return;
   }
-  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photos)}</div>${recordPhotoActionsHtml()}`;
+  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photos, { showDelete: true })}</div>${recordPhotoActionsHtml()}`;
   qs("[data-photo-order-page]", card)?.addEventListener("click", () => {
     if (createMode) {
       state.memoryCreateDraft = {
@@ -13117,6 +13120,82 @@ function duariRefreshPhotoManageCard(count, options = {}) {
   qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
   bindPhotoRoleSelectionLatest?.(card);
   bindPhotoDragLatest?.(card);
+  bindPhotoManageDeleteButtons(card, createMode ? { createMode: true } : { memoryIndex });
+}
+
+function duariPhotoIsOwnedByMe(memoryIndex, photoIndex, createMode = false) {
+  const photos = createMode
+    ? (Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [])
+    : duariPhotoListForMemory(memoryIndex);
+  const photo = photos[photoIndex];
+  if (photo && typeof photo === "object" && photo.owner) return photo.owner !== "상대";
+  return createMode ? true : duariPhotoIsMine(memoryIndex, photoIndex);
+}
+
+function removePhotoFromManageState({ createMode = false, memoryIndex = 0, photoIndex = 0 } = {}) {
+  if (createMode) {
+    const draft = state.memoryCreateDraft || {};
+    const photos = Array.isArray(draft.photos) ? [...draft.photos] : [];
+    if (photos.length > photoIndex) photos.splice(photoIndex, 1);
+    const currentCount = duariCurrentPhotoManageCount(draft.photoCount || photos.length);
+    state.memoryCreateDraft = {
+      ...draft,
+      photos,
+      photoCount: Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length)))
+    };
+    duariRefreshPhotoManageCard(state.memoryCreateDraft.photoCount, { createMode: true });
+    return;
+  }
+
+  const memory = state.memories?.[memoryIndex];
+  if (!memory) return;
+  const photos = Array.isArray(memory.photos) ? [...memory.photos] : [];
+  if (photos.length > photoIndex) photos.splice(photoIndex, 1);
+  const currentCount = duariPhotoCountForMemory(memoryIndex);
+  memory.photos = photos;
+  memory.photoCount = Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length)));
+  duariSavePersistentContent();
+  duariRefreshPhotoManageCard(memory.photoCount, { memoryIndex });
+  renderAlbum();
+  renderHome();
+}
+
+function openPhotoManageDeleteConfirm(options = {}) {
+  const createMode = options.createMode === true;
+  const memoryIndex = Number(options.memoryIndex) || 0;
+  const photoIndex = Number(options.photoIndex) || 0;
+  const isMine = duariPhotoIsOwnedByMe(memoryIndex, photoIndex, createMode);
+  const modal = qs("#modal") || document.body;
+  qs(".photo-delete-overlay", modal)?.remove();
+  modal.insertAdjacentHTML("beforeend", `
+    <div class="photo-delete-overlay" role="dialog" aria-modal="true">
+      <section class="photo-delete-sheet">
+        <h3>사진을 삭제할까요?</h3>
+        <p>${isMine ? "삭제하면 양쪽에서 사라지고 복구할 수 없어요." : "상대가 올린 사진은 삭제할 수 없어요. 내 화면에서 숨기기만 가능해요."}</p>
+        <div class="inline-action-pair">
+          <button class="ghost-btn" type="button" data-photo-manage-delete-cancel>${isMine ? "취소" : "확인"}</button>
+          ${isMine ? `<button class="primary-btn" type="button" data-photo-manage-delete-confirm>삭제</button>` : ""}
+        </div>
+      </section>
+    </div>
+  `);
+  qs("[data-photo-manage-delete-cancel]", modal)?.addEventListener("click", () => qs(".photo-delete-overlay", modal)?.remove());
+  qs("[data-photo-manage-delete-confirm]", modal)?.addEventListener("click", () => {
+    qs(".photo-delete-overlay", modal)?.remove();
+    removePhotoFromManageState({ createMode, memoryIndex, photoIndex });
+    showToast("사진을 삭제했어요.");
+  });
+}
+
+function bindPhotoManageDeleteButtons(root, options = {}) {
+  qsa("[data-photo-manage-delete]", root).forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const photoIndex = Number(button.dataset.photoManageDelete) || 0;
+      openPhotoManageDeleteConfirm({ ...options, photoIndex });
+    });
+  });
 }
 
 function readSelectedPhotoFiles(input) {
