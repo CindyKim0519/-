@@ -10897,8 +10897,8 @@ function renderLinkedRecordCards(linkedTitle, linkedMemoryIndex = null, options 
 
 function recordPhotoActionsHtml() {
   return actionPairHtml(
-    `<button class="ghost-btn" data-photo-order-page>사진 순서 변경</button>`,
-    `<button class="ghost-btn" data-photo-add-choice>사진 추가</button>`
+    `<button class="ghost-btn" data-photo-add-choice>사진 추가</button>`,
+    `<button class="ghost-btn" data-photo-order-page>사진 순서 변경</button>`
   );
 }
 
@@ -10908,6 +10908,12 @@ function recordPhotoManageHtml(photoCount = 0, { title = "사진 관리" } = {})
     ? `<div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount)}</div>${recordPhotoActionsHtml()}`
     : `<div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
   return `<section class="card" data-photo-manage-card><div class="between"><h3>${title}</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div>${photoBody}</section>`;
+}
+
+function duariCurrentPhotoManageCount(fallback = 0) {
+  const counterText = qs("[data-photo-manage-count]")?.textContent || "";
+  const count = Number(counterText.match(/\d+/)?.[0]);
+  return Number.isFinite(count) ? count : Math.max(0, Number(fallback) || 0);
 }
 
 function recordLinkedDiaryActionsHtml() {
@@ -10959,8 +10965,8 @@ function openMemoryEditPageLatest(index, backAction = null) {
     showToast("기록 수정 내용이 저장됐어요.");
   });
   qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
-  qs("[data-photo-order-page]").addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack)));
-  qs("[data-photo-add-choice]").addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: index }));
+  qs("[data-photo-order-page]")?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack)));
+  qs("[data-photo-add-choice]")?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: index }));
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(index));
   qs("[data-linked-diary-select]").addEventListener("click", () => openLinkedDiarySelectPage({ mode: "edit", memoryIndex: index, backAction: resolvedBack }));
   bindLinkedDiaryCardsLatest(qs(".modal-sheet"), () => openMemoryEditPageLatest(index, resolvedBack));
@@ -10972,6 +10978,7 @@ function openMemoryEditPageLatest(index, backAction = null) {
 function openMemoryCreatePage(backAction = null) {
   const draft = state.memoryCreateDraft || {};
   const diarySelection = selectedLinkedDiaryCardsHtml("create");
+  const photoCount = Math.max(0, Number(draft.photoCount) || 0);
   openModal(`
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page memory-create-page">
       <header class="notification-header">
@@ -10985,7 +10992,7 @@ function openMemoryCreatePage(backAction = null) {
         <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
         <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>기록 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
-        ${recordPhotoManageHtml(0)}
+        ${recordPhotoManageHtml(photoCount)}
         <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <button class="primary-btn full" data-save-memory-create>저장</button>
       </div>
@@ -11006,15 +11013,16 @@ function openMemoryCreatePage(backAction = null) {
       place: qs("#memoryPlace")?.value.trim() || "",
       type: qs("#memoryType")?.value || "",
       scope: qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || (state.connected ? "우리 둘이 보기" : "나만 보기"),
+      photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0),
     };
   };
-  qs("[data-photo-order-page]").addEventListener("click", () => {
+  qs("[data-photo-order-page]")?.addEventListener("click", () => {
     saveMemoryCreateDraft();
     openPhotoOrderManagerPageLatest(() => openMemoryCreatePage(backAction));
   });
-  qs("[data-photo-add-choice]").addEventListener("click", () => {
+  qs("[data-photo-add-choice]")?.addEventListener("click", () => {
     saveMemoryCreateDraft();
-    openPhotoAddChoiceModal();
+    openPhotoAddChoiceModal({ createMode: true });
   });
   qs("[data-linked-diary-add]").addEventListener("click", () => {
     saveMemoryCreateDraft();
@@ -11031,7 +11039,18 @@ function openMemoryCreatePage(backAction = null) {
     const place = qs("#memoryPlace")?.value.trim() || "";
     const type = qs("#memoryType")?.value || "일상";
     const scope = qs("[data-memory-scope] .chip-btn.active")?.textContent.trim() || "나만 보기";
-    const newMemory = { title, date: dateValue.replaceAll("-", "."), place, type, note: "", scope, feelings: [], reaction: "", author: "나" };
+    const newMemory = {
+      title,
+      date: dateValue.replaceAll("-", "."),
+      place,
+      type,
+      note: "",
+      scope,
+      feelings: [],
+      reaction: "",
+      author: "나",
+      photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0)
+    };
     state.memories.unshift(newMemory);
     duariAttachCreateDiaryToMemory(newMemory);
     memoryLinkedDiarySelection.create = null;
@@ -13046,25 +13065,39 @@ linkedDiariesLatest = function linkedDiariesLatest() {
 
 window.linkedDiariesLatest = linkedDiariesLatest;
 
-function duariRefreshPhotoManageCard(count) {
+function duariRefreshPhotoManageCard(count, options = {}) {
   const card = qs("[data-photo-manage-card]");
   if (!card) return;
-  const grid = qs("[data-photo-manage-grid]", card);
-  const counter = qs("[data-photo-manage-count]", card);
-  if (counter) counter.textContent = `${count}장`;
-  if (count <= 0) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  const createMode = options.createMode === true || !!qs(".memory-create-page");
+  const memoryIndex = typeof options.memoryIndex === "number"
+    ? options.memoryIndex
+    : (typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0);
+  const openAddChoice = () => openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
+  if (safeCount <= 0) {
     card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
-    qs("[data-photo-add-choice]", card)?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0 }));
+    qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
     return;
   }
-  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${count}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(count)}</div>${recordPhotoActionsHtml()}`;
-  qs("[data-photo-order-page]", card)?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0)));
-  qs("[data-photo-add-choice]", card)?.addEventListener("click", () => openPhotoAddChoiceModal({ memoryIndex: typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0 }));
+  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount)}</div>${recordPhotoActionsHtml()}`;
+  qs("[data-photo-order-page]", card)?.addEventListener("click", () => {
+    if (createMode) {
+      state.memoryCreateDraft = {
+        ...(state.memoryCreateDraft || {}),
+        photoCount: duariCurrentPhotoManageCount(safeCount)
+      };
+      openPhotoOrderManagerPageLatest(() => openMemoryCreatePage());
+      return;
+    }
+    openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(memoryIndex));
+  });
+  qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
   bindPhotoRoleSelectionLatest?.(card);
   bindPhotoDragLatest?.(card);
 }
 
 function openPhotoAddChoiceModal(options = {}) {
+  const createMode = options.createMode === true || (!!qs(".memory-create-page") && typeof options.memoryIndex !== "number");
   const memoryIndex = typeof options.memoryIndex === "number"
     ? options.memoryIndex
     : (typeof state.activeMemoryIndex === "number" ? state.activeMemoryIndex : 0);
@@ -13095,18 +13128,25 @@ function openPhotoAddChoiceModal(options = {}) {
     const selectedCount = input?.files?.length || 0;
     if (!selectedCount) return;
     const memory = state.memories?.[memoryIndex];
-    const currentCount = duariPhotoCountForMemory(memoryIndex);
+    const currentCount = createMode
+      ? duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0)
+      : duariPhotoCountForMemory(memoryIndex);
     const nextCount = Math.min(30, currentCount + selectedCount);
     const addedCount = nextCount - currentCount;
     if (addedCount <= 0) {
       showToast("한 기록에는 사진을 최대 30장까지 추가할 수 있어요.");
       return;
     }
-    if (memory) {
+    if (createMode) {
+      state.memoryCreateDraft = {
+        ...(state.memoryCreateDraft || {}),
+        photoCount: nextCount
+      };
+    } else if (memory) {
       memory.photoCount = nextCount;
       duariSavePersistentContent();
     }
-    duariRefreshPhotoManageCard(nextCount);
+    duariRefreshPhotoManageCard(nextCount, createMode ? { createMode: true } : { memoryIndex });
     overlay.remove();
     showToast(`사진 ${addedCount}장을 추가했어요.`);
   };
@@ -14800,7 +14840,8 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       scope,
       feelings: [],
       reaction: "",
-      author: "나"
+      author: "나",
+      photoCount: duariCurrentPhotoManageCount(state.memoryCreateDraft?.photoCount || 0)
     };
     state.memories.unshift(newMemory);
     state.activeMemoryIndex = 0;
