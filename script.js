@@ -14385,12 +14385,34 @@ openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction =
 
 if (!window.__duariLinkedDiaryMenuGlobalGuard) {
   window.__duariLinkedDiaryMenuGlobalGuard = true;
+  const toggleLinkedDiaryDropdown = (target) => {
+    const tools = target.closest?.(".memory-edit-page .linked-diary-right-tools, .memory-edit-page .linked-diary-menu-wrap");
+    const menuButton = target.closest?.("[data-linked-diary-menu]") || tools?.querySelector?.("[data-linked-diary-menu]");
+    if (!menuButton) return false;
+    const page = menuButton.closest(".modal-sheet") || qs(".modal-sheet") || document;
+    const menu = menuButton.closest(".linked-diary-menu-wrap")?.querySelector("[data-linked-diary-dropdown]");
+    const willOpen = !!menu?.hidden;
+    qsa("[data-linked-diary-dropdown]", page).forEach((item) => { item.hidden = true; });
+    qsa("[data-linked-diary-menu]", page).forEach((item) => item.classList.remove("active"));
+    if (menu && willOpen) {
+      menu.hidden = false;
+      menuButton.classList.add("active");
+    }
+    return true;
+  };
   window.addEventListener("pointerdown", (event) => {
-    if (!event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap")) return;
+    if (!event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .memory-edit-page .linked-diary-right-tools")) return;
     event.stopPropagation();
     event.stopImmediatePropagation();
   }, true);
   window.addEventListener("click", (event) => {
+    if (event.target.closest?.(".memory-edit-page .linked-diary-right-tools") && !event.target.closest?.("[data-linked-diary-dropdown]")) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      toggleLinkedDiaryDropdown(event.target);
+      return;
+    }
     const menuButton = event.target.closest?.("[data-linked-diary-menu]");
     const detailButton = event.target.closest?.("[data-linked-diary-menu-detail]");
     const editButton = event.target.closest?.("[data-linked-diary-menu-edit]");
