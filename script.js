@@ -14654,7 +14654,6 @@ function renderAlbumPhotoGroups(memories = state.memories) {
                 ${photos.map((photo, photoIndex) => `
                   <button class="album-photo-thumb has-photo" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${photoIndex}" aria-label="${memory.title} ${photoIndex + 1}번째 사진">
                     <img src="${signupAttr(duariPhotoSource(photo))}" alt="" />
-                    <span>${photoIndex + 1}</span>
                   </button>
                 `).join("")}
               </div>
