@@ -12298,7 +12298,10 @@ function duariBindDiaryEditor(args = {}) {
     const draft = duariCurrentDiaryDraft(args);
     memoryLinkedDiarySelection.create = null;
     memoryLinkedDiarySelection.createDiary = null;
-    openMemoryCreatePage(() => renderDiaryEditor({ heading: draft.heading, diary: draft, linkedMemoryIndex: draft.linkedMemoryIndex, backAction: draft.backAction }));
+    openMemoryCreatePage(
+      () => renderDiaryEditor({ heading: draft.heading, diary: draft, linkedMemoryIndex: draft.linkedMemoryIndex, backAction: draft.backAction }),
+      { hideLinkedDiaries: true }
+    );
   });
   sheet.addEventListener("click", (event) => {
     const menuButton = event.target.closest("[data-linked-record-menu]");
@@ -14760,3 +14763,9 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     showToast("AI 결과를 답변 본문에 저장했어요.");
   });
 }
+const duariOpenMemoryCreatePageWithoutLinkedDiaryBase = openMemoryCreatePage;
+openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options = {}) {
+  duariOpenMemoryCreatePageWithoutLinkedDiaryBase(backAction);
+  if (options.hideLinkedDiaries !== true) return;
+  qs(".memory-create-page .linked-diary-section")?.remove();
+};
