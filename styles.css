@@ -2136,7 +2136,7 @@ h3 {
 
 .photo-delete-sheet h3 {
   margin: 0;
-  text-align: center;
+  text-align: left;
 }
 
 .photo-delete-sheet p {
@@ -2144,7 +2144,7 @@ h3 {
   font-size: var(--font-size-md);
   line-height: var(--line-height-md);
   margin: 0;
-  text-align: center;
+  text-align: left;
 }
 
 .photo-delete-sheet .primary-btn:disabled {
