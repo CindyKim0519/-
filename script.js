@@ -15439,7 +15439,7 @@ function renderAlbum() {
     <div class="section-stack">
       <div class="album-record-toolbar">
         <div class="between">
-          <span class="meta">${state.memories.length}개 기록</span>
+          <span class="meta">총 ${state.memories.length}개 기록</span>
           <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
         </div>
       </div>
