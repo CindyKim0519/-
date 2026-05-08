@@ -4053,3 +4053,9 @@ h3 {
   box-shadow: none;
   padding: 0;
 }
+
+.memory-detail-page .linked-diary-card,
+.memory-edit-page .linked-diary-card {
+  border: 1px solid var(--border-default);
+  box-shadow: none;
+}
