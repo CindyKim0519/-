@@ -1965,7 +1965,7 @@ function renderMy() {
         ["문의하기", "문의 접수와 문의내역", "support-contact"],
         ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
-      ].map(([title, body, action]) => `<button class="card" data-action="${action}" style="text-align:left"><div class="between"><strong>${title}</strong><span class="menu-chevron" aria-hidden="true">›</span></div><p>${body}</p></button>`).join("")}</div>
+      ].map(([title, body, action]) => `<button class="my-menu-item" data-action="${action}" type="button"><div class="between"><strong>${title}</strong><span class="menu-chevron" aria-hidden="true">›</span></div><p>${body}</p></button>`).join("")}</div>
       <p class="tiny-note">Duari v0.1.0</p>
     </div>
   `;
