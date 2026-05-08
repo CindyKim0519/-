@@ -16816,3 +16816,33 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     state.questionHistory = [];
   }
 })();
+
+(function installDiaryDetailLinkedRecordRecovery() {
+  const baseNormalizeDiaryForDetail = normalizeDiaryForDetail;
+
+  function recoverLinkedRecordTitle(diary = {}, detail = {}) {
+    const existing = String(detail.linked || diary.linked || "").trim();
+    if (existing && existing !== "관련 기록 없음" && existing !== "기록 추가 중") return existing;
+
+    const linkedMemoryTitle = String(diary.linkedMemoryTitle || "").trim();
+    if (linkedMemoryTitle) return linkedMemoryTitle;
+
+    const linkedMemoryIndex = typeof diary.linkedMemoryIndex === "number" ? diary.linkedMemoryIndex : null;
+    const memory = typeof linkedMemoryIndex === "number" ? state.memories?.[linkedMemoryIndex] : null;
+    return memory?.title || existing || "관련 기록 없음";
+  }
+
+  normalizeDiaryForDetail = function normalizeDiaryForDetailWithRecoveredLinkedRecord(diary, fallbackIndex = 0) {
+    const detail = baseNormalizeDiaryForDetail(diary, fallbackIndex);
+    const linked = recoverLinkedRecordTitle(diary || {}, detail);
+    const linkedMemoryIndex = diaryHasLinkedRecord?.(linked)
+      ? recordIndexByTitle(linked, typeof detail.linkedMemoryIndex === "number" ? detail.linkedMemoryIndex : 0)
+      : detail.linkedMemoryIndex;
+    return {
+      ...detail,
+      linked,
+      linkedMemoryIndex,
+      linkedMemoryTitle: linked
+    };
+  };
+})();
