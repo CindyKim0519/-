@@ -4172,3 +4172,83 @@ h3 {
   border: 1px solid var(--border-default);
   box-shadow: none;
 }
+
+/* Couple diary softness: round core controls without changing flows. */
+.primary-btn,
+.ghost-btn,
+.login-grid .ghost-btn,
+.ds-button-primary,
+.ds-button-secondary,
+input,
+select,
+textarea {
+  border-radius: 16px;
+}
+
+.chip-btn,
+.notification-nav-btn,
+.icon-btn,
+.camera-icon-btn,
+.terms-checkbox,
+.terms-chevron-btn,
+.anniversary-kebab,
+.relation-kebab,
+.linked-diary-kebab,
+.linked-record-kebab {
+  border-radius: var(--radius-pill);
+}
+
+.memory-card,
+.diary-card,
+.linked-diary-card,
+.record-picker-card,
+.question-history-card,
+.support-card,
+.support-history-card,
+.support-detail-card,
+.policy-content,
+.password-change-card,
+.password-rule-card,
+.signup-terms-card,
+.relation-switch-card,
+.relation-method-card,
+.relation-add-complete-card,
+.anniversary-form-card,
+.anniversary-item-card,
+.photo-delete-sheet,
+.share-preview-card {
+  border-radius: 18px;
+}
+
+.card,
+.inner-card,
+.modal-sheet:not(.notification-page),
+.diary-detail-summary,
+.linked-record-pill,
+.photo-order-card,
+.photo-upload-card,
+.photo-empty-state,
+.notification-item,
+.notification-filter-select,
+.record-picker-card,
+.question-history-page .question-history-card {
+  border-radius: 16px;
+}
+
+.memory-detail-page .linked-diary-card,
+.memory-edit-page .linked-diary-card,
+.diary-detail-page .linked-record-card .linked-record-pill,
+.diary-detail-page .linked-record-card button.linked-record-pill,
+.diary-detail-page .linked-record-card .linked-record-button,
+.diary-write-page .linked-record-card .linked-record-pill,
+.card :is(.card, .memory-card, .diary-card, .question-card) {
+  border-radius: 16px !important;
+}
+
+.linked-record-dropdown,
+.linked-diary-dropdown,
+.relation-dropdown,
+.anniversary-dropdown {
+  border-radius: 14px;
+  overflow: hidden;
+}
