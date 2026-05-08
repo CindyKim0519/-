@@ -14374,7 +14374,12 @@ function duariHomeAnniversaryPillHtml() {
   const next = upcoming[0];
   if (!next) return "";
   const label = duariAnniversaryDdayLabel(next.diff);
-  return `<span class="anniversary-pill">${label} ${duariEscapeHtml(next.name || "기념일")}</span>`;
+  return `
+    <button class="anniversary-pill" type="button" data-action="couple-settings">
+      <span>${label} ${duariEscapeHtml(next.name || "기념일")}</span>
+      <span class="anniversary-pill-chevron" aria-hidden="true">›</span>
+    </button>
+  `;
 }
 
 function duariAnniversaryNotificationItems() {
