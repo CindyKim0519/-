@@ -1819,6 +1819,9 @@ function setTab(tab) {
   qsa(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === tab));
   qs("#screenTitle").textContent = titles[tab];
   qs("#relationshipKicker").textContent = state.connected ? "봄이와 현재 관계" : "혼자 쓰는 듀아리";
+  const notificationButton = qs("#openNotifications");
+  notificationButton?.classList.toggle("is-settings", tab === "my");
+  notificationButton?.setAttribute("aria-label", tab === "my" ? "설정" : "알림");
   renderApp();
 }
 

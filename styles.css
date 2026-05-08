@@ -510,6 +510,11 @@ h3 {
   content: "\1F514";
 }
 
+#openNotifications.is-settings::before {
+  content: "\2699";
+  font-size: 19px;
+}
+
 .screen {
   background: linear-gradient(180deg, transparent 0 112px, var(--color-white) 112px);
   display: none;
