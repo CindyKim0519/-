@@ -14410,7 +14410,7 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
 
 function duariMemoryEditLinkedDiaryCardHtml(diary, index) {
   return `
-    <article class="linked-diary-card" role="button" tabindex="0" data-linked-diary-index="${index}">
+    <article class="linked-diary-card" data-linked-diary-index="${index}" data-disable-linked-diary-card-open="true">
       <div class="linked-diary-title-row">
         <strong>${duariEscapeHtml(diary?.title || "제목 없는 일기")}</strong>
         <span class="linked-diary-right-tools">
@@ -15932,6 +15932,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
   bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
     if (typeof duariBindLinkedDiaryDropdowns === "function") duariBindLinkedDiaryDropdowns(root);
     qsa("[data-linked-diary-index]", root).forEach((card) => {
+      if (card.dataset.disableLinkedDiaryCardOpen === "true") return;
       const open = () => {
         window.duariOpenLinkedDiaryCard(card, null, backAction);
       };
@@ -15960,6 +15961,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
   window.duariOpenLinkedDiaryCard = function duariOpenLinkedDiaryCard(card, event = null, backAction = null) {
     if (!card) return;
+    if (card.dataset.disableLinkedDiaryCardOpen === "true") return;
     if (event?.target?.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
     event?.preventDefault?.();
     event?.stopPropagation?.();
@@ -16130,6 +16132,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     window.addEventListener("click", (event) => {
       if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
+      if (card?.dataset?.disableLinkedDiaryCardOpen === "true") return;
       if (!card) return;
       window.duariOpenLinkedDiaryCard(card, event);
     }, true);
@@ -16138,6 +16141,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       if (event.key !== "Enter" && event.key !== " ") return;
       if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
+      if (card?.dataset?.disableLinkedDiaryCardOpen === "true") return;
       if (!card) return;
       window.duariOpenLinkedDiaryCard(card, event);
     }, true);
