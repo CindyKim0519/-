@@ -511,7 +511,7 @@ h3 {
 }
 
 .screen {
-  background: transparent;
+  background: linear-gradient(180deg, transparent 0 112px, var(--color-white) 112px);
   display: none;
   height: 100%;
   isolation: isolate;
