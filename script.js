@@ -15060,9 +15060,7 @@ function duariJournalSubTabsHtml(activeView = "diary") {
 
 function duariQuestionPanelHtml() {
   const history = duariQuestionHistorySeed();
-  const recentQuestionHistoryHtml = history.length
-    ? history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")
-    : `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+  const filtered = duariFilterQuestionHistory(history, "전체", "", "");
   return `
     <section class="question-card">
       <p class="eyebrow">오늘의 질문</p>
@@ -15075,23 +15073,62 @@ function duariQuestionPanelHtml() {
     <section class="card question-history-section">
       <div class="between">
         <h3>전달한 질문</h3>
-        <span class="meta">최근 ${Math.min(history.length, 3)}개</span>
+        <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
       </div>
-      <div class="question-history-list">
-        ${recentQuestionHistoryHtml}
+      <div class="chip-row question-history-filters">
+        ${["전체", "읽음", "전달됨"].map((item) => `<button class="chip-btn ${item === "전체" ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
       </div>
-      <button class="ghost-btn full" type="button" data-question-history-all>전체 보기</button>
+      <div class="question-history-search-grid">
+        <div class="form-field">
+          <label for="questionHistoryInlineSearch">질문 검색</label>
+          <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
+        </div>
+        <div class="form-field">
+          <label for="questionHistoryInlineDate">월</label>
+          <input id="questionHistoryInlineDate" type="month" />
+        </div>
+      </div>
+      <div class="question-history-list" data-question-history-list>
+        ${duariQuestionHistoryListHtml(history, filtered)}
+      </div>
     </section>
   `;
 }
 
+function duariBindInlineQuestionHistory(root) {
+  const history = duariQuestionHistorySeed();
+  let activeFilter = "전체";
+  const searchInput = qs("#questionHistoryInlineSearch", root);
+  const dateInput = qs("#questionHistoryInlineDate", root);
+  const renderList = () => {
+    const filtered = duariFilterQuestionHistory(
+      history,
+      activeFilter,
+      searchInput?.value || "",
+      dateInput?.value || ""
+    );
+    const list = qs("[data-question-history-list]", root);
+    if (list) list.innerHTML = duariQuestionHistoryListHtml(history, filtered);
+    const count = qs("[data-question-history-count]", root);
+    if (count) count.textContent = `총 ${filtered.length}개`;
+  };
+  qsa("[data-question-history-filter]", root).forEach((button) => {
+    button.addEventListener("click", () => {
+      activeFilter = button.dataset.questionHistoryFilter || "전체";
+      qsa("[data-question-history-filter]", root).forEach((item) => {
+        item.classList.toggle("active", item === button);
+      });
+      renderList();
+    });
+  });
+  searchInput?.addEventListener("input", renderList);
+  dateInput?.addEventListener("input", renderList);
+  dateInput?.addEventListener("change", renderList);
+}
+
 function duariBindQuestionPanel(root) {
   bindActions(root);
-  bindQuestionHistoryCards(root, () => {
-    state.journalView = "question";
-    setTab("diary");
-  });
-  qs("[data-question-history-all]", root)?.addEventListener("click", openQuestionHistoryPage);
+  duariBindInlineQuestionHistory(root);
 }
 
 function duariBindJournalSubTabs(root) {
@@ -15361,9 +15398,7 @@ function renderQuestions() {
   const questions = qs("#questions");
   if (!questions) return;
   const history = duariQuestionHistorySeed();
-  const recentQuestionHistoryHtml = history.length
-    ? history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")
-    : `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+  const filtered = duariFilterQuestionHistory(history, "전체", "", "");
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
@@ -15377,18 +15412,29 @@ function renderQuestions() {
       <section class="card question-history-section">
         <div class="between">
           <h3>전달한 질문</h3>
-          <span class="meta">최근 ${Math.min(history.length, 3)}개</span>
+          <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
         </div>
-        <div class="question-history-list">
-          ${recentQuestionHistoryHtml}
+        <div class="chip-row question-history-filters">
+          ${["전체", "읽음", "전달됨"].map((item) => `<button class="chip-btn ${item === "전체" ? "active" : ""}" type="button" data-question-history-filter="${item}">${item}</button>`).join("")}
         </div>
-        <button class="ghost-btn full" type="button" data-question-history-all>전체 보기</button>
+        <div class="question-history-search-grid">
+          <div class="form-field">
+            <label for="questionHistoryInlineSearch">질문 검색</label>
+            <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
+          </div>
+          <div class="form-field">
+            <label for="questionHistoryInlineDate">월</label>
+            <input id="questionHistoryInlineDate" type="month" />
+          </div>
+        </div>
+        <div class="question-history-list" data-question-history-list>
+          ${duariQuestionHistoryListHtml(history, filtered)}
+        </div>
       </section>
     </div>
   `;
   bindActions(questions);
-  bindQuestionHistoryCards(questions, () => setTab("questions"));
-  qs("[data-question-history-all]", questions)?.addEventListener("click", openQuestionHistoryPage);
+  duariBindInlineQuestionHistory(questions);
 }
 
 function duariNormalizeQuestionHistoryDate(value = "") {
