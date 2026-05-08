@@ -15611,12 +15611,10 @@ function openPhotoDetail(trigger = null) {
               const src = duariPhotoSource(photo);
               return `<div class="photo-detail-image" data-photo-detail-item="${index}">
                 ${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}
-                ${src ? `<button class="photo-detail-download" type="button" data-photo-download-one="${index}" aria-label="${index + 1}번째 사진 다운로드"><svg class="download-tray-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11"></path><path d="m7 10 5 5 5-5"></path><path d="M5 16v3h14v-3"></path></svg></button>` : ""}
               </div>`;
             }).join("")
             : `<div class="photo-detail-image"></div>`}
         </section>
-        <button class="primary-btn full" type="button" data-action="download-all-photos">${photos.length > 1 ? "전체 사진 다운로드" : "사진 다운로드"}</button>
       </div>
     </div>
   `);
@@ -15634,13 +15632,6 @@ function openPhotoDetail(trigger = null) {
   qsa("[data-photo-detail-item]", qs("#modal")).forEach((item) => {
     item.addEventListener("click", () => {
       state.activePhotoIndex = Number(item.dataset.photoDetailItem) || 0;
-    });
-  });
-  qsa("[data-photo-download-one]", qs("#modal")).forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      duariDownloadPhotoAsPng(memoryIndex, Number(button.dataset.photoDownloadOne) || 0);
     });
   });
   bindActions(qs("#modal"));
