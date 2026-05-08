@@ -4066,6 +4066,10 @@ h3 {
   overflow: hidden;
 }
 
+.another-question-page .question-history-card {
+  box-shadow: none;
+}
+
 .memory-detail-page .linked-diary-card,
 .memory-edit-page .linked-diary-card {
   border: 1px solid var(--border-default);
