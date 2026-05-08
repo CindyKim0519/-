@@ -50,17 +50,17 @@
   --font-body: "Cafe24SsurroundAir", "Pretendard", "Nunito", Arial, sans-serif;
   --font-bold: "Cafe24Ssurround", "Cafe24SsurroundAir", "Pretendard", "Nunito", Arial, sans-serif;
 
-  --font-size-xs: 10px;
-  --font-size-sm: 12px;
-  --font-size-md: 14px;
-  --font-size-lg: 20px;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
+  --font-size-lg: 21px;
   --font-size-xl: 24px;
   --font-size-2xl: 28px;
 
-  --line-height-xs: 14px;
-  --line-height-sm: 18px;
-  --line-height-md: 22px;
-  --line-height-lg: 28px;
+  --line-height-xs: 16px;
+  --line-height-sm: 20px;
+  --line-height-md: 24px;
+  --line-height-lg: 30px;
   --line-height-xl: 32px;
   --line-height-2xl: 36px;
 
@@ -72,6 +72,13 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  --gap-section: 20px;
+  --gap-list: 12px;
+  --gap-card-content: 12px;
+  --gap-title-body: 8px;
+  --gap-form-field: 16px;
+  --gap-content-action: 16px;
+  --gap-page-title-content: 24px;
 
   --radius-xs: 4px;
   --radius-sm: 8px;

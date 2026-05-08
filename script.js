@@ -15234,7 +15234,7 @@ function duariJournalSubTabsHtml(activeView = "diary") {
 function duariQuestionPanelHtml() {
   const history = duariQuestionHistorySeed();
   const filtered = duariFilterQuestionHistory(history, "전체", "", "");
-  const visibleCount = 10;
+  const visibleCount = 5;
   return `
     <section class="question-card">
       <p class="eyebrow">오늘의 질문</p>
@@ -15273,12 +15273,12 @@ function duariQuestionPanelHtml() {
 function duariBindInlineQuestionHistory(root) {
   const history = duariQuestionHistorySeed();
   let activeFilter = "전체";
-  let visibleCount = 10;
+  let visibleCount = 5;
   const searchInput = qs("#questionHistoryInlineSearch", root);
   const dateInput = qs("#questionHistoryInlineDate", root);
   const bindLoadMore = () => {
     qs("[data-question-history-load-more]", root)?.addEventListener("click", () => {
-      visibleCount += 10;
+      visibleCount += 5;
       renderList();
     });
   };
@@ -15300,7 +15300,7 @@ function duariBindInlineQuestionHistory(root) {
   qsa("[data-question-history-filter]", root).forEach((button) => {
     button.addEventListener("click", () => {
       activeFilter = button.dataset.questionHistoryFilter || "전체";
-      visibleCount = 10;
+      visibleCount = 5;
       qsa("[data-question-history-filter]", root).forEach((item) => {
         item.classList.toggle("active", item === button);
       });
@@ -15308,7 +15308,7 @@ function duariBindInlineQuestionHistory(root) {
     });
   });
   const resetAndRenderList = () => {
-    visibleCount = 10;
+    visibleCount = 5;
     renderList();
   };
   searchInput?.addEventListener("input", resetAndRenderList);
@@ -15592,7 +15592,7 @@ function renderQuestions() {
   if (!questions) return;
   const history = duariQuestionHistorySeed();
   const filtered = duariFilterQuestionHistory(history, "전체", "", "");
-  const visibleCount = 10;
+  const visibleCount = 5;
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
@@ -15656,7 +15656,7 @@ function duariQuestionHistoryListHtml(history, filtered, limit = filtered.length
   return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 나눈 질문이 없어요. 오늘의 질문에 답변을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
 }
 
-function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 10) {
+function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 5) {
   return filtered.length > visibleCount
     ? `<button class="ghost-btn full diary-load-more" type="button" data-question-history-load-more>더보기</button>`
     : "";
@@ -17232,4 +17232,163 @@ ${photoSection}
   };
 
   window.duariDiaryFeelingOptions = diaryFeelingOptions;
+})();
+
+(function installDuariQuestionRatioPool() {
+  if (window.__duariQuestionRatioPoolInstalled) return;
+  window.__duariQuestionRatioPoolInstalled = true;
+
+  const ratioQuestionPool = [
+    { scope: "개인", category: "감정", text: "요즘 내 마음을 가장 많이 차지하는 감정은 뭐야?" },
+    { scope: "개인", category: "감정", text: "오늘 내가 스스로에게 다정하게 말해주고 싶은 한마디는 뭐야?" },
+    { scope: "개인", category: "감정", text: "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?" },
+    { scope: "개인", category: "감정", text: "최근에 마음이 편안해졌던 순간은 언제였어?" },
+    { scope: "개인", category: "감정", text: "요즘 내가 조금 더 알아주고 싶은 내 마음은 뭐야?" },
+    { scope: "개인", category: "감정", text: "오늘 하루 중 마음이 가장 따뜻했던 순간은 뭐야?" },
+    { scope: "개인", category: "감정", text: "요즘 내가 자주 숨기게 되는 감정은 뭐야?" },
+    { scope: "관계", category: "감정", text: "요즘 우리 사이에서 가장 자주 느끼는 감정은 뭐야?" },
+    { scope: "관계", category: "감정", text: "상대가 해준 말 중 아직 마음에 남아 있는 말은 뭐야?" },
+    { scope: "관계", category: "감정", text: "우리 사이에서 더 자주 나누고 싶은 감정은 뭐야?" },
+
+    { scope: "개인", category: "취향", text: "요즘 내가 빠져 있는 작은 취향은 뭐야?" },
+    { scope: "개인", category: "취향", text: "혼자 있을 때 가장 편안해지는 시간은 언제야?" },
+    { scope: "개인", category: "취향", text: "최근에 새롭게 좋아하게 된 것은 뭐야?" },
+    { scope: "개인", category: "취향", text: "내 하루를 기분 좋게 만드는 작은 습관은 뭐야?" },
+    { scope: "관계", category: "취향", text: "우리 둘이 함께하면 더 즐거운 취향은 뭐야?" },
+    { scope: "관계", category: "취향", text: "다음 데이트에서 같이 해보고 싶은 취향 활동은 뭐야?" },
+
+    { scope: "개인", category: "일상", text: "오늘 하루에서 오래 기억하고 싶은 장면은 뭐야?" },
+    { scope: "개인", category: "일상", text: "요즘 내 일상을 조금 더 편하게 만드는 것은 뭐야?" },
+    { scope: "개인", category: "일상", text: "이번 주에 나를 칭찬하고 싶은 일은 뭐야?" },
+    { scope: "개인", category: "일상", text: "오늘 내가 가장 잘 챙긴 것은 뭐야?" },
+    { scope: "관계", category: "일상", text: "우리의 평범한 하루 중 가장 좋아하는 순간은 뭐야?" },
+    { scope: "관계", category: "일상", text: "상대와 함께 나누고 싶은 오늘의 작은 소식은 뭐야?" },
+
+    { scope: "개인", category: "가치관", text: "요즘 내가 중요하게 지키고 싶은 기준은 뭐야?" },
+    { scope: "개인", category: "가치관", text: "내가 사랑에서 가장 중요하게 생각하는 태도는 뭐야?" },
+    { scope: "개인", category: "가치관", text: "내가 더 솔직해지고 싶은 부분은 뭐야?" },
+    { scope: "개인", category: "가치관", text: "내가 관계 안에서 꼭 지키고 싶은 나다움은 뭐야?" },
+    { scope: "관계", category: "가치관", text: "우리 관계에서 오래 지켜가고 싶은 약속은 뭐야?" },
+    { scope: "관계", category: "가치관", text: "우리가 서로에게 더 편안한 사람이 되려면 무엇이 필요할까?" },
+
+    { scope: "개인", category: "애정 표현", text: "내가 사랑받는다고 느끼는 표현은 어떤 거야?" },
+    { scope: "개인", category: "애정 표현", text: "상대에게 오늘 꼭 전하고 싶은 다정한 말은 뭐야?" },
+    { scope: "관계", category: "애정 표현", text: "우리만의 애정 표현으로 오래 남기고 싶은 것은 뭐야?" },
+    { scope: "관계", category: "애정 표현", text: "상대가 해주면 특히 힘이 나는 표현은 뭐야?" },
+
+    { scope: "개인", category: "추억 회상", text: "문득 다시 떠오른 좋은 기억은 뭐야?" },
+    { scope: "개인", category: "추억 회상", text: "그때의 나에게 다시 말해주고 싶은 말은 뭐야?" },
+    { scope: "관계", category: "추억 회상", text: "우리의 지난 시간 중 다시 꺼내 보고 싶은 장면은 뭐야?" },
+
+    { scope: "개인", category: "서운함/갈등", text: "최근에 말하지 못하고 넘긴 마음이 있다면 뭐야?" },
+    { scope: "개인", category: "서운함/갈등", text: "내가 상처받지 않기 위해 더 잘 말하고 싶은 경계는 뭐야?" },
+    { scope: "관계", category: "서운함/갈등", text: "우리 사이에서 부드럽게 풀어보고 싶은 이야기는 뭐야?" },
+
+    { scope: "개인", category: "미래/기대", text: "가까운 미래의 내가 기대하는 작은 변화는 뭐야?" },
+    { scope: "관계", category: "미래/기대", text: "앞으로 우리 둘이 함께 만들고 싶은 장면은 뭐야?" }
+  ];
+
+  const questionTexts = ratioQuestionPool.map((item) => item.text);
+  const storageKey = "duari.currentQuestionIndex";
+
+  function answeredQuestionSet() {
+    return new Set((state.questionHistory || [])
+      .map((item) => String(item.question || "").trim())
+      .filter(Boolean));
+  }
+
+  function normalizeIndex(value) {
+    const numeric = Number.parseInt(value, 10);
+    if (!Number.isFinite(numeric) || numeric < 0) return 0;
+    return numeric % questionTexts.length;
+  }
+
+  function currentIndex() {
+    return normalizeIndex(localStorage.getItem(storageKey));
+  }
+
+  function setQuestionIndex(index) {
+    localStorage.setItem(storageKey, String(normalizeIndex(index)));
+  }
+
+  function nextUnansweredIndex(fromIndex = currentIndex() + 1) {
+    const answered = answeredQuestionSet();
+    for (let offset = 0; offset < questionTexts.length; offset += 1) {
+      const index = normalizeIndex(fromIndex + offset);
+      if (!answered.has(questionTexts[index])) return index;
+    }
+    return normalizeIndex(fromIndex);
+  }
+
+  function refreshQuestionViews() {
+    if (typeof renderHome === "function") renderHome();
+    if (state.tab === "diary" && typeof renderDiary === "function") renderDiary();
+    if (state.tab === "questions" && typeof renderQuestions === "function") renderQuestions();
+  }
+
+  const currentQuestionText = function duariCurrentQuestionTextByRatio() {
+    return questionTexts[currentIndex()] || questionTexts[0];
+  };
+
+  const advanceTodayQuestion = function duariAdvanceTodayQuestionByRatio() {
+    setQuestionIndex(nextUnansweredIndex(currentIndex() + 1));
+    refreshQuestionViews();
+  };
+
+  function otherQuestionItems() {
+    const answered = answeredQuestionSet();
+    const current = currentQuestionText();
+    const fresh = ratioQuestionPool.filter((item) => !answered.has(item.text) && item.text !== current);
+    const fallback = ratioQuestionPool.filter((item) => item.text !== current);
+    return (fresh.length ? fresh : fallback).slice(0, 6);
+  }
+
+  const openAnotherQuestionPage = function openAnotherQuestionPageByRatio() {
+    const previousTab = qs(".screen.active")?.id || state.tab || "home";
+    const questions = otherQuestionItems();
+    openModal(`
+      <div class="modal-sheet notification-page another-question-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
+          <h3>다른 질문 보기</h3>
+          <span class="notification-header-spacer"></span>
+        </header>
+        <div class="section-stack another-question-list">
+          ${questions.map((item) => `
+            <article class="another-question-card">
+              <h3>${duariEscapeHtml(item.text)}</h3>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(item.text)}">이 질문에 답하기</button>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `);
+    const modal = qs("#modal");
+    modal.classList.add("page-modal");
+    modal.dataset.returnTab = previousTab;
+    qs("[data-another-question-back]", modal)?.addEventListener("click", () => {
+      closeModal();
+      setTab(previousTab === "questions" ? "diary" : previousTab);
+    });
+    qsa("[data-question-option]", modal).forEach((button) => {
+      button.addEventListener("click", () => {
+        state.selectedQuestionForAnswer = button.dataset.questionOption;
+        closeModal();
+        openQuestionModal("answer");
+      });
+    });
+  };
+
+  window.duariQuestionRatioPool = ratioQuestionPool;
+  window.duariCurrentQuestionText = currentQuestionText;
+  window.duariAdvanceTodayQuestion = advanceTodayQuestion;
+  window.openAnotherQuestionModal = openAnotherQuestionPage;
+
+  try { duariCurrentQuestionText = currentQuestionText; } catch (error) {}
+  try { duariAdvanceTodayQuestion = advanceTodayQuestion; } catch (error) {}
+  try { openAnotherQuestionModal = openAnotherQuestionPage; } catch (error) {}
+
+  if (!localStorage.getItem(storageKey)) {
+    setQuestionIndex(nextUnansweredIndex(0));
+  }
 })();

@@ -183,9 +183,9 @@ h2 {
 }
 
 h3 {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  line-height: 24px;
+  line-height: 25px;
   margin-bottom: 8px;
 }
 
@@ -677,11 +677,11 @@ h3 {
 .section-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--gap-section);
 }
 
 #home > .section-stack {
-  gap: 20px;
+  gap: var(--gap-section);
 }
 
 .hero-card {
@@ -2060,7 +2060,7 @@ h3 {
 .list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--gap-list);
 }
 
 .album-calendar {
@@ -2343,7 +2343,7 @@ h3 {
 
 .form-field {
   display: grid;
-  gap: 8px;
+  gap: var(--gap-title-body);
 }
 
 .form-field label {
@@ -4199,6 +4199,36 @@ h3 {
   box-shadow: none;
 }
 
+.another-question-page .another-question-list {
+  padding-bottom: 24px;
+}
+
+.another-question-card {
+  background: var(--color-white);
+  border: 0;
+  border-radius: var(--radius-card);
+  box-shadow: none;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.another-question-card h3 {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-lg);
+  margin: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.another-question-meta {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  margin: 0;
+}
+
 .memory-detail-page .linked-diary-card,
 .memory-edit-page .linked-diary-card {
   border: 1px solid var(--border-default);
@@ -4305,8 +4335,472 @@ textarea {
 .record-picker-card .linked-diary-type,
 .question-history-card .linked-diary-type,
 .notification-type-label {
-  font-size: 11px;
-  line-height: 16px;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
   min-height: 24px;
   padding: 4px 9px;
+}
+
+/* App standard type scale: keep text readable in the compact phone frame. */
+p,
+li,
+label,
+input,
+select,
+textarea,
+button,
+.meta,
+.tiny-note,
+.empty-state,
+.linked-record-empty,
+.notification-item p,
+.support-card p,
+.policy-content p {
+  font-size: max(var(--font-size-md), 15px);
+  line-height: var(--line-height-md);
+}
+
+.eyebrow,
+.home-memory-meta,
+.diary-date-meta,
+.question-history-meta,
+.another-question-meta,
+.memory-card .meta,
+.diary-card .meta,
+.record-picker-card .meta {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.linked-diary-type,
+.linked-record-scope,
+.notification-type-label,
+.chip-btn {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+/* Detail and edit pages follow the same app-readable type scale. */
+.modal.page-modal .modal-sheet.notification-page :is(
+  p,
+  li,
+  label,
+  input,
+  select,
+  textarea,
+  button,
+  .meta,
+  .tiny-note,
+  .diary-date-meta,
+  .linked-record-empty,
+  .photo-empty-state,
+  .notification-item p
+) {
+  font-size: var(--font-size-md) !important;
+  line-height: var(--line-height-md) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  h3,
+  .linked-record-title-text,
+  .linked-diary-title,
+  .record-picker-title,
+  .question-history-card h3,
+  .another-question-card h3
+) {
+  font-size: 17px !important;
+  line-height: 25px !important;
+}
+
+.modal.page-modal .notification-header h3 {
+  font-size: 18px !important;
+  line-height: 26px !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .eyebrow,
+  .home-memory-meta,
+  .question-history-meta,
+  .another-question-meta,
+  .memory-detail-page .meta,
+  .memory-edit-page .meta,
+  .diary-detail-page .meta,
+  .diary-write-page .meta
+) {
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-sm) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .linked-diary-type,
+  .linked-record-scope,
+  .notification-type-label,
+  .chip-btn
+) {
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-sm) !important;
+}
+
+/* Spacing standard: section 20, list 12, form 16, content-to-action 16. */
+.section-stack,
+.screen > .section-stack,
+.modal-sheet.notification-page .section-stack,
+.modal-sheet:not(.notification-page) .section-stack {
+  gap: var(--gap-section) !important;
+}
+
+.list,
+.question-history-list,
+.linked-record-list,
+.linked-diary-list,
+.album-record-list,
+.selected-calendar-records,
+.notification-list,
+.support-history-list,
+.another-question-list {
+  gap: var(--gap-list) !important;
+}
+
+.memory-card,
+.diary-card,
+.question-card,
+.question-history-card,
+.another-question-card,
+.linked-record-pill,
+.linked-diary-card,
+.record-picker-card,
+.notification-item,
+.support-card,
+.support-detail-card,
+.anniversary-item-card,
+.relation-switch-card {
+  gap: var(--gap-card-content);
+}
+
+.memory-card :is(h3, .memory-card-title),
+.diary-card h3,
+.question-card h3,
+.question-history-card h3,
+.another-question-card h3,
+.linked-diary-card h3,
+.linked-record-pill h3,
+.record-picker-card h3,
+.notification-item h3,
+.support-card h3 {
+  margin-bottom: var(--gap-title-body);
+}
+
+.form-field {
+  gap: var(--gap-title-body) !important;
+}
+
+.diary-write-page .section-stack,
+.memory-edit-page .section-stack,
+.memory-detail-page .section-stack,
+.diary-detail-page .section-stack,
+.question-answer-page .section-stack,
+.ai-compose-page .section-stack,
+.ai-result-page .section-stack {
+  gap: var(--gap-section) !important;
+}
+
+.modal-sheet.notification-page .notification-header + .section-stack,
+.modal-sheet.notification-page .notification-header + .another-question-list,
+.modal-sheet.notification-page .notification-header + .photo-detail-list {
+  margin-top: var(--gap-page-title-content);
+}
+
+.home-question-actions,
+.question-action-row,
+.button-row,
+.row.actions,
+.modal-actions,
+.photo-manage-actions,
+.diary-write-actions,
+.memory-edit-actions {
+  gap: var(--gap-list) !important;
+}
+
+.question-card .home-question-actions,
+.diary-write-page :is(.primary-btn.full, .ghost-btn.full),
+.memory-edit-page :is(.primary-btn.full, .ghost-btn.full),
+.memory-detail-page :is(.primary-btn.full, .ghost-btn.full),
+.diary-detail-page :is(.primary-btn.full, .ghost-btn.full) {
+  margin-top: var(--gap-content-action);
+}
+
+.form-stack,
+.form-grid,
+.signup-form,
+.question-history-search-grid,
+.album-filter-grid {
+  gap: var(--gap-form-field) !important;
+}
+
+/* Final detail/edit spacing sweep for nested page content. */
+.modal.page-modal .modal-sheet.notification-page :is(
+  .memory-detail-page,
+  .memory-edit-page,
+  .diary-detail-page,
+  .diary-write-page,
+  .question-answer-page,
+  .record-picker-page,
+  .diary-record-picker-page,
+  .photo-detail-page,
+  .photo-order-page,
+  .ai-page,
+  .ai-compose-page,
+  .ai-result-page,
+  .support-contact-page,
+  .support-detail-page,
+  .anniversary-add-page,
+  .relation-add-page
+) :is(.section-stack, .list) {
+  gap: var(--gap-section) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .linked-record-list,
+  .linked-diary-list,
+  .record-picker-list,
+  .photo-order-grid,
+  .photo-manage-grid,
+  .memory-photo-gallery,
+  .support-history-list,
+  .question-history-list
+) {
+  gap: var(--gap-list) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .linked-diary-card,
+  .linked-record-card,
+  .linked-record-pill,
+  .linked-record-static,
+  .record-picker-card,
+  .diary-detail-summary,
+  .photo-upload-card,
+  .photo-empty-state,
+  .ai-confirm-sheet,
+  .ai-page .readonly-source,
+  .ai-page .tone-section,
+  .support-card,
+  .support-detail-card
+) {
+  gap: var(--gap-card-content) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .field-label-row,
+  .linked-diary-title-row,
+  .linked-record-title-row,
+  .record-picker-card .between,
+  .notification-title-row,
+  .photo-manage-actions,
+  .memory-edit-actions,
+  .record-picker-actions,
+  .ai-action-grid,
+  .profile-photo-actions
+) {
+  gap: var(--gap-list) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .linked-diary-list,
+  .diary-detail-feelings,
+  .emotion-badge-row,
+  .tag-row,
+  .chip-row,
+  .diary-feelings-centered,
+  .memory-edit-feelings
+) {
+  margin-top: var(--gap-list) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .linked-diary-card,
+  .linked-record-pill,
+  .record-picker-card,
+  .diary-detail-summary,
+  .photo-upload-card,
+  .support-detail-card
+) > :is(h3, strong, .linked-diary-title-row, .linked-record-title-row, .record-picker-title):not(:last-child) {
+  margin-bottom: var(--gap-title-body) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(
+  .primary-btn.full,
+  .ghost-btn.full,
+  .diary-load-more,
+  [data-save-memory-edit],
+  [data-save-diary],
+  [data-delete-diary-edit]
+) {
+  margin-top: var(--gap-content-action);
+}
+
+/* Whole-app spacing audit: normalize remaining content screens without touching icon internals. */
+#app :is(.screen, .modal-sheet) :is(
+  .section-stack,
+  .content-stack,
+  .settings-list,
+  .my-menu-list,
+  .question-history-section,
+  .anniversary-list,
+  .relation-list,
+  .support-list
+) {
+  gap: var(--gap-section) !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .list,
+  .tag-row,
+  .chip-row,
+  .photo-list,
+  .photo-detail-list,
+  .photo-upload-list,
+  .memory-photo-gallery,
+  .memory-photo-scroll,
+  .memory-photo-strip,
+  .album-calendar,
+  .calendar-record-list,
+  .question-history-list,
+  .record-picker-list,
+  .linked-record-list,
+  .linked-diary-list,
+  .support-history-list
+) {
+  gap: var(--gap-list) !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .card,
+  .inner-card,
+  .question-card,
+  .memory-card,
+  .diary-card,
+  .question-history-card,
+  .another-question-card,
+  .notification-item,
+  .record-picker-card,
+  .linked-record-card,
+  .linked-diary-card,
+  .support-card,
+  .support-detail-card,
+  .policy-content,
+  .password-change-card,
+  .password-rule-card,
+  .signup-terms-card,
+  .anniversary-form-card,
+  .anniversary-item-card,
+  .relation-switch-card,
+  .relation-method-card,
+  .photo-upload-card,
+  .photo-empty-state,
+  .diary-detail-summary
+) {
+  gap: var(--gap-card-content) !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .form-field,
+  .form-stack,
+  .form-grid,
+  .signup-form,
+  .album-filter-grid,
+  .question-history-search-grid,
+  .support-form,
+  .contact-form
+) {
+  gap: var(--gap-form-field) !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .between,
+  .row,
+  .button-row,
+  .home-question-actions,
+  .question-action-row,
+  .modal-actions,
+  .record-picker-actions,
+  .ai-action-grid,
+  .memory-edit-actions,
+  .photo-manage-actions,
+  .profile-photo-actions,
+  .linked-record-title-row,
+  .linked-diary-title-row,
+  .notification-title-row
+) {
+  gap: var(--gap-list) !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .primary-btn.full,
+  .ghost-btn.full,
+  .diary-load-more,
+  .album-record-load-more,
+  [data-save-memory-edit],
+  [data-save-diary],
+  [data-save-memory],
+  [data-complete-setup]
+) {
+  margin-top: var(--gap-content-action);
+}
+
+/* Button spacing audit for detail/edit pages. */
+#app :is(.screen, .modal-sheet) :is(
+  .button-row,
+  .home-question-actions,
+  .question-action-row,
+  .modal-actions,
+  .record-picker-actions,
+  .ai-action-grid,
+  .memory-edit-actions,
+  .photo-manage-actions,
+  .profile-photo-actions,
+  .photo-upload-actions,
+  .support-actions,
+  .anniversary-actions,
+  .relation-actions
+) > :is(button, .primary-btn, .ghost-btn) {
+  margin-top: 0 !important;
+}
+
+#app :is(.screen, .modal-sheet) :is(
+  .button-row,
+  .home-question-actions,
+  .question-action-row,
+  .modal-actions,
+  .record-picker-actions,
+  .ai-action-grid,
+  .memory-edit-actions,
+  .photo-manage-actions,
+  .profile-photo-actions,
+  .photo-upload-actions,
+  .support-actions,
+  .anniversary-actions,
+  .relation-actions
+) {
+  gap: var(--gap-list) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page .section-stack > :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) {
+  margin-top: -4px !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page .section-stack > :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) + :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) {
+  margin-top: -8px !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(.card, .linked-diary-card, .linked-record-card, .record-picker-card, .diary-detail-summary, .photo-upload-card, .support-detail-card) > :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) {
+  margin-top: var(--gap-content-action) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(.card, .linked-diary-card, .linked-record-card, .record-picker-card, .diary-detail-summary, .photo-upload-card, .support-detail-card) > :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) + :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) {
+  margin-top: var(--gap-list) !important;
+}
+
+.modal.page-modal .modal-sheet.notification-page :is(.record-picker-actions, .ai-action-grid, .modal-actions) > :is(.primary-btn, .ghost-btn) {
+  min-width: 0;
 }
