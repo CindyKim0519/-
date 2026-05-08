@@ -720,20 +720,20 @@ h3 {
   color: var(--accent-primary);
   cursor: pointer;
   display: inline-flex;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: 700;
   gap: 4px;
   justify-content: center;
   line-height: var(--line-height-sm);
-  min-height: 34px;
-  min-width: 112px;
-  padding: 0 12px;
+  min-height: 38px;
+  min-width: 124px;
+  padding: 0 14px;
   text-align: center;
 }
 
 .anniversary-pill-chevron {
   color: var(--text-tertiary);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
 }
 
