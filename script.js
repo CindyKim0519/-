@@ -14364,7 +14364,7 @@ function duariTriggeredCustomAnniversaries(todayDate = duariTodayMidnight()) {
       if (item.repeat && target < todayDate) target = new Date(todayDate.getFullYear() + 1, parts[1] - 1, parts[2]);
       if (!item.repeat && target < todayDate) return null;
       const diff = Math.round((target - todayDate) / 86400000);
-      return { ...item, diff };
+      return { ...item, diff, source: "custom" };
     })
     .filter(Boolean)
     .filter((item) => [0, 1, 7].includes(item.diff))
@@ -14412,7 +14412,25 @@ function duariTriggeredAnniversaries() {
   return [
     ...duariAutomaticAnniversaries(todayDate),
     ...duariTriggeredCustomAnniversaries(todayDate),
-  ].sort((a, b) => a.diff - b.diff);
+  ].sort(duariSortAnniversaryPriority);
+}
+
+function duariAnniversaryPriority(item) {
+  const sourcePriority = item.source === "custom" ? 0 : item.autoType === "yearly" ? 1 : 2;
+  return [
+    item.diff === 0 ? 0 : item.diff === 1 ? 1 : 2,
+    sourcePriority,
+    item.diff,
+  ];
+}
+
+function duariSortAnniversaryPriority(a, b) {
+  const aPriority = duariAnniversaryPriority(a);
+  const bPriority = duariAnniversaryPriority(b);
+  for (let index = 0; index < aPriority.length; index += 1) {
+    if (aPriority[index] !== bPriority[index]) return aPriority[index] - bPriority[index];
+  }
+  return String(a.name || "").localeCompare(String(b.name || ""), "ko");
 }
 
 function duariAnniversaryDdayLabel(diff) {
@@ -14425,9 +14443,11 @@ function duariHomeAnniversaryPillHtml() {
   const next = upcoming[0];
   if (!next) return "";
   const label = duariAnniversaryDdayLabel(next.diff);
+  const extraCount = upcoming.length - 1;
+  const suffix = extraCount > 0 ? ` 외 ${extraCount}개` : "";
   return `
     <button class="anniversary-pill" type="button" data-action="couple-settings">
-      <span>${label} ${duariEscapeHtml(next.name || "기념일")}</span>
+      <span>${label} ${duariEscapeHtml(next.name || "기념일")}${suffix}</span>
       <span class="anniversary-pill-chevron" aria-hidden="true">›</span>
     </button>
   `;
