@@ -10046,7 +10046,7 @@ function bindLinkedDiaryCardsLatest(root, backAction = null) {
 }
 
 function openLinkedDiaryUnlinkConfirm(index, backAction = null) {
-  const page = qs(".memory-detail-page") || qs("#modal");
+  const page = qs(".memory-edit-page") || qs(".memory-detail-page") || qs("#modal");
   const diary = linkedDiariesLatest()[index];
   if (!page || !diary) return;
   qs(".ai-confirm-overlay", page)?.remove();

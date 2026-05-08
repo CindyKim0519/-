@@ -2933,7 +2933,7 @@ h3 {
   align-items: center;
   background: transparent;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-xs);
+  border-radius: 50%;
   cursor: pointer;
   display: inline-flex;
   flex-direction: column;
