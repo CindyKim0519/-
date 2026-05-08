@@ -14194,7 +14194,7 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
   openModal(`
     <div class="modal-sheet notification-page another-question-page">
       <header class="notification-header">
-        <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+        <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
         <h3>다른 질문 보기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
@@ -14250,7 +14250,7 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
     openModal(`
       <div class="modal-sheet notification-page another-question-page">
         <header class="notification-header">
-          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
           <h3>다른 질문 보기</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
@@ -16545,7 +16545,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     openModal(`
       <div class="modal-sheet notification-page another-question-page">
         <header class="notification-header">
-          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
           <h3>다른 질문 보기</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
