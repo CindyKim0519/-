@@ -206,7 +206,7 @@ function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.questionHistory);
 }
 
-const titles = { home: "홈", album: "기록", diary: "일기", questions: "질문", my: "마이" };
+const titles = { home: "우리 홈", album: "우리 기록", diary: "마음", questions: "질문", my: "설정" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -1819,7 +1819,7 @@ function setTab(tab) {
   qsa(".nav-item").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
   qsa(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === tab));
   qs("#screenTitle").textContent = titles[tab];
-  qs("#relationshipKicker").textContent = state.connected ? "봄이와 현재 관계" : "혼자 쓰는 듀아리";
+  qs("#relationshipKicker").textContent = state.connected ? "둘만의 듀아리" : "나만의 듀아리";
   const notificationButton = qs("#openNotifications");
   notificationButton?.classList.toggle("is-settings", tab === "my");
   notificationButton?.setAttribute("aria-label", tab === "my" ? "설정" : "알림");
@@ -1962,10 +1962,10 @@ function renderMy() {
         </div>
       </section>
       <div class="list">${[
-        ["관계 관리", "관계 전환, 관계 추가", "relation-management"],
-        ["기념일 설정", "자동 기념일, 추가한 기념일", "couple-settings"],
-        ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["문의하기", "문의 접수와 문의내역", "support-contact"],
+        ["우리 관계", "관계 전환과 새로운 연결", "relation-management"],
+        ["우리 기념일", "자동 기념일과 직접 추가한 날", "couple-settings"],
+        ["보안 PIN", "6자리 PIN과 관계 전환 확인", "security"],
+        ["문의하기", "문의 접수와 답변 내역", "support-contact"],
         ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
       ].map(([title, body, action]) => `<button class="my-menu-item" data-action="${action}" type="button"><div class="between"><strong>${title}</strong><span class="menu-chevron" aria-hidden="true">›</span></div><p>${body}</p></button>`).join("")}</div>
@@ -2353,7 +2353,7 @@ function renderQuestions() {
   qs("#questions").innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘 나눌 질문</p>
         <h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3>
         <p>개인 질문 70%, 관계 질문 30% 비율로 부담 없이 이어집니다.</p>
         <div class="row" style="margin-top:12px">
@@ -2724,7 +2724,7 @@ function openNotificationSettingsModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        ${["알림", "기념일 알림"].map((item) => `
+        ${["앱 알림", "우리 기념일 알림"].map((item) => `
           <section class="card notification-setting-card">
             <div class="between">
               <strong>${item}</strong>
@@ -12171,8 +12171,8 @@ function renderHome() {
           <p class="eyebrow">오늘의 질문</p>
           <h3>요즘 나에게 가장 힘이 되는 말은 뭐야?</h3>
           <div class="home-question-actions">
-            <button class="primary-btn" data-action="answer-question">답변 추가</button>
-            <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+            <button class="primary-btn" data-action="answer-question">마음 남기기</button>
+            <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
           </div>
         </section>
       </div>
@@ -13201,19 +13201,19 @@ function openQuestionModal() {
     <div class="modal-sheet notification-page question-answer-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
-        <h3>답변 추가</h3>
+        <h3>마음 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘의 질문</p>
+          <p class="eyebrow">오늘 나눌 질문</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
-          <label>답변</label>
-          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="솔직하게 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+          <label>내 마음</label>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 마음을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
         </div>
-        <p class="meta question-delivery-note">답변은 상대방에게 전달됩니다.</p>
+        <p class="meta question-delivery-note">남긴 마음은 상대방에게 전달됩니다.</p>
         <div class="diary-editor-action-stack">
           <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬어서 보내기</button>
           <button class="primary-btn full" type="button" data-question-send-original>원문으로 보내기</button>
@@ -13249,11 +13249,11 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>상대방에게 전달할까요?</h3>
-        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>이 마음을 보낼까요?</h3>
+        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
-          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
         </div>
       </div>
     </div>
@@ -13263,7 +13263,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("home");
-    showToast("답변을 상대방에게 전달했어요.");
+    showToast("마음을 상대방에게 보냈어요.");
   });
 }
 
@@ -14491,11 +14491,11 @@ renderHome = function renderHome() {
 
   const questionCard = `
     <section class="question-card">
-      <p class="eyebrow">오늘의 질문</p>
+      <p class="eyebrow">오늘 나눌 질문</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText?.() || "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?")}</h3>
       <div class="home-question-actions">
-        <button class="primary-btn" data-action="answer-question">답변 추가</button>
-        <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+        <button class="primary-btn" data-action="answer-question">마음 남기기</button>
+        <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
       </div>
     </section>
   `;
@@ -14505,26 +14505,26 @@ renderHome = function renderHome() {
       <div class="section-stack">
         <div class="between">
           <div>
-            <p class="eyebrow">내 공간</p>
+            <p class="eyebrow">나의 듀아리</p>
             <h3>${duariEscapeHtml(state.nickname || "하린")}</h3>
           </div>
-          <button class="chip-btn" data-action="connect">상대 초대</button>
+          <button class="chip-btn" data-action="connect">함께 시작</button>
         </div>
         ${state.aloneCtaHidden ? "" : `
           <section class="hero-card">
-            <h3>함께 쓸 공간을 만들어볼까요?</h3>
-            <p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p>
+            <h3>둘만의 다이어리를 만들어볼까요?</h3>
+            <p>상대와 연결하면 순간 기록과 마음 일기를 함께 남길 수 있어요.</p>
             <div class="row" style="margin-top:14px">
-              <button class="primary-btn" data-action="connect">상대 초대하기</button>
-              <button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button>
+              <button class="primary-btn" data-action="connect">함께 시작하기</button>
+              <button class="ghost-btn" data-action="continue-alone">나만 먼저 쓰기</button>
             </div>
           </section>
         `}
         ${questionCard}
         <section class="card home-records-card">
-          <h3>최근 기록</h3>
-          <p>아직 최근 기록이 없어요.</p>
-          <button class="primary-btn full" data-action="new-memory">기록 추가</button>
+          <h3>최근 우리 기록</h3>
+          <p>아직 함께 남긴 기록이 없어요.</p>
+          <button class="primary-btn full" data-action="new-memory">순간 기록하기</button>
         </section>
       </div>
     `;
@@ -14535,7 +14535,7 @@ renderHome = function renderHome() {
   const recentMemories = (state.memories || []).slice(0, 3);
   const homeRecentMemoryCards = recentMemories.length
     ? memoryCards(recentMemories, true)
-    : `<p>아직 최근 기록이 없어요.</p>`;
+    : `<p>아직 함께 남긴 기록이 없어요.</p>`;
   const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
   const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
   const anniversaryPill = duariHomeAnniversaryPillHtml();
@@ -14554,11 +14554,11 @@ renderHome = function renderHome() {
       ${questionCard}
       <section class="card home-records-card">
         <div class="between">
-          <h3>최근 기록</h3>
+          <h3>최근 우리 기록</h3>
           <button class="chip-btn" data-tab-go="album">더보기</button>
         </div>
         <div class="list">${homeRecentMemoryCards}</div>
-        <button class="primary-btn full" data-action="new-memory">기록 추가</button>
+        <button class="primary-btn full" data-action="new-memory">순간 기록하기</button>
       </section>
     </div>
   `;
@@ -15195,17 +15195,17 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
 
 function duariEmptyDiaryMessage() {
   const type = duariDiaryFilterForCurrentView().type || "all";
-  if (type === "mineShared") return "아직 내 공유 일기가 없어요.";
-  if (type === "private") return "아직 나만 보기 일기가 없어요.";
-  if (type === "draft") return "아직 임시 저장한 일기가 없어요.";
-  return "아직 일기가 없어요.";
+  if (type === "mineShared") return "아직 함께 나눈 마음이 없어요.";
+  if (type === "private") return "아직 나만의 마음이 없어요.";
+  if (type === "draft") return "아직 저장해 둔 초안이 없어요.";
+  return "아직 남긴 마음이 없어요.";
 }
 
 function duariJournalSubTabsHtml(activeView = "diary") {
   return `
     <div class="tabs diary-tabs">
       <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">질문</button>
-      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">일기</button>
+      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">마음 일기</button>
     </div>
   `;
 }
@@ -15216,16 +15216,16 @@ function duariQuestionPanelHtml() {
   const visibleCount = 10;
   return `
     <section class="question-card">
-      <p class="eyebrow">오늘의 질문</p>
+      <p class="eyebrow">오늘 나눌 질문</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
       <div class="home-question-actions question-action-row">
-        <button class="primary-btn" data-action="answer-question">답변 추가</button>
-        <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+        <button class="primary-btn" data-action="answer-question">마음 남기기</button>
+        <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
       </div>
     </section>
     <section class="card question-history-section">
       <div class="between">
-        <h3>전달한 질문</h3>
+        <h3>함께 나눈 질문</h3>
         <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
       </div>
       <div class="chip-row question-history-filters">
@@ -15233,7 +15233,7 @@ function duariQuestionPanelHtml() {
       </div>
       <div class="question-history-search-grid">
         <div class="form-field">
-          <label for="questionHistoryInlineSearch">질문 검색</label>
+          <label for="questionHistoryInlineSearch">나눈 질문 검색</label>
           <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
         </div>
         <div class="form-field">
@@ -15339,7 +15339,7 @@ renderDiary = function renderDiary() {
       ${duariJournalSubTabsHtml("diary")}
       <div class="diary-filter-grid">
         <div class="form-field">
-          <label for="diarySearch">일기 검색</label>
+          <label for="diarySearch">마음 검색</label>
           <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목이나 본문 검색" />
         </div>
         <div class="form-field">
@@ -15347,7 +15347,7 @@ renderDiary = function renderDiary() {
           <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
         </div>
         <div class="form-field">
-          <label for="diaryTypeFilter">일기 유형</label>
+          <label for="diaryTypeFilter">공개 범위</label>
           <select id="diaryTypeFilter">
             <option value="all" ${diaryFilter.type === "all" ? "selected" : ""}>전체</option>
             <option value="mineShared" ${diaryFilter.type === "mineShared" ? "selected" : ""}>내 공유</option>
@@ -15357,8 +15357,8 @@ renderDiary = function renderDiary() {
         </div>
       </div>
       <div class="diary-list-toolbar">
-        <p class="meta diary-list-count">총 ${filteredEntries.length}개</p>
-        <button class="primary-btn" data-action="diary-scope-first">일기 추가</button>
+        <p class="meta diary-list-count">총 ${filteredEntries.length}개의 마음</p>
+        <button class="primary-btn" data-action="diary-scope-first">마음 남기기</button>
       </div>
       <div class="list">
         ${visibleEntries.length ? visibleEntries.map((entry, index) => `
@@ -15460,11 +15460,11 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>상대방에게 전달할까요?</h3>
-        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>이 마음을 보낼까요?</h3>
+        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
-          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
         </div>
       </div>
     </div>
@@ -15478,7 +15478,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("questions");
-    showToast("답변을 상대방에게 전달했어요.");
+    showToast("마음을 상대방에게 보냈어요.");
   });
 }
 
@@ -15575,16 +15575,16 @@ function renderQuestions() {
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘 나눌 질문</p>
         <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
         <div class="home-question-actions question-action-row">
-          <button class="primary-btn" data-action="answer-question">답변 추가</button>
-          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+          <button class="primary-btn" data-action="answer-question">마음 남기기</button>
+          <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
         </div>
       </section>
       <section class="card question-history-section">
         <div class="between">
-          <h3>전달한 질문</h3>
+          <h3>함께 나눈 질문</h3>
           <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
         </div>
         <div class="chip-row question-history-filters">
@@ -15592,7 +15592,7 @@ function renderQuestions() {
         </div>
         <div class="question-history-search-grid">
           <div class="form-field">
-            <label for="questionHistoryInlineSearch">질문 검색</label>
+            <label for="questionHistoryInlineSearch">나눈 질문 검색</label>
             <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
           </div>
           <div class="form-field">
@@ -15750,11 +15750,11 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>상대방에게 전달할까요?</h3>
-        <p>작성한 답변이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>이 마음을 보낼까요?</h3>
+        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
-          <button class="primary-btn" type="button" data-question-send-confirm>전달하기</button>
+          <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
         </div>
       </div>
     </div>
@@ -15768,7 +15768,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("questions");
-    showToast("답변을 상대방에게 전달했어요.");
+    showToast("마음을 상대방에게 보냈어요.");
   });
 }
 
@@ -15811,7 +15811,7 @@ function renderAlbumRecordList(memories = state.memories) {
   const visibleCount = duariAlbumRecordVisibleCount();
   const visibleMemories = memories.slice(0, visibleCount);
   return {
-    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">아직 남긴 기록이 없어요.</p>`,
+    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">아직 함께 남긴 순간이 없어요.</p>`,
     hasMore: memories.length > visibleMemories.length
   };
 }
@@ -15955,11 +15955,11 @@ function renderAlbumCalendar(memories = state.memories) {
     </section>
     <section class="card selected-calendar-records">
       <div class="between">
-        <h3>${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일 기록</h3>
+        <h3>${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일의 순간</h3>
         <span class="meta">${selectedMemories.length}개</span>
       </div>
       <div class="list">
-        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날짜에 남긴 기록이 없어요.</p>`}
+        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날에 남긴 순간이 없어요.</p>`}
       </div>
     </section>
   `;
@@ -16004,8 +16004,8 @@ function renderAlbum() {
     <div class="section-stack">
       <div class="album-record-toolbar">
         <div class="between">
-          <span class="meta">총 ${state.memories.length}개</span>
-          <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
+          <span class="meta">총 ${state.memories.length}개의 순간</span>
+          <button class="primary-btn" type="button" data-action="new-memory">순간 기록하기</button>
         </div>
       </div>
       ${renderAlbumCalendar()}
@@ -16206,22 +16206,22 @@ function openQuestionModal() {
     <div class="modal-sheet notification-page question-answer-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
-        <h3>답변 추가</h3>
+        <h3>마음 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘의 질문</p>
+          <p class="eyebrow">오늘 나눌 질문</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
-          <label>답변</label>
-          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="솔직하게 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+          <label>내 마음</label>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 마음을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
         </div>
-        <p class="meta question-delivery-note">답변은 상대방에게 전달됩니다.</p>
+        <p class="meta question-delivery-note">남긴 마음은 상대방에게 전달됩니다.</p>
         <div class="diary-editor-action-stack">
-          <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬어서 보내기</button>
-          <button class="primary-btn full" type="button" data-question-send-original>상대에게 전달하기</button>
+          <button class="ghost-btn full" type="button" data-question-ai>AI로 부드럽게 다듬기</button>
+          <button class="primary-btn full" type="button" data-question-send-original>상대에게 마음 보내기</button>
         </div>
       </div>
     </div>
