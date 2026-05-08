@@ -11360,7 +11360,11 @@ function openMemoryCreatePage(backAction = null) {
 let aiDiaryEditorDraft = null;
 
 function normalizeDiaryEditorHeading(heading) {
-  return String(heading || "") === "일기 쓰기" ? "일기 추가" : (heading || "일기 추가");
+  const text = String(heading || "").trim();
+  if (!text || text === "일기 쓰기" || text === "새 마음 남기기") return "일기 추가";
+  if (text === "마음 일기 다듬기") return "일기 수정";
+  if (text === "마음 일기") return "일기 상세";
+  return text;
 }
 
 const renderDiaryEditorAiFlowBase = renderDiaryEditor;
@@ -12507,7 +12511,9 @@ let duariDiaryAiDraft = null;
 
 function duariNormalizeDiaryHeading(heading) {
   const text = String(heading || "").trim();
-  if (!text || text === "일기 쓰기") return "일기 추가";
+  if (!text || text === "일기 쓰기" || text === "새 마음 남기기") return "일기 추가";
+  if (text === "마음 일기 다듬기") return "일기 수정";
+  if (text === "마음 일기") return "일기 상세";
   return text;
 }
 
@@ -16846,4 +16852,99 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       linkedMemoryTitle: linked
     };
   };
+})();
+
+(function installCoupleDiaryModalCopyPolish() {
+  if (window.__duariCoupleDiaryModalCopyPolish) return;
+  window.__duariCoupleDiaryModalCopyPolish = true;
+
+  const titleCopy = {
+    "기록 상세": "우리 순간",
+    "기록 수정": "우리 순간 다듬기",
+    "기록 추가": "새로운 순간 남기기",
+    "일기 상세": "마음 일기",
+    "일기 수정": "마음 일기 다듬기",
+    "일기 추가": "새 마음 남기기",
+    "사진 상세": "사진으로 보는 순간",
+    "기록 선택": "이어질 순간 선택"
+  };
+  const sectionCopy = {
+    "사진 관리": "사진으로 남긴 장면",
+    "연결된 일기": "이 순간에 이어진 마음",
+    "관련 기록 연결": "이 마음과 이어진 순간",
+    "연결된 기록": "이 마음과 이어진 순간"
+  };
+  const buttonCopy = {
+    "기록 수정": "이 순간 다듬기",
+    "일기 연결 추가": "마음 일기 추가",
+    "연결된 일기 추가": "마음 일기 추가",
+    "연결한 일기 선택": "이어진 마음 선택",
+    "기록 연결 추가": "이어질 순간 선택",
+    "연결할 기록 선택": "이어질 순간 선택",
+    "기록 선택": "이어질 순간 선택",
+    "이 기록 추가": "이 순간 연결",
+    "AI로 정리하기": "AI로 마음 다듬기",
+    "전할 말로 정리하기": "AI로 마음 다듬기",
+    "전할 말 정리하기": "AI로 마음 다듬기",
+    "원본으로 저장": "이 마음 저장",
+    "수정 저장": "수정한 마음 저장",
+    "임시 저장": "초안으로 보관"
+  };
+
+  function replaceExactText(elements, copy) {
+    elements.forEach((element) => {
+      const text = element.textContent?.trim();
+      if (copy[text]) element.textContent = copy[text];
+    });
+  }
+
+  function replaceDiaryLabels(root) {
+    qsa(".diary-write-page .form-field label", root).forEach((label) => {
+      const text = label.textContent.trim();
+      if (text === "공개 범위") label.textContent = "이 마음을 볼 사람";
+      if (text === "제목") label.textContent = "마음 제목";
+      if (text === "날짜") label.textContent = "마음을 남긴 날";
+      if (text === "본문") label.textContent = "마음 내용";
+      if (text === "내 감정") label.textContent = "오늘의 감정";
+    });
+    qsa(".diary-write-page textarea[placeholder='오늘의 마음을 적어보세요.']", root).forEach((textarea) => {
+      textarea.setAttribute("placeholder", "오늘 상대에게 전하고 싶거나 나만 간직하고 싶은 마음을 적어보세요.");
+    });
+  }
+
+  function replaceMemoryLabels(root) {
+    qsa(".memory-edit-page .form-field label", root).forEach((label) => {
+      const text = label.textContent.trim();
+      if (text === "제목") label.textContent = "순간 제목";
+      if (text === "날짜") label.textContent = "함께한 날짜";
+      if (text === "장소") label.textContent = "함께한 장소";
+      if (text === "기록 유형") label.textContent = "순간 유형";
+    });
+  }
+
+  function replaceEmptyCopy(root) {
+    qsa(".linked-record-empty", root).forEach((node) => {
+      const text = node.textContent.trim();
+      if (text === "연결된 일기가 없습니다.") node.textContent = "아직 이 순간에 이어진 마음 일기가 없어요.";
+      if (text === "연결된 기록이 없습니다.") node.textContent = "아직 이 마음과 이어진 우리 순간이 없어요. 관련된 기록을 연결하면 그날의 장면과 감정을 함께 볼 수 있어요.";
+      if (text === "추가된 사진이 없습니다.") node.textContent = "아직 이 순간에 담긴 사진이 없어요. 함께한 장면을 더하면 기억이 더 또렷해져요.";
+    });
+  }
+
+  function polishCoupleDiaryCopy(root = document) {
+    replaceExactText(qsa(".notification-header h3, .modal-sheet > .between h3", root), titleCopy);
+    replaceExactText(qsa("section h3, .between h3", root), sectionCopy);
+    replaceExactText(qsa("button", root), buttonCopy);
+    replaceDiaryLabels(root);
+    replaceMemoryLabels(root);
+    replaceEmptyCopy(root);
+  }
+
+  const previousOpenModal = openModal;
+  openModal = function openModalWithCoupleDiaryCopy(html) {
+    previousOpenModal(html);
+    polishCoupleDiaryCopy(qs("#modal") || document);
+  };
+
+  window.duariPolishCoupleDiaryCopy = polishCoupleDiaryCopy;
 })();
