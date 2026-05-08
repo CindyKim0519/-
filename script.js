@@ -1948,7 +1948,6 @@ function renderMy() {
         ["기념일 설정", "자동 기념일, 추가한 기념일", "couple-settings"],
         ["알림", "기본 알림, 기념일", "notification-settings"],
         ["PIN 재설정", "6자리 PIN 재설정, 관계 전환 확인", "security"],
-        ["FAQ", "자주 묻는 질문", "support"],
         ["문의하기", "문의 접수와 문의내역", "support-contact"],
         ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
