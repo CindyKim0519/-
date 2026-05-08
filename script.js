@@ -2720,7 +2720,7 @@ function openNotificationSettingsModal() {
     <div class="modal-sheet notification-page notification-settings-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
-        <h3>알림 설정</h3>
+        <h3>설정</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -2735,6 +2735,10 @@ function openNotificationSettingsModal() {
             </div>
           </section>
         `).join("")}
+        <div class="diary-editor-action-row">
+          <button class="ghost-btn" type="button" data-action="logout">로그아웃</button>
+          <button class="ghost-btn danger-outline" type="button" data-action="danger-withdraw">회원 탈퇴</button>
+        </div>
       </div>
     </div>
   `);
