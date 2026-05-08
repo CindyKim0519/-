@@ -2625,11 +2625,11 @@ function openAnniversarySettingsPage() {
         <section class="card">
           <h3>추가한 기념일</h3>
           <div class="between anniversary-list-header">
-            <span class="meta">${state.anniversaries.length}개</span>
+            <span class="meta">총 ${state.anniversaries.length}개</span>
             <button class="chip-btn active" type="button" data-open-add-anniversary>기념일 추가</button>
           </div>
           <div class="list">
-            ${state.anniversaries.map((item, index) => `
+            ${state.anniversaries.length ? state.anniversaries.map((item, index) => `
               <article class="card inner-card anniversary-item-card">
                 <div class="between anniversary-item-header">
                   <div class="anniversary-item-text">
@@ -2649,7 +2649,7 @@ function openAnniversarySettingsPage() {
                   </div>
                 </div>
               </article>
-            `).join("")}
+            `).join("") : `<p class="linked-record-empty">아직 추가한 기념일이 없어요.</p>`}
           </div>
         </section>
       </div>
