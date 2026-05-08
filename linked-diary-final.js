@@ -46,13 +46,28 @@
   };
 
   bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
+    if (typeof duariBindLinkedDiaryDropdowns === "function") duariBindLinkedDiaryDropdowns(root);
     qsa("[data-linked-diary-index]", root).forEach((card) => {
       const open = () => {
         window.duariOpenLinkedDiaryCard(card, null, backAction);
       };
-      card.addEventListener("click", open);
+      card.addEventListener("click", (event) => {
+        if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          return;
+        }
+        open();
+      });
       card.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
+        if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          return;
+        }
         event.preventDefault();
         open();
       });
