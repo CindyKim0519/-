@@ -64,7 +64,6 @@ const state = {
   notifications: [
     { type: "기록", text: "상대가 새 우리 기록을 추가함" },
     { type: "다이어리", text: "상대가 내 공유 일기에 반응함" },
-    { type: "기념일", text: "가까운 기념일 D-7" },
   ],
 };
 
@@ -1699,8 +1698,6 @@ const notificationItemsFinal = [
   { type: "diary", title: "상대가 공유 일기를 작성함", body: "새 공유 일기가 도착했어요." },
   { type: "diary", title: "상대가 내 공유 일기에 반응함", body: "공유 일기에 '고마워' 반응을 남겼어요." },
   { type: "message", title: "상대가 정리한 메시지를 보냄", body: "전하고 싶은 마음을 정리한 메시지가 도착했어요." },
-  { type: "anniversary", title: "기념일 D-day", body: "오늘은 여행 1주년이에요." },
-  { type: "anniversary", title: "가까운 기념일 D-7", body: "여행 1주년이 7일 남았어요." },
   { type: "system", title: "커플 연결 완료", body: "봄이와 하린의 공간이 연결되었어요." },
 ];
 
@@ -1715,7 +1712,8 @@ const notificationTypeLabelsFinal = {
 function renderNotificationItemsFinal(filter = "all") {
   const list = qs("[data-notification-list]");
   if (!list) return;
-  const filtered = filter === "all" ? notificationItemsFinal : notificationItemsFinal.filter((item) => item.type === filter);
+  const notificationItems = [...notificationItemsFinal, ...duariAnniversaryNotificationItems()];
+  const filtered = filter === "all" ? notificationItems : notificationItems.filter((item) => item.type === filter);
   list.innerHTML = filtered.map((item) => `
     <section class="card notification-item">
       <div class="notification-title-row">
@@ -2222,8 +2220,6 @@ const notificationItemsV4 = [
   { type: "diary", title: "상대가 공유 일기를 작성함", body: "새 공유 일기가 도착했어요." },
   { type: "diary", title: "상대가 내 공유 일기에 반응함", body: "공유 일기에 '고마워' 반응을 남겼어요." },
   { type: "message", title: "상대가 정리한 메시지를 보냄", body: "전하고 싶은 마음을 정리한 메시지가 도착했어요." },
-  { type: "anniversary", title: "기념일 D-day", body: "오늘은 여행 1주년이에요." },
-  { type: "anniversary", title: "가까운 기념일 D-7", body: "여행 1주년이 7일 남았어요." },
   { type: "system", title: "커플 연결 완료", body: "봄이와 하린의 공간이 연결되었어요." },
 ];
 
@@ -14346,12 +14342,12 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
   window.duariRemoveCardClasses = removeCardClasses;
 })();
 
-function duariHomeAnniversaryPillHtml() {
+function duariTriggeredAnniversaries() {
   const anniversaries = Array.isArray(state.anniversaries) ? state.anniversaries : [];
-  if (!anniversaries.length) return "";
+  if (!anniversaries.length) return [];
   const today = new Date();
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const upcoming = anniversaries
+  return anniversaries
     .map((item) => {
       const dateValue = String(item.date || "").replaceAll(".", "-");
       const parts = dateValue.split("-").map(Number);
@@ -14364,11 +14360,35 @@ function duariHomeAnniversaryPillHtml() {
       return { ...item, diff };
     })
     .filter(Boolean)
+    .filter((item) => [0, 1, 7].includes(item.diff))
     .sort((a, b) => a.diff - b.diff);
+}
+
+function duariAnniversaryDdayLabel(diff) {
+  if (diff === 0) return "D-day";
+  return `D-${diff}`;
+}
+
+function duariHomeAnniversaryPillHtml() {
+  const upcoming = duariTriggeredAnniversaries();
   const next = upcoming[0];
   if (!next) return "";
-  const label = next.diff === 0 ? "D-day" : `D-${next.diff}`;
+  const label = duariAnniversaryDdayLabel(next.diff);
   return `<span class="anniversary-pill">${label} ${duariEscapeHtml(next.name || "기념일")}</span>`;
+}
+
+function duariAnniversaryNotificationItems() {
+  return duariTriggeredAnniversaries().map((item) => {
+    const name = item.name || "기념일";
+    if (item.diff === 0) {
+      return { type: "anniversary", title: `오늘은 ${name}이에요`, body: "홈에서도 오늘의 기념일을 확인할 수 있어요." };
+    }
+    return {
+      type: "anniversary",
+      title: `기념일 ${duariAnniversaryDdayLabel(item.diff)}`,
+      body: `${name}이 ${item.diff === 1 ? "하루" : `${item.diff}일`} 남았어요.`,
+    };
+  });
 }
 
 renderHome = function renderHome() {
