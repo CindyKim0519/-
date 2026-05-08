@@ -145,6 +145,7 @@ function duariSavePersistentContent() {
       memories: state.memories,
       diaries: state.diaries,
       questionHistory: state.questionHistory,
+      anniversaries: state.anniversaries,
     }));
   } catch {
     showToast?.("저장 공간이 부족해요. 사진을 줄여 다시 저장해 주세요.");
@@ -159,6 +160,7 @@ function duariLoadPersistentContent() {
       state.memories = Array.isArray(saved?.memories) ? saved.memories : [];
       state.diaries = Array.isArray(saved?.diaries) ? saved.diaries : [];
       state.questionHistory = Array.isArray(saved?.questionHistory) ? saved.questionHistory : [];
+      if (Array.isArray(saved?.anniversaries)) state.anniversaries = saved.anniversaries;
       duariStripBundledSamplesFromAccountContent();
       duariSavePersistentContent();
     } else if (state.currentLoginEmail) {
@@ -2513,6 +2515,7 @@ function addCustomAnniversary(element) {
   const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
   const newAnniversary = { name, date: date.replaceAll("-", "."), repeat, alert: true };
   state.anniversaries = [newAnniversary, ...state.anniversaries];
+  duariSavePersistentContent();
   openAnniversarySettingsPage();
   showToast("기념일 설정에 추가했어요.");
 }
@@ -2523,12 +2526,14 @@ function saveEditedAnniversary(element, index) {
   const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
   const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
   state.anniversaries[index] = { ...state.anniversaries[index], name, date: date.replaceAll("-", "."), repeat };
+  duariSavePersistentContent();
   openAnniversarySettingsPage();
   showToast("기념일을 수정했어요.");
 }
 
 function deleteAnniversary(index) {
   state.anniversaries.splice(index, 1);
+  duariSavePersistentContent();
   openAnniversarySettingsPage();
   showToast("기념일을 삭제했어요.");
 }
@@ -2607,7 +2612,7 @@ function openAnniversarySettingsPage() {
   openModal(`
     <div class="modal-sheet notification-page anniversary-settings-page">
       <header class="notification-header">
-        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
+        <button class="notification-nav-btn" data-anniversary-settings-back aria-label="뒤로가기">←</button>
         <h3>기념일 설정</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
@@ -2653,6 +2658,10 @@ function openAnniversarySettingsPage() {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  qs("[data-anniversary-settings-back]", sheet)?.addEventListener("click", () => {
+    closeModal();
+    setTab("home");
+  });
   qs("[data-open-add-anniversary]", sheet)?.addEventListener("click", openAddAnniversaryPage);
   sheet.addEventListener("click", (event) => {
     const menuButton = event.target.closest("[data-anniversary-menu]");
