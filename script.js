@@ -15960,6 +15960,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
   window.duariOpenLinkedDiaryCard = function duariOpenLinkedDiaryCard(card, event = null, backAction = null) {
     if (!card) return;
+    if (event?.target?.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
     event?.preventDefault?.();
     event?.stopPropagation?.();
     event?.stopImmediatePropagation?.();
@@ -16127,6 +16128,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
   if (!window.__duariLinkedDiaryFinalClickGuard) {
     window.__duariLinkedDiaryFinalClickGuard = true;
     window.addEventListener("click", (event) => {
+      if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
       if (!card) return;
       window.duariOpenLinkedDiaryCard(card, event);
@@ -16134,6 +16136,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
     window.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return;
       const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
       if (!card) return;
       window.duariOpenLinkedDiaryCard(card, event);

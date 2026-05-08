@@ -82,6 +82,7 @@
       window.__duariLinkedDiaryEarlyRouter = true;
 
       const openLinkedDiary = (event) => {
+        if (event.target.closest?.("[data-linked-diary-menu], [data-linked-diary-dropdown], .linked-diary-menu-wrap, .linked-diary-right-tools")) return false;
         const card = event.target.closest?.(".memory-detail-page [data-linked-diary-index]");
         if (!card || typeof window.duariOpenLinkedDiaryCard !== "function") return false;
         window.duariOpenLinkedDiaryCard(card, event);
