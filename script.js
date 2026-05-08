@@ -1,7 +1,7 @@
 const onboardingSlides = [
-  { art: "diary", title: "함께한 순간을 사진과 글로 남겨요.", body: "데이트, 여행, 일상까지 우리만의 기록으로 모아둘 수 있어요." },
-  { art: "lock", title: "나만의 마음과 함께 보는 일기를 따로 기록해요.", body: "개인 일기와 공유 일기를 구분해서 안전하게 남길 수 있어요." },
-  { art: "message", title: "전하고 싶은 말을 더 부드럽게 정리해요.", body: "질문, 일기, 기록에서 꺼낸 마음을 확인하고 다듬어 보낼 수 있어요." },
+  { art: "diary", title: "우리의 하루가 흩어지지 않게 모아요.", body: "사진 한 장, 짧은 문장 하나도 둘만의 기록이 될 수 있어요. 데이트와 여행은 물론 평범한 일상까지 차곡차곡 남겨요." },
+  { art: "lock", title: "나만 보는 마음과 함께 보는 마음을 나눠요.", body: "혼자 정리하고 싶은 이야기는 조용히 보관하고, 함께 기억하고 싶은 일기는 상대와 나눌 수 있어요." },
+  { art: "message", title: "말하기 어려운 마음도 부드럽게 전해요.", body: "질문과 일기에서 꺼낸 마음을 한 번 더 다듬어, 상대가 편하게 읽을 수 있는 문장으로 준비해요." },
 ];
 
 const state = {
@@ -13313,7 +13313,7 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     duariQuestionAnswerDraft.original = original || duariQuestionAnswerDraft.body || "";
     duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
     openQuestionModal();
-    showToast("AI 결과를 답변 본문에 저장했어요.");
+    showToast("다듬은 마음을 본문에 담았어요.");
   });
 }
 
@@ -13398,7 +13398,7 @@ function duariRefreshPhotoManageCard(count, options = {}) {
     : (Number(state.memories?.[memoryIndex]?.representativePhotoIndex) || 0);
   const openAddChoice = () => openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
   if (safeCount <= 0) {
-    card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
+    card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 이 기록에 담긴 사진이 없어요. 함께한 장면을 추가하면 기록이 더 선명해져요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
     qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
     return;
   }
@@ -13470,7 +13470,7 @@ function openPhotoManageDeleteConfirm(options = {}) {
     <div class="photo-delete-overlay" role="dialog" aria-modal="true">
       <section class="photo-delete-sheet">
         <h3>사진을 삭제할까요?</h3>
-        <p>삭제하면 사진 관리에서 사라지고 복구할 수 없어요.</p>
+        <p>이 사진은 기록에서 사라지고 다시 복구할 수 없어요. 정말 삭제할까요?</p>
         <div class="inline-action-pair">
           <button class="primary-btn" type="button" data-photo-manage-delete-confirm>삭제</button>
           <button class="ghost-btn" type="button" data-photo-manage-delete-cancel>취소</button>
@@ -13683,7 +13683,7 @@ function openLoginModal(provider = "이메일") {
         ` : `
           <section class="card">
             <h3>소셜 계정으로 계속하기</h3>
-            <p>로그인 후 6자리 PIN만 설정하면 바로 시작할 수 있어요.</p>
+            <p>처음 로그인하는 계정이라면 6자리 PIN을 설정한 뒤, 혼자 먼저 쓸지 상대와 연결할지 선택하게 돼요.</p>
           </section>
           <button class="primary-btn full" type="button" data-entry-login-complete>계속하기</button>
         `}
@@ -13722,9 +13722,9 @@ const signupTerms = [
     type: "필수",
     title: "이용약관",
     content: [
-      ["서비스 이용", "듀아리는 커플의 사진, 기록, 일기, 질문 답변을 안전하게 정리하는 관계 기록 서비스입니다."],
+      ["서비스 이용", "듀아리는 커플이 함께 보낸 순간과 각자의 마음을 안전하게 정리하는 관계 기록 서비스입니다."],
       ["회원가입과 동의", "회원가입을 위해 이메일, 비밀번호, 필수 약관 동의가 필요합니다. 선택 약관은 동의하지 않아도 서비스를 이용할 수 있습니다."],
-      ["기록과 공유", "나만 보기 기록은 본인에게만 보이며, 우리 둘이 보기 기록과 공유 일기는 연결된 상대에게 표시될 수 있습니다."],
+      ["기록과 공유", "나만 보기 기록은 본인에게만 보이고, 우리 둘이 보기 기록과 공유 일기는 연결된 상대와 함께 확인할 수 있습니다."],
     ],
   },
   {
@@ -13733,9 +13733,9 @@ const signupTerms = [
     type: "필수",
     title: "개인정보처리방침",
     content: [
-      ["수집하는 정보", "계정 이메일, 닉네임, 프로필 정보, 관계 기록, 일기, 질문 답변, 알림 설정처럼 서비스 이용에 필요한 정보를 다룹니다."],
-      ["개인 기록 보호", "개인 일기, 개인 초안, 나만 보기 기록은 상대에게 존재 자체가 노출되지 않도록 분리해서 관리합니다."],
-      ["탈퇴와 보존", "탈퇴 시 개인 데이터는 삭제되며, 공유 기록이나 공유 일기처럼 상대 공간에 남는 정보는 탈퇴한 사용자로 표시될 수 있습니다."],
+      ["수집하는 정보", "계정 이메일, 닉네임, 관계 기록, 일기, 질문 답변, 알림 설정처럼 듀아리를 사용하는 데 필요한 정보를 다룹니다."],
+      ["개인 기록 보호", "개인 일기, 개인 초안, 나만 보기 기록은 상대에게 보이지 않도록 공유 기록과 분리해서 관리합니다."],
+      ["탈퇴와 보존", "탈퇴하면 개인 데이터는 삭제되지만, 이미 함께 남긴 공유 기록과 공유 일기는 상대 화면에 남을 수 있습니다."],
     ],
   },
   {
@@ -13745,8 +13745,8 @@ const signupTerms = [
     title: "마케팅 정보 수신 동의",
     content: [
       ["선택 동의", "이 항목은 선택 사항이며 동의하지 않아도 듀아리의 기본 기능을 사용할 수 있습니다."],
-      ["수신 내용", "새 기능, 이벤트, 관계 기록 팁처럼 앱 이용에 도움이 되는 안내를 받을 수 있습니다."],
-      ["철회", "마이 탭의 알림 또는 계정 설정에서 언제든 수신 동의를 변경할 수 있습니다."],
+      ["수신 내용", "새 기능, 이벤트, 둘의 기록을 더 잘 남기는 팁처럼 듀아리 이용에 도움이 되는 안내를 받을 수 있습니다."],
+      ["철회", "설정에서 언제든 수신 동의를 바꿀 수 있으며, 동의하지 않아도 기본 기록 기능은 사용할 수 있습니다."],
     ],
   },
 ];
@@ -14100,7 +14100,7 @@ function openFirstSetupPage() {
       <div class="section-stack">
         <section class="card">
           <h3>앱 보안 PIN</h3>
-          <p>이전 커플 보관함, 관계 전환 확인, 회원 탈퇴 같은 중요한 동작에 사용할 6자리 PIN을 설정해요.</p>
+          <p>둘만의 기록을 더 안전하게 지킬 수 있도록 6자리 PIN을 설정해요. 관계 전환이나 회원 탈퇴처럼 중요한 순간에 한 번 더 확인합니다.</p>
         </section>
         <div class="form-field">
           <label>앱 보안 PIN 6자리</label>
@@ -14132,7 +14132,7 @@ function openStartMethodPage() {
       <div class="section-stack">
         <section class="card">
           <h3>어떻게 시작할까요?</h3>
-          <p>상대와 연결해 함께 기록하거나, 혼자 먼저 기록을 시작할 수 있어요.</p>
+          <p>지금 바로 상대와 연결해 둘만의 공간을 만들 수도 있고, 먼저 혼자 마음과 기록을 차분히 쌓아둘 수도 있어요.</p>
         </section>
         <button class="primary-btn full" type="button" data-entry-connect>상대와 연결하기</button>
         <button class="ghost-btn full" type="button" data-entry-alone>혼자 먼저 시작하기</button>
@@ -14158,7 +14158,7 @@ function openStartAlonePage() {
       <div class="section-stack">
         <section class="hero-card">
           <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
-          <p>혼자 먼저 시작하면 나만보기 기록과 개인 일기만 사용할 수 있어요.</p>
+          <p>아직 연결하지 않아도 괜찮아요. 나만 보기 기록과 개인 일기로 먼저 시작하고, 준비되면 언제든 상대를 초대할 수 있어요.</p>
         </section>
         <button class="primary-btn full" type="button" data-entry-confirm-alone>혼자 시작하기</button>
         <button class="ghost-btn full" type="button" data-entry-connect>상대와 연결하기</button>
@@ -14175,7 +14175,7 @@ function openStartAlonePage() {
     qs("#onboarding").classList.add("is-hidden");
     qs("#app").classList.remove("is-hidden");
     setTab("home");
-    showToast("혼자 먼저 시작했어요. 상대 초대는 언제든 할 수 있어요.");
+    showToast("나만의 듀아리를 먼저 열었어요. 상대 초대는 언제든 할 수 있어요.");
   });
   qs("[data-entry-connect]")?.addEventListener("click", () => openRelationAddPage(1, { fromOnboarding: true }));
 }
@@ -14523,7 +14523,7 @@ renderHome = function renderHome() {
         ${questionCard}
         <section class="card home-records-card">
           <h3>최근 우리 기록</h3>
-          <p>아직 함께 남긴 기록이 없어요.</p>
+          <p>아직 이 공간에 남긴 순간이 없어요. 오늘의 작은 장면부터 둘만의 기록으로 남겨보세요.</p>
           <button class="primary-btn full" data-action="new-memory">순간 기록하기</button>
         </section>
       </div>
@@ -14535,7 +14535,7 @@ renderHome = function renderHome() {
   const recentMemories = (state.memories || []).slice(0, 3);
   const homeRecentMemoryCards = recentMemories.length
     ? memoryCards(recentMemories, true)
-    : `<p>아직 함께 남긴 기록이 없어요.</p>`;
+    : `<p>아직 이 공간에 남긴 순간이 없어요. 오늘의 작은 장면부터 둘만의 기록으로 남겨보세요.</p>`;
   const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
   const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
   const anniversaryPill = duariHomeAnniversaryPillHtml();
@@ -15195,10 +15195,10 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
 
 function duariEmptyDiaryMessage() {
   const type = duariDiaryFilterForCurrentView().type || "all";
-  if (type === "mineShared") return "아직 함께 나눈 마음이 없어요.";
-  if (type === "private") return "아직 나만의 마음이 없어요.";
-  if (type === "draft") return "아직 저장해 둔 초안이 없어요.";
-  return "아직 남긴 마음이 없어요.";
+  if (type === "mineShared") return "아직 상대와 함께 나눈 마음이 없어요. 함께 보고 싶은 이야기를 남겨보세요.";
+  if (type === "private") return "아직 나만 볼 수 있는 마음이 없어요. 정리되지 않은 생각도 편하게 적어둘 수 있어요.";
+  if (type === "draft") return "아직 저장해 둔 초안이 없어요. 바로 보내기 어려운 마음은 잠시 보관해둘 수 있어요.";
+  return "아직 남긴 마음이 없어요. 오늘의 감정이나 기억하고 싶은 말을 천천히 적어보세요.";
 }
 
 function duariJournalSubTabsHtml(activeView = "diary") {
@@ -15634,7 +15634,7 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
 
 function duariQuestionHistoryListHtml(history, filtered, limit = filtered.length) {
   const visible = filtered.slice(0, limit);
-  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 함께 나눈 질문이 없어요. 오늘의 질문에 마음을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
 }
 
 function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 10) {
@@ -15811,7 +15811,7 @@ function renderAlbumRecordList(memories = state.memories) {
   const visibleCount = duariAlbumRecordVisibleCount();
   const visibleMemories = memories.slice(0, visibleCount);
   return {
-    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">아직 함께 남긴 순간이 없어요.</p>`,
+    html: visibleMemories.length ? memoryCards(visibleMemories) : `<p class="linked-record-empty">아직 함께 남긴 순간이 없어요. 사진이 없어도 괜찮으니 기억하고 싶은 장면부터 남겨보세요.</p>`,
     hasMore: memories.length > visibleMemories.length
   };
 }
@@ -15821,7 +15821,7 @@ function renderAlbumPhotoGroups(memories = state.memories) {
     const memoryIndex = state.memories.indexOf(memory);
     return duariActualPhotoCountForMemory(memoryIndex) > 0;
   });
-  if (!memoriesWithPhotos.length) return `<p class="linked-record-empty">아직 남긴 사진이 없어요.</p>`;
+  if (!memoriesWithPhotos.length) return `<p class="linked-record-empty">아직 기록에 담긴 사진이 없어요. 둘이 함께한 장면을 추가하면 이곳에서 한눈에 볼 수 있어요.</p>`;
   const groups = memoriesWithPhotos.reduce((acc, memory) => {
     const date = memory.date || "날짜 없음";
     if (!acc.has(date)) acc.set(date, []);
@@ -15959,7 +15959,7 @@ function renderAlbumCalendar(memories = state.memories) {
         <span class="meta">${selectedMemories.length}개</span>
       </div>
       <div class="list">
-        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날에 남긴 순간이 없어요.</p>`}
+        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날에는 아직 남긴 순간이 없어요. 기억하고 싶은 일이 있었다면 새 기록으로 남겨보세요.</p>`}
       </div>
     </section>
   `;
@@ -16182,7 +16182,7 @@ function openPhotoDeleteConfirm() {
     <div class="photo-delete-overlay" role="dialog" aria-modal="true">
       <section class="photo-delete-sheet">
         <h3>사진을 삭제할까요?</h3>
-        <p>${isMine ? "작성자가 올린 사진이면 삭제하면 양쪽에서 사라집니다." : "이 사진은 상대방이 올린 사진이어서 삭제할 수 없습니다."}</p>
+        <p>${isMine ? "삭제하면 이 사진은 둘의 기록에서 함께 사라져요. 다시 복구할 수 없으니 한 번 더 확인해 주세요." : "이 사진은 상대방이 올린 사진이라 삭제할 수 없어요. 내 화면에서만 숨기는 기능은 별도로 관리할 수 있어요."}</p>
         <div class="inline-action-pair">
           <button class="ghost-btn" type="button" data-photo-delete-cancel>취소</button>
           <button class="primary-btn" type="button" data-photo-delete-confirm ${isMine ? "" : "disabled"}>삭제</button>
@@ -16346,7 +16346,7 @@ function openQuestionAiResultPage({ original = "", tone = "부드럽게", result
     duariQuestionAnswerDraft.original = original || duariQuestionAnswerDraft.body || "";
     duariQuestionAnswerDraft.body = qs("#questionAiResultText")?.value || cleanResult;
     openQuestionModal();
-    showToast("AI 결과를 답변 본문에 저장했어요.");
+    showToast("다듬은 마음을 본문에 담았어요.");
   });
 }
 const duariOpenMemoryCreatePageWithoutLinkedDiaryBase = openMemoryCreatePage;
@@ -16560,7 +16560,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     return `
       <section class="card linked-record-card">
         <div class="between"><h3>연결된 기록</h3><span class="meta">0개</span></div>
-        <p class="linked-record-empty">연결된 기록이 없습니다.</p>
+        <p class="linked-record-empty">아직 이 마음과 연결된 기록이 없어요. 함께한 순간을 연결하면 그때의 마음을 더 쉽게 다시 떠올릴 수 있어요.</p>
       </section>
     `;
   };
@@ -16630,7 +16630,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
               <h3>연결된 일기</h3>
               <span class="meta">${linkedDiaries.length}개</span>
             </div>
-            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`}
+            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.</p>`}
           </section>
           <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">기록 수정</button>
         </div>
