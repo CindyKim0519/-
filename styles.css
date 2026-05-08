@@ -628,7 +628,6 @@ h3 {
   border: 0;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  margin-top: -18px;
   padding: 18px;
   position: relative;
   z-index: 3;
