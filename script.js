@@ -15061,6 +15061,7 @@ function duariJournalSubTabsHtml(activeView = "diary") {
 function duariQuestionPanelHtml() {
   const history = duariQuestionHistorySeed();
   const filtered = duariFilterQuestionHistory(history, "전체", "", "");
+  const visibleCount = 10;
   return `
     <section class="question-card">
       <p class="eyebrow">오늘의 질문</p>
@@ -15089,7 +15090,10 @@ function duariQuestionPanelHtml() {
         </div>
       </div>
       <div class="question-history-list" data-question-history-list>
-        ${duariQuestionHistoryListHtml(history, filtered)}
+        ${duariQuestionHistoryListHtml(history, filtered, visibleCount)}
+      </div>
+      <div data-question-history-load-more-slot>
+        ${duariQuestionHistoryLoadMoreHtml(filtered, visibleCount)}
       </div>
     </section>
   `;
@@ -15098,8 +15102,15 @@ function duariQuestionPanelHtml() {
 function duariBindInlineQuestionHistory(root) {
   const history = duariQuestionHistorySeed();
   let activeFilter = "전체";
+  let visibleCount = 10;
   const searchInput = qs("#questionHistoryInlineSearch", root);
   const dateInput = qs("#questionHistoryInlineDate", root);
+  const bindLoadMore = () => {
+    qs("[data-question-history-load-more]", root)?.addEventListener("click", () => {
+      visibleCount += 10;
+      renderList();
+    });
+  };
   const renderList = () => {
     const filtered = duariFilterQuestionHistory(
       history,
@@ -15108,22 +15119,31 @@ function duariBindInlineQuestionHistory(root) {
       dateInput?.value || ""
     );
     const list = qs("[data-question-history-list]", root);
-    if (list) list.innerHTML = duariQuestionHistoryListHtml(history, filtered);
+    if (list) list.innerHTML = duariQuestionHistoryListHtml(history, filtered, visibleCount);
     const count = qs("[data-question-history-count]", root);
     if (count) count.textContent = `총 ${filtered.length}개`;
+    const loadMoreSlot = qs("[data-question-history-load-more-slot]", root);
+    if (loadMoreSlot) loadMoreSlot.innerHTML = duariQuestionHistoryLoadMoreHtml(filtered, visibleCount);
+    bindLoadMore();
   };
   qsa("[data-question-history-filter]", root).forEach((button) => {
     button.addEventListener("click", () => {
       activeFilter = button.dataset.questionHistoryFilter || "전체";
+      visibleCount = 10;
       qsa("[data-question-history-filter]", root).forEach((item) => {
         item.classList.toggle("active", item === button);
       });
       renderList();
     });
   });
-  searchInput?.addEventListener("input", renderList);
-  dateInput?.addEventListener("input", renderList);
-  dateInput?.addEventListener("change", renderList);
+  const resetAndRenderList = () => {
+    visibleCount = 10;
+    renderList();
+  };
+  searchInput?.addEventListener("input", resetAndRenderList);
+  dateInput?.addEventListener("input", resetAndRenderList);
+  dateInput?.addEventListener("change", resetAndRenderList);
+  bindLoadMore();
 }
 
 function duariBindQuestionPanel(root) {
@@ -15399,6 +15419,7 @@ function renderQuestions() {
   if (!questions) return;
   const history = duariQuestionHistorySeed();
   const filtered = duariFilterQuestionHistory(history, "전체", "", "");
+  const visibleCount = 10;
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
@@ -15428,7 +15449,10 @@ function renderQuestions() {
           </div>
         </div>
         <div class="question-history-list" data-question-history-list>
-          ${duariQuestionHistoryListHtml(history, filtered)}
+          ${duariQuestionHistoryListHtml(history, filtered, visibleCount)}
+        </div>
+        <div data-question-history-load-more-slot>
+          ${duariQuestionHistoryLoadMoreHtml(filtered, visibleCount)}
         </div>
       </section>
     </div>
@@ -15456,8 +15480,15 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
   });
 }
 
-function duariQuestionHistoryListHtml(history, filtered) {
-  return filtered.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+function duariQuestionHistoryListHtml(history, filtered, limit = filtered.length) {
+  const visible = filtered.slice(0, limit);
+  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+}
+
+function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 10) {
+  return filtered.length > visibleCount
+    ? `<button class="ghost-btn full diary-load-more" type="button" data-question-history-load-more>더보기</button>`
+    : "";
 }
 
 function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
