@@ -4030,3 +4030,26 @@ h3 {
   min-width: 0;
   width: 100%;
 }
+
+/* Final card treatment: only records and diaries keep the bordered card style. */
+.memory-card,
+.diary-card,
+.linked-diary-card,
+.record-picker-card {
+  background: var(--color-white);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  padding: 12px;
+}
+
+.question-card,
+.question-history-card,
+.hero-card,
+.my-profile-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
