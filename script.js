@@ -16863,15 +16863,21 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "우리 순간": "순간 기록",
     "우리 순간 다듬기": "기록 다듬기",
     "새로운 순간 남기기": "새 기록 남기기",
+    "우리 기록 남기기": "기록 남기기",
     "기록 수정": "기록 다듬기",
     "기록 추가": "새 기록 남기기",
     "일기 상세": "마음 일기",
     "일기 수정": "일기 다듬기",
+    "일기 쓰기": "새 마음 남기기",
     "일기 추가": "새 마음 남기기",
     "사진 상세": "사진으로 보는 순간",
     "기록 선택": "기록 선택",
     "마음 남기기": "답변 남기기",
-    "다른 질문 보기": "다른 질문"
+    "다른 질문 보기": "다른 질문",
+    "최근 공유 일기": "최근 일기",
+    "일기 추가 제안": "이어 쓸 일기",
+    "함께 나눈 질문": "나눈 질문",
+    "전달한 질문": "나눈 질문"
   };
   const sectionCopy = {
     "사진 관리": "사진으로 남긴 장면",
@@ -16879,15 +16885,20 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "이 순간에 이어진 마음": "이어진 마음",
     "관련 기록 연결": "이어진 기록",
     "연결된 기록": "이어진 기록",
-    "이 마음과 이어진 순간": "이어진 기록"
+    "이 마음과 이어진 순간": "이어진 기록",
+    "최근 공유 일기": "최근 일기",
+    "최근 우리 기록": "최근 기록"
   };
   const buttonCopy = {
     "기록 수정": "기록 다듬기",
     "이 순간 다듬기": "기록 다듬기",
     "순간 기록하기": "기록 남기기",
+    "우리 기록 남기기": "기록 남기기",
+    "새 기록 추가": "기록 남기기",
     "마음 남기기": "답변 남기기",
     "질문 더 보기": "다른 질문",
     "이 질문에 답하기": "답변 남기기",
+    "답변 추가": "답변 남기기",
     "일기 연결 추가": "일기 추가",
     "연결된 일기 추가": "일기 추가",
     "연결한 일기 선택": "일기 선택",
@@ -16903,13 +16914,28 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "수정한 마음 저장": "저장",
     "수정 저장": "저장",
     "수정한 순간 저장": "저장",
-    "임시 저장": "초안 저장"
+    "임시 저장": "초안 저장",
+    "초안으로 보관": "초안 저장",
+    "일기 쓰기": "일기 남기기",
+    "기록 상세 보기": "기록 보기",
+    "상대에게 마음 보내기": "상대에게 보내기"
   };
 
   function replaceExactText(elements, copy) {
     elements.forEach((element) => {
       const text = element.textContent?.trim();
       if (copy[text]) element.textContent = copy[text];
+    });
+  }
+
+  function replaceInlineText(root) {
+    qsa("p, span, strong, li", root).forEach((node) => {
+      const text = node.textContent?.trim();
+      if (text === "오늘 나눌 질문") node.textContent = "오늘의 질문";
+      if (text === "남긴 마음은 상대방에게 전달됩니다.") node.textContent = "작성한 답변은 상대에게 전달됩니다.";
+      if (text === "연결 전에는 공유 일기를 사용할 수 없어요.") node.textContent = "연결 전에는 함께 보는 일기를 사용할 수 없어요.";
+      if (text === "아직 공유 일기가 없어요.") node.textContent = "아직 최근 일기가 없어요.";
+      if (text === "기록 수정 내용이 저장됐어요.") node.textContent = "기록을 저장했어요.";
     });
   }
 
@@ -16970,6 +16996,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     replaceDiaryLabels(root);
     replaceMemoryLabels(root);
     replaceQuestionLabels(root);
+    replaceInlineText(root);
     replaceEmptyCopy(root);
   }
 
@@ -16979,5 +17006,16 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     polishCoupleDiaryCopy(qs("#modal") || document);
   };
 
+  ["render", "renderHome", "renderAlbum", "renderDiary", "renderQuestions"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function polishedRenderWrapper(...args) {
+      const result = original.apply(this, args);
+      polishCoupleDiaryCopy(document);
+      return result;
+    };
+  });
+
   window.duariPolishCoupleDiaryCopy = polishCoupleDiaryCopy;
+  window.setTimeout(() => polishCoupleDiaryCopy(document), 0);
 })();
