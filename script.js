@@ -16353,7 +16353,16 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     const index = Number(value);
     return Number.isFinite(index) ? ((index % questions.length) + questions.length) % questions.length : 0;
   };
-  const currentIndex = () => normalizeIndex(localStorage.getItem(storageKey) ?? state.currentQuestionIndex);
+  const answeredQuestions = () => new Set((state.questionHistory || []).map((item) => String(item.question || "").trim()).filter(Boolean));
+  const firstUnansweredIndex = (startIndex = 0) => {
+    const answered = answeredQuestions();
+    for (let offset = 0; offset < questions.length; offset += 1) {
+      const index = normalizeIndex(startIndex + offset);
+      if (!answered.has(questions[index])) return index;
+    }
+    return normalizeIndex(startIndex);
+  };
+  const currentIndex = () => firstUnansweredIndex(normalizeIndex(localStorage.getItem(storageKey) ?? state.currentQuestionIndex));
   const setQuestionIndex = (index) => {
     const nextIndex = normalizeIndex(index);
     state.currentQuestionIndex = nextIndex;
@@ -16367,7 +16376,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     if (activeTab === "diary" && state.journalView === "question") renderDiary();
   };
   window.duariAdvanceTodayQuestion = function duariAdvanceTodayQuestion() {
-    const nextQuestion = setQuestionIndex(currentIndex() + 1);
+    const nextQuestion = setQuestionIndex(firstUnansweredIndex(currentIndex() + 1));
     refreshQuestionSurfaces();
     return nextQuestion;
   };
