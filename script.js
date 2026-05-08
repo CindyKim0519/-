@@ -1795,6 +1795,10 @@ function renderHome() {
 }
 
 function setTab(tab) {
+  if (tab === "questions") {
+    state.journalView = "question";
+    tab = "diary";
+  }
   state.tab = tab;
   qsa(".nav-item").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
   qsa(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === tab));
@@ -14802,8 +14806,75 @@ function duariEmptyDiaryMessage() {
   return "아직 일기가 없어요.";
 }
 
+function duariJournalSubTabsHtml(activeView = "diary") {
+  return `
+    <div class="tabs diary-tabs">
+      <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">질문</button>
+      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">일기</button>
+    </div>
+  `;
+}
+
+function duariQuestionPanelHtml() {
+  const history = duariQuestionHistorySeed();
+  const recentQuestionHistoryHtml = history.length
+    ? history.slice(0, 3).map((item, index) => duariQuestionHistoryCard(item, index)).join("")
+    : `<p class="linked-record-empty">아직 전달한 질문이 없어요.</p>`;
+  return `
+    <section class="question-card">
+      <p class="eyebrow">오늘의 질문</p>
+      <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
+      <div class="home-question-actions question-action-row">
+        <button class="primary-btn" data-action="answer-question">답변 추가</button>
+        <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+      </div>
+    </section>
+    <section class="card question-history-section">
+      <div class="between">
+        <h3>전달한 질문</h3>
+        <span class="meta">최근 ${Math.min(history.length, 3)}개</span>
+      </div>
+      <div class="question-history-list">
+        ${recentQuestionHistoryHtml}
+      </div>
+      <button class="ghost-btn full" type="button" data-question-history-all>전체 보기</button>
+    </section>
+  `;
+}
+
+function duariBindQuestionPanel(root) {
+  bindActions(root);
+  bindQuestionHistoryCards(root, () => {
+    state.journalView = "question";
+    setTab("diary");
+  });
+  qs("[data-question-history-all]", root)?.addEventListener("click", openQuestionHistoryPage);
+}
+
+function duariBindJournalSubTabs(root) {
+  qsa("[data-journal-view]", root).forEach((button) => {
+    button.addEventListener("click", () => {
+      state.journalView = button.dataset.journalView || "diary";
+      renderDiary();
+    });
+  });
+}
+
 renderDiary = function renderDiary() {
   const diary = qs("#diary");
+  const activeJournalView = state.journalView === "question" ? "question" : "diary";
+  if (activeJournalView === "question") {
+    diary.innerHTML = `
+      <div class="section-stack">
+        ${duariJournalSubTabsHtml("question")}
+        ${duariQuestionPanelHtml()}
+      </div>
+    `;
+    duariBindJournalSubTabs(diary);
+    duariBindQuestionPanel(diary);
+    return;
+  }
+
   const entries = state.diaries || [];
   const diaryFilter = duariDiaryFilterForCurrentView();
   const filteredEntries = duariFilterDiaryEntries(entries, diaryFilter);
@@ -14812,6 +14883,7 @@ renderDiary = function renderDiary() {
   const hasMoreEntries = filteredEntries.length > visibleEntries.length;
   diary.innerHTML = `
     <div class="section-stack">
+      ${duariJournalSubTabsHtml("diary")}
       <div class="diary-filter-grid">
         <div class="form-field">
           <label for="diarySearch">일기 검색</label>
@@ -14850,6 +14922,7 @@ renderDiary = function renderDiary() {
       ${hasMoreEntries ? `<button class="ghost-btn full diary-load-more" type="button" data-diary-load-more>더보기</button>` : ""}
     </div>
   `;
+  duariBindJournalSubTabs(diary);
   const searchInput = qs("#diarySearch", diary);
   const monthInput = qs("#diaryMonthFilter", diary);
   const typeInput = qs("#diaryTypeFilter", diary);
