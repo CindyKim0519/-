@@ -548,6 +548,14 @@ h3 {
   z-index: 1;
 }
 
+.screen > .section-stack {
+  background: var(--color-white);
+  border-radius: 28px 28px 0 0;
+  margin: -26px -24px -92px;
+  min-height: calc(100% - 112px);
+  padding: 26px 24px 92px;
+}
+
 @keyframes riseIn {
   from {
     opacity: 0;
