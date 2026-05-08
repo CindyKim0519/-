@@ -2735,9 +2735,9 @@ function openNotificationSettingsModal() {
             </div>
           </section>
         `).join("")}
-        <div class="diary-editor-action-row">
-          <button class="ghost-btn" type="button" data-action="logout">로그아웃</button>
-          <button class="ghost-btn danger-outline" type="button" data-action="danger-withdraw">회원 탈퇴</button>
+        <div class="settings-account-actions">
+          <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
+          <button class="ghost-btn danger-outline full" type="button" data-action="danger-withdraw">회원 탈퇴</button>
         </div>
       </div>
     </div>
