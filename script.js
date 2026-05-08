@@ -1712,7 +1712,7 @@ const notificationTypeLabelsFinal = {
 function renderNotificationItemsFinal(filter = "all") {
   const list = qs("[data-notification-list]");
   if (!list) return;
-  const notificationItems = [...notificationItemsFinal, ...duariAnniversaryNotificationItems()];
+  const notificationItems = [...duariAnniversaryNotificationItems(), ...notificationItemsFinal];
   const filtered = filter === "all" ? notificationItems : notificationItems.filter((item) => item.type === filter);
   list.innerHTML = filtered.map((item) => `
     <section class="card notification-item">
