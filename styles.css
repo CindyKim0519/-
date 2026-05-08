@@ -515,6 +515,43 @@ h3 {
   font-size: 19px;
 }
 
+#openNotifications.has-ionicon::before,
+#openNotifications.is-settings.has-ionicon::before {
+  content: none;
+}
+
+.duari-ion-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.icon-btn .duari-ion-icon,
+#openNotifications .duari-ion-icon,
+.notification-nav-btn .duari-ion-icon,
+.terms-chevron-btn .duari-ion-icon,
+.chip-btn.icon-only .duari-ion-icon {
+  font-size: 20px;
+}
+
+.nav-item .duari-ion-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.menu-chevron .duari-ion-icon,
+.anniversary-pill-chevron .duari-ion-icon {
+  font-size: 18px;
+}
+
+.linked-diary-kebab .duari-ion-icon,
+.linked-record-kebab .duari-ion-icon,
+.anniversary-kebab .duari-ion-icon,
+.relation-kebab .duari-ion-icon {
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
 .screen {
   background: linear-gradient(180deg, transparent 0 112px, var(--color-white) 112px);
   display: none;

@@ -17125,3 +17125,98 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
   window.setTimeout(() => patchHeartActionCopy(document), 0);
 })();
+
+(function installDuariIonicons() {
+  if (window.__duariIoniconsInstalled) return;
+  window.__duariIoniconsInstalled = true;
+
+  const iconHtml = (name, label = "") => `<ion-icon class="duari-ion-icon" name="${name}"${label ? ` aria-label="${label}"` : " aria-hidden=\"true\""}></ion-icon>`;
+
+  function setIconOnly(button, name, label = button?.getAttribute("aria-label") || "") {
+    if (!button) return;
+    button.classList.add("has-ionicon");
+    if (label) button.setAttribute("aria-label", label);
+    if (qs(`ion-icon[name="${name}"]`, button)) return;
+    button.innerHTML = iconHtml(name, label);
+  }
+
+  function patchHeaderIcons(root = document) {
+    const notificationButton = qs("#openNotifications", root) || qs("#openNotifications");
+    if (notificationButton) {
+      const isSettings = notificationButton.classList.contains("is-settings") || state?.tab === "my";
+      setIconOnly(notificationButton, isSettings ? "settings-outline" : "notifications-outline", isSettings ? "설정" : "알림");
+    }
+
+    qsa(".notification-nav-btn", root).forEach((button) => {
+      const label = button.getAttribute("aria-label") || "";
+      const text = button.textContent.trim();
+      if (label.includes("닫기") || text === "×") setIconOnly(button, "close-outline", "닫기");
+      else if (label.includes("뒤로") || text === "←") setIconOnly(button, "chevron-back-outline", "뒤로가기");
+    });
+  }
+
+  function patchTabIcons(root = document) {
+    const tabIcons = {
+      home: "home-outline",
+      album: "albums-outline",
+      diary: "heart-outline",
+      questions: "chatbubble-ellipses-outline",
+      my: "settings-outline"
+    };
+    qsa(".nav-item", root).forEach((button) => {
+      const iconName = tabIcons[button.dataset.tab];
+      const iconSlot = qs("span", button);
+      if (!iconName || !iconSlot) return;
+      if (qs(`ion-icon[name="${iconName}"]`, iconSlot)) return;
+      iconSlot.innerHTML = iconHtml(iconName);
+    });
+  }
+
+  function patchUtilityIcons(root = document) {
+    qsa(".terms-chevron-btn", root).forEach((button) => setIconOnly(button, "chevron-forward-outline", button.getAttribute("aria-label") || "보기"));
+    qsa(".menu-chevron, .anniversary-pill-chevron", root).forEach((node) => {
+      if (qs('ion-icon[name="chevron-forward-outline"]', node)) return;
+      node.innerHTML = iconHtml("chevron-forward-outline");
+    });
+    qsa("[data-calendar-prev], [data-calendar-next]", root).forEach((button) => {
+      const isNext = button.hasAttribute("data-calendar-next");
+      setIconOnly(button, isNext ? "chevron-forward-outline" : "chevron-back-outline", isNext ? "다음 월" : "이전 월");
+    });
+    qsa(".linked-diary-kebab, .linked-record-kebab, .anniversary-kebab, .relation-kebab", root).forEach((button) => {
+      setIconOnly(button, "ellipsis-vertical-outline", button.getAttribute("aria-label") || "더보기");
+    });
+    qsa(".css-icon-search", root).forEach((icon) => {
+      icon.outerHTML = iconHtml("eye-outline", "보기");
+    });
+    qsa(".css-icon-trash", root).forEach((icon) => {
+      icon.outerHTML = iconHtml("trash-outline", "삭제");
+    });
+  }
+
+  function patchIonicons(root = document) {
+    patchHeaderIcons(root);
+    patchTabIcons(root);
+    patchUtilityIcons(root);
+  }
+
+  const previousOpenModal = openModal;
+  openModal = function openModalWithIonicons(html) {
+    previousOpenModal(html);
+    patchIonicons(qs("#modal") || document);
+  };
+
+  ["render", "renderHome", "renderAlbum", "renderDiary", "renderQuestions"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function ioniconRenderWrapper(...args) {
+      const result = original.apply(this, args);
+      patchIonicons(document);
+      return result;
+    };
+  });
+
+  const observer = new MutationObserver(() => patchIonicons(document));
+  observer.observe(document.body, { childList: true, subtree: true });
+  window.duariPatchIonicons = patchIonicons;
+  window.setTimeout(() => patchIonicons(document), 0);
+})();
