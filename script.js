@@ -14749,29 +14749,31 @@ bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backActio
 const duariRenderDiaryWithDateBase = renderDiary;
 function duariDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};
-  const view = state.diaryView || "mineShared";
+  const view = "all";
   if (!state.diaryVisibleCounts[view]) state.diaryVisibleCounts[view] = 5;
   return state.diaryVisibleCounts[view];
 }
 
 function duariIncreaseDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};
-  const view = state.diaryView || "mineShared";
+  const view = "all";
   state.diaryVisibleCounts[view] = duariDiaryVisibleCount() + 5;
 }
 
 function duariDiaryFilterForCurrentView() {
   state.diaryFilters = state.diaryFilters || {};
-  const view = state.diaryView || "mineShared";
-  state.diaryFilters[view] = state.diaryFilters[view] || { query: "", month: "" };
+  const view = "all";
+  state.diaryFilters[view] = state.diaryFilters[view] || { query: "", month: "", type: "all" };
   return state.diaryFilters[view];
 }
 
 function duariFilterDiaryEntries(entries = [], filter = {}) {
   const normalizedQuery = String(filter.query || "").trim().toLowerCase();
   const normalizedMonth = String(filter.month || "").trim().replaceAll("-", ".");
+  const type = String(filter.type || "all");
   return entries.filter((entry) => {
     const dateLabel = duariDiaryDateLabel(entry);
+    const scopeValue = normalizeDiaryScopeValue(entry.scope || entry.type);
     const searchTarget = [
       entry.title,
       entry.body,
@@ -14783,21 +14785,26 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
     ].join(" ").toLowerCase();
     const matchesQuery = !normalizedQuery || searchTarget.includes(normalizedQuery);
     const matchesMonth = !normalizedMonth || dateLabel.startsWith(normalizedMonth);
-    return matchesQuery && matchesMonth;
+    const matchesType =
+      type === "all" ||
+      (type === "mineShared" && scopeValue === "공유") ||
+      (type === "private" && scopeValue === "개인") ||
+      (type === "draft" && scopeValue === "draft");
+    return matchesQuery && matchesMonth && matchesType;
   });
 }
 
 function duariEmptyDiaryMessage() {
-  if (state.diaryView === "mineShared") return "아직 공유한 일기가 없어요.";
-  if (state.diaryView === "private") return "아직 나만 보기 일기가 없어요.";
-  if (state.diaryView === "draft") return "아직 임시 저장한 일기가 없어요.";
+  const type = duariDiaryFilterForCurrentView().type || "all";
+  if (type === "mineShared") return "아직 내 공유 일기가 없어요.";
+  if (type === "private") return "아직 나만 보기 일기가 없어요.";
+  if (type === "draft") return "아직 임시 저장한 일기가 없어요.";
   return "아직 일기가 없어요.";
 }
 
 renderDiary = function renderDiary() {
-  normalizeDiaryView();
   const diary = qs("#diary");
-  const entries = diaryEntriesForCurrentView();
+  const entries = state.diaries || [];
   const diaryFilter = duariDiaryFilterForCurrentView();
   const filteredEntries = duariFilterDiaryEntries(entries, diaryFilter);
   const visibleCount = duariDiaryVisibleCount();
@@ -14805,11 +14812,6 @@ renderDiary = function renderDiary() {
   const hasMoreEntries = filteredEntries.length > visibleEntries.length;
   diary.innerHTML = `
     <div class="section-stack">
-      <div class="tabs diary-tabs">
-        <button class="chip-btn ${state.diaryView === "mineShared" ? "active" : ""}" data-diary-view="mineShared">내 공유</button>
-        <button class="chip-btn ${state.diaryView === "private" ? "active" : ""}" data-diary-view="private">나만보기</button>
-        <button class="chip-btn ${state.diaryView === "draft" ? "active" : ""}" data-diary-view="draft">임시 저장</button>
-      </div>
       <div class="diary-filter-grid">
         <div class="form-field">
           <label for="diarySearch">일기 검색</label>
@@ -14818,6 +14820,15 @@ renderDiary = function renderDiary() {
         <div class="form-field">
           <label for="diaryMonthFilter">월</label>
           <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
+        </div>
+        <div class="form-field">
+          <label for="diaryTypeFilter">일기 유형</label>
+          <select id="diaryTypeFilter">
+            <option value="all" ${diaryFilter.type === "all" ? "selected" : ""}>전체</option>
+            <option value="mineShared" ${diaryFilter.type === "mineShared" ? "selected" : ""}>내 공유</option>
+            <option value="private" ${diaryFilter.type === "private" ? "selected" : ""}>나만보기</option>
+            <option value="draft" ${diaryFilter.type === "draft" ? "selected" : ""}>임시 저장</option>
+          </select>
         </div>
       </div>
       <div class="diary-list-toolbar">
@@ -14839,30 +14850,26 @@ renderDiary = function renderDiary() {
       ${hasMoreEntries ? `<button class="ghost-btn full diary-load-more" type="button" data-diary-load-more>더보기</button>` : ""}
     </div>
   `;
-  qsa("[data-diary-view]", diary).forEach((button) => {
-    button.addEventListener("click", () => {
-      state.diaryView = button.dataset.diaryView;
-      renderDiary();
-    });
-  });
   const searchInput = qs("#diarySearch", diary);
   const monthInput = qs("#diaryMonthFilter", diary);
+  const typeInput = qs("#diaryTypeFilter", diary);
   const applyDiaryFilters = () => {
     const filter = duariDiaryFilterForCurrentView();
     filter.query = searchInput?.value || "";
     filter.month = monthInput?.value || "";
+    filter.type = typeInput?.value || "all";
     state.diaryVisibleCounts = state.diaryVisibleCounts || {};
-    state.diaryVisibleCounts[state.diaryView || "mineShared"] = 5;
+    state.diaryVisibleCounts.all = 5;
     renderDiary();
   };
   searchInput?.addEventListener("change", applyDiaryFilters);
   monthInput?.addEventListener("input", applyDiaryFilters);
   monthInput?.addEventListener("change", applyDiaryFilters);
+  typeInput?.addEventListener("change", applyDiaryFilters);
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
     const openEntry = () => {
       const entry = filteredEntries[Number(card.dataset.diaryEntryIndex)] || filteredEntries[0] || entries[0];
       renderDiaryDetailReadOnly(entry, () => {
-        state.diaryView = duariDiaryViewFromScope(entry.scope || entry.type);
         closeModal();
         setTab("diary");
       });
