@@ -14532,7 +14532,7 @@ renderHome = function renderHome() {
     return;
   }
 
-  const recentMemories = (state.memories || []).slice(0, 2);
+  const recentMemories = (state.memories || []).slice(0, 3);
   const homeRecentMemoryCards = recentMemories.length
     ? memoryCards(recentMemories, true)
     : `<p>아직 최근 기록이 없어요.</p>`;
