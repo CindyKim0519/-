@@ -15305,8 +15305,8 @@ function duariMemoryDateValue(memory) {
   return `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}`;
 }
 
-function duariCalendarState() {
-  const recordDates = (state.memories || []).map(duariMemoryDateValue).filter(Boolean);
+function duariCalendarState(memories = state.memories) {
+  const recordDates = (memories || []).map(duariMemoryDateValue).filter(Boolean);
   const fallback = recordDates[0] || "2026-04-01";
   const fallbackMonth = fallback.slice(0, 7);
   const monthHasRecord = recordDates.some((date) => date.startsWith(state.calendarMonth || ""));
@@ -15325,25 +15325,25 @@ function duariCalendarMonthLabel(monthValue) {
   return `${year}년 ${Number(month)}월`;
 }
 
-function duariCalendarShiftMonth(amount) {
-  const { month } = duariCalendarState();
+function duariCalendarShiftMonth(amount, memories = state.memories) {
+  const { month } = duariCalendarState(memories);
   const [year, monthNumber] = month.split("-").map(Number);
   const next = new Date(year, monthNumber - 1 + amount, 1);
   const nextMonth = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
-  const firstMemory = state.memories.find((memory) => duariMemoryDateValue(memory).startsWith(nextMonth));
+  const firstMemory = (memories || []).find((memory) => duariMemoryDateValue(memory).startsWith(nextMonth));
   state.calendarMonth = nextMonth;
   state.calendarSelectedDate = duariMemoryDateValue(firstMemory) || `${nextMonth}-01`;
   state.calendarTouched = true;
 }
 
-function renderAlbumCalendar() {
-  const { month, selectedDate } = duariCalendarState();
+function renderAlbumCalendar(memories = state.memories) {
+  const { month, selectedDate } = duariCalendarState(memories);
   const [year, monthNumber] = month.split("-").map(Number);
   const firstDay = new Date(year, monthNumber - 1, 1);
   const daysInMonth = new Date(year, monthNumber, 0).getDate();
   const leadingBlankCount = firstDay.getDay();
   const todayValue = "2026-05-02";
-  const memoriesByDate = state.memories.reduce((acc, memory) => {
+  const memoriesByDate = (memories || []).reduce((acc, memory) => {
     const dateValue = duariMemoryDateValue(memory);
     if (!dateValue) return acc;
     if (!acc.has(dateValue)) acc.set(dateValue, []);
@@ -15434,18 +15434,42 @@ openModal = function openModalWithTwoButtonRows(html) {
 function renderAlbum() {
   const album = qs("#album");
   state.albumView = "calendar";
+  const recordTypes = ["데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
+  const queryValue = state.albumCalendarQuery || "";
+  const typeValue = state.albumCalendarType || "전체";
+  const filteredMemories = duariAlbumFilterMemories({
+    query: queryValue,
+    type: typeValue
+  });
 
   album.innerHTML = `
     <div class="section-stack">
-      ${renderAlbumCalendar()}
+      <div class="album-record-toolbar">
+        <div class="between">
+          <span class="meta">${filteredMemories.length}개 기록</span>
+          <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="albumCalendarSearch">기록 검색</label>
+        <input id="albumCalendarSearch" value="${signupAttr(queryValue)}" placeholder="제목, 장소, 기록 유형" />
+      </div>
+      <div class="form-field">
+        <label for="albumCalendarTypeFilter">기록 유형</label>
+        <select id="albumCalendarTypeFilter">
+          <option ${typeValue === "전체" ? "selected" : ""}>전체</option>
+          ${recordTypes.map((type) => `<option ${typeValue === type ? "selected" : ""}>${type}</option>`).join("")}
+        </select>
+      </div>
+      ${renderAlbumCalendar(filteredMemories)}
     </div>
   `;
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
-    duariCalendarShiftMonth(-1);
+    duariCalendarShiftMonth(-1, filteredMemories);
     renderAlbum();
   });
   qs("[data-calendar-next]", album)?.addEventListener("click", () => {
-    duariCalendarShiftMonth(1);
+    duariCalendarShiftMonth(1, filteredMemories);
     renderAlbum();
   });
   qsa("[data-calendar-date]", album).forEach((button) => {
@@ -15453,6 +15477,18 @@ function renderAlbum() {
       state.calendarSelectedDate = button.dataset.calendarDate;
       renderAlbum();
     });
+  });
+  qs("#albumCalendarSearch", album)?.addEventListener("input", (event) => {
+    state.albumCalendarQuery = event.target.value;
+    state.calendarTouched = false;
+    state.calendarSelectedDate = "";
+    renderAlbum();
+  });
+  qs("#albumCalendarTypeFilter", album)?.addEventListener("change", (event) => {
+    state.albumCalendarType = event.target.value || "전체";
+    state.calendarTouched = false;
+    state.calendarSelectedDate = "";
+    renderAlbum();
   });
   bindActions(album);
 }
