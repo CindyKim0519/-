@@ -14473,6 +14473,66 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
   return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
 };
 
+openLinkedDiarySelectPage = function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backAction = null } = {}) {
+  const diaries = state.diaries || [];
+  const safeMemoryIndex = Number.isFinite(Number(memoryIndex)) ? Number(memoryIndex) : 0;
+  const returnToOwner = () => mode === "create" ? openMemoryCreatePage(backAction) : openMemoryEditPageLatest(safeMemoryIndex, backAction);
+  const cards = diaries.length ? diaries.map((diary, diaryIndex) => `
+    <article class="record-picker-card">
+      <div class="between"><h3>${duariEscapeHtml(diary.title || "제목 없는 일기")}</h3><span class="linked-diary-type">${duariEscapeHtml(diary.type || diaryScopeLabel?.(diary.scope) || "나만 보기")}</span></div>
+      <p>${duariEscapeHtml(diary.body || "작성된 내용이 없습니다.")}</p>
+      ${linkedDiaryEmotionRow(diary)}
+      ${typeof duariDiaryDateMeta === "function" ? duariDiaryDateMeta(diary) : ""}
+      <div class="record-picker-actions">
+        <button class="ghost-btn" data-linked-diary-preview="${diaryIndex}">상세 보기</button>
+        <button class="primary-btn" data-linked-diary-pick="${diaryIndex}">선택</button>
+      </div>
+    </article>
+  `).join("") : `<p class="linked-record-empty">작성된 일기가 없습니다.</p>`;
+
+  openModal(`
+    <div class="modal-sheet notification-page diary-record-picker-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-linked-diary-select-back aria-label="뒤로가기">←</button>
+        <h3>연결한 일기 선택</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <div class="record-picker-list">${cards}</div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-linked-diary-select-back]")?.addEventListener("click", () => runWithoutModalHistory(returnToOwner));
+  qsa("[data-linked-diary-preview]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const diary = diaries[Number(button.dataset.linkedDiaryPreview)];
+      if (!diary) return;
+      renderDiaryDetailReadOnly(normalizeDiaryForDetail(diary), () => openLinkedDiarySelectPage({ mode, memoryIndex: safeMemoryIndex, backAction }));
+    });
+  });
+  qsa("[data-linked-diary-pick]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const diaryIndex = Number(button.dataset.linkedDiaryPick);
+      const diary = diaries[diaryIndex];
+      if (!diary) return;
+      if (mode === "create") {
+        memoryLinkedDiarySelection.create = diaryIndex;
+      } else {
+        const memory = state.memories?.[safeMemoryIndex];
+        if (memory) {
+          state.diaries[diaryIndex] = { ...diary, linked: memory.title, linkedMemoryTitle: memory.title };
+          memoryLinkedDiarySelection.edit[safeMemoryIndex] = null;
+          duariInstallContentPersistenceHooks();
+          duariSavePersistentContent();
+        }
+      }
+      runWithoutModalHistory(returnToOwner);
+      showToast("연결할 일기를 선택했어요.");
+    });
+  });
+};
+
 function duariEnsureLinkedDiaryMenus(root = document) {
   qsa(".linked-diary-card", root).forEach((card, fallbackIndex) => {
     if (card.dataset.noLinkedDiaryMenu === "true") return;
