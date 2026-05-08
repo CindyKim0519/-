@@ -628,6 +628,10 @@ h3 {
   gap: 16px;
 }
 
+#home > .section-stack {
+  gap: 20px;
+}
+
 .hero-card {
   background: var(--surface-card);
   border: 0;
