@@ -918,6 +918,12 @@ h3 {
   padding: 6px 12px;
 }
 
+.my-info-link {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
 .my-menu-item {
   background: transparent;
   border: 0;

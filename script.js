@@ -1958,7 +1958,7 @@ function renderMy() {
               <p class="meta">${current.date}부터</p>
             </div>
           </div>
-          <button class="chip-btn" data-action="account">우리 정보</button>
+          <button class="chip-btn my-info-link" data-action="account">우리 정보<span class="menu-chevron" aria-hidden="true">›</span></button>
         </div>
       </section>
       <div class="list">${[
