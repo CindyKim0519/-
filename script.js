@@ -15434,42 +15434,24 @@ openModal = function openModalWithTwoButtonRows(html) {
 function renderAlbum() {
   const album = qs("#album");
   state.albumView = "calendar";
-  const recordTypes = ["데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
-  const queryValue = state.albumCalendarQuery || "";
-  const typeValue = state.albumCalendarType || "전체";
-  const filteredMemories = duariAlbumFilterMemories({
-    query: queryValue,
-    type: typeValue
-  });
 
   album.innerHTML = `
     <div class="section-stack">
       <div class="album-record-toolbar">
         <div class="between">
-          <span class="meta">${filteredMemories.length}개 기록</span>
+          <span class="meta">${state.memories.length}개 기록</span>
           <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
         </div>
       </div>
-      <div class="form-field">
-        <label for="albumCalendarSearch">기록 검색</label>
-        <input id="albumCalendarSearch" value="${signupAttr(queryValue)}" placeholder="제목, 장소, 기록 유형" />
-      </div>
-      <div class="form-field">
-        <label for="albumCalendarTypeFilter">기록 유형</label>
-        <select id="albumCalendarTypeFilter">
-          <option ${typeValue === "전체" ? "selected" : ""}>전체</option>
-          ${recordTypes.map((type) => `<option ${typeValue === type ? "selected" : ""}>${type}</option>`).join("")}
-        </select>
-      </div>
-      ${renderAlbumCalendar(filteredMemories)}
+      ${renderAlbumCalendar()}
     </div>
   `;
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
-    duariCalendarShiftMonth(-1, filteredMemories);
+    duariCalendarShiftMonth(-1);
     renderAlbum();
   });
   qs("[data-calendar-next]", album)?.addEventListener("click", () => {
-    duariCalendarShiftMonth(1, filteredMemories);
+    duariCalendarShiftMonth(1);
     renderAlbum();
   });
   qsa("[data-calendar-date]", album).forEach((button) => {
@@ -15477,18 +15459,6 @@ function renderAlbum() {
       state.calendarSelectedDate = button.dataset.calendarDate;
       renderAlbum();
     });
-  });
-  qs("#albumCalendarSearch", album)?.addEventListener("input", (event) => {
-    state.albumCalendarQuery = event.target.value;
-    state.calendarTouched = false;
-    state.calendarSelectedDate = "";
-    renderAlbum();
-  });
-  qs("#albumCalendarTypeFilter", album)?.addEventListener("change", (event) => {
-    state.albumCalendarType = event.target.value || "전체";
-    state.calendarTouched = false;
-    state.calendarSelectedDate = "";
-    renderAlbum();
   });
   bindActions(album);
 }
