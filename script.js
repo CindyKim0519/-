@@ -691,7 +691,7 @@ function renderDiaryDetailReadOnly(diary, backAction = restorePreviousModal) {
     <div class="modal-sheet notification-page diary-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-diary-detail-back aria-label="뒤로가기">←</button>
-        <h3>일기 상세</h3>
+        <h3>마음 보기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -7716,7 +7716,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
           </div>
           ${canEditLinks ? `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>` : ""}
         </section>
-        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>수정</button></div>` : ""}
+        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>마음 수정</button></div>` : ""}
       </div>
     </div>
   `);
@@ -7744,7 +7744,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
     <div class="modal-sheet notification-page diary-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-diary-detail-back aria-label="뒤로가기">←</button>
-        <h3>일기 상세</h3>
+        <h3>마음 보기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -9007,8 +9007,8 @@ function openDiaryScopeChangeConfirmOverlay(draft, heading = "일기 수정", li
   const nextLabel = diaryScopeLabel(draft.scope);
   const title = draft.scope === "공유" ? "상대에게 공유할까요?" : "나만 보기로 변경할까요?";
   const body = draft.scope === "공유"
-    ? `공개 범위가 ${previousLabel}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
-    : `공개 범위가 ${previousLabel}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`;
+    ? `공개 범위가 ${previousLabel}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
+    : `공개 범위가 ${previousLabel}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`;
   const confirmText = draft.scope === "공유" ? "공유로 변경" : "나만 보기로 변경";
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
@@ -9062,11 +9062,11 @@ function openDiaryScopeChangeConfirmOverlay(draft, heading = "일기 수정", li
     : draft.scope === "공유" ? "상대에게 공유할까요?" : "나만 보기로 변경할까요?";
   const body = fromDraft
     ? (draft.scope === "공유"
-      ? "임시 저장 일기를 내 공유 일기로 저장합니다. 저장하면 내 공유 탭으로 이동하고 상대가 볼 수 있어요."
-      : "임시 저장 일기를 나만 보기 일기로 저장합니다. 저장하면 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.")
+      ? "임시 저장한 마음을 내 공유로 저장합니다. 저장하면 내 공유 탭으로 이동하고 상대가 볼 수 있어요."
+      : "임시 저장한 마음을 나만 보기로 저장합니다. 저장하면 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.")
     : (draft.scope === "공유"
-      ? `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
-      : `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`);
+      ? `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
+      : `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`);
   const confirmText = draft.scope === "공유" ? "내 공유로 저장" : "나만 보기로 저장";
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
@@ -9145,11 +9145,11 @@ function openDiaryScopeChangeConfirmOverlay(draft, heading = "일기 수정", li
     : nextScope === "공유" ? "상대에게 공유할까요?" : "나만 보기로 변경할까요?";
   const body = fromDraft
     ? (nextScope === "공유"
-      ? "임시 저장 일기를 내 공유 일기로 저장합니다. 저장하면 내 공유 탭으로 이동하고 상대가 볼 수 있어요."
-      : "임시 저장 일기를 나만 보기 일기로 저장합니다. 저장하면 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.")
+      ? "임시 저장한 마음을 내 공유로 저장합니다. 저장하면 내 공유 탭으로 이동하고 상대가 볼 수 있어요."
+      : "임시 저장한 마음을 나만 보기로 저장합니다. 저장하면 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.")
     : (nextScope === "공유"
-      ? `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
-      : `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 일기는 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`);
+      ? `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 내 공유 탭으로 이동하고 상대가 볼 수 있어요.`
+      : `공개 범위가 ${diaryScopeLabel(draft.originalScope)}에서 ${nextLabel}로 변경됩니다. 저장하면 이 마음은 나만 보기 탭으로 이동하고 상대에게 보이지 않아요.`);
   const confirmText = nextScope === "공유" ? "내 공유로 저장" : "나만 보기로 저장";
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
@@ -9775,7 +9775,7 @@ function openDiaryUnlinkDeleteConfirmOverlay(backAction) {
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
         <h3>연결을 해제할까요?</h3>
-        <p>이 일기에서 선택한 관련 기록 연결만 삭제돼요.</p>
+        <p>이 마음에서 선택한 기록 연결만 해제돼요.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" data-diary-unlink-cancel>취소</button>
           <button class="primary-btn" data-diary-unlink-confirm>삭제</button>
@@ -10079,7 +10079,7 @@ function openLinkedDiaryUnlinkConfirm(index, backAction = null) {
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <section class="ai-confirm-sheet">
         <h3>연결을 해제할까요?</h3>
-        <p>이 일기는 삭제되지 않고 현재 기록과의 연결만 해제돼요.</p>
+        <p>이 마음은 삭제되지 않고 현재 기록과의 연결만 해제돼요.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-linked-diary-unlink-cancel>취소</button>
           <button class="primary-btn" type="button" data-linked-diary-unlink-confirm>연결 해제</button>
@@ -10655,7 +10655,7 @@ function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backActi
     <div class="modal-sheet notification-page diary-record-picker-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-linked-diary-select-back aria-label="뒤로가기">←</button>
-        <h3>연결한 일기 선택</h3>
+        <h3>연결할 마음 선택</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -10738,7 +10738,7 @@ function openMemoryCreateLinkedDiaryDetail(backAction = null, selectedIndex = nu
           <div class="tag-row diary-detail-feelings">${feelings.map((feeling) => `<span class="chip-btn">${duariEscapeHtml(feeling)}</span>`).join("")}</div>
         </section>
         <div class="diary-detail-actions">
-          <button class="primary-btn" type="button" data-create-diary-edit>수정</button>
+          <button class="primary-btn" type="button" data-create-diary-edit>마음 수정</button>
           <button class="ghost-btn" type="button" data-create-diary-delete>삭제</button>
         </div>
       </div>
@@ -11134,8 +11134,8 @@ function duariCurrentPhotoManageCount(fallback = 0) {
 
 function recordLinkedDiaryActionsHtml() {
   return actionPairHtml(
-    `<button class="ghost-btn" data-linked-diary-select>일기 선택</button>`,
-    `<button class="ghost-btn" data-linked-diary-add>일기 추가</button>`
+    `<button class="ghost-btn" data-linked-diary-select>마음 선택</button>`,
+    `<button class="ghost-btn" data-linked-diary-add>마음 추가</button>`
   );
 }
 
@@ -11361,9 +11361,9 @@ let aiDiaryEditorDraft = null;
 
 function normalizeDiaryEditorHeading(heading) {
   const text = String(heading || "").trim();
-  if (!text || text === "일기 쓰기" || text === "새 마음 남기기" || text === "일기 남기기") return "일기 추가";
-  if (text === "마음 일기 다듬기" || text === "일기 다듬기" || text === "일기 수정") return "일기 수정";
-  if (text === "마음 일기" || text === "일기 보기") return "일기 상세";
+  if (!text || text === "일기 쓰기" || text === "새 마음 남기기" || text === "일기 남기기" || text === "마음 남기기") return "일기 추가";
+  if (text === "마음 일기 다듬기" || text === "일기 다듬기" || text === "일기 수정" || text === "마음 수정") return "일기 수정";
+  if (text === "마음 일기" || text === "일기 보기" || text === "마음 보기") return "일기 상세";
   return text;
 }
 
@@ -11534,7 +11534,7 @@ function openDiaryAddSaveScopeOverlay({ linkedTitle, linkedMemoryIndex, backActi
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
         <h3>일기를 저장할까요?</h3>
-        <p>선택한 공개 범위는 ${scopeLabel}입니다. 저장 후 공개 범위에 맞는 다이어리 목록과 연결된 기록에 반영돼요.</p>
+        <p>선택한 공개 범위는 ${scopeLabel}입니다. 저장 후 공개 범위에 맞는 마음 목록과 연결된 기록에 반영돼요.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" data-diary-add-save-cancel>취소</button>
           <button class="primary-btn" data-diary-add-save-confirm>저장</button>
@@ -12511,9 +12511,9 @@ let duariDiaryAiDraft = null;
 
 function duariNormalizeDiaryHeading(heading) {
   const text = String(heading || "").trim();
-  if (!text || text === "일기 쓰기" || text === "새 마음 남기기" || text === "일기 남기기") return "일기 추가";
-  if (text === "마음 일기 다듬기" || text === "일기 다듬기" || text === "일기 수정") return "일기 수정";
-  if (text === "마음 일기" || text === "일기 보기") return "일기 상세";
+  if (!text || text === "일기 쓰기" || text === "새 마음 남기기" || text === "일기 남기기" || text === "마음 남기기") return "일기 추가";
+  if (text === "마음 일기 다듬기" || text === "일기 다듬기" || text === "일기 수정" || text === "마음 수정") return "일기 수정";
+  if (text === "마음 일기" || text === "일기 보기" || text === "마음 보기") return "일기 상세";
   return text;
 }
 
@@ -12792,8 +12792,8 @@ function openDiaryEditDeleteConfirmOverlay(args = {}) {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>일기를 삭제할까요?</h3>
-        <p>삭제하면 이 일기는 복구할 수 없고, 연결된 기록에서도 함께 사라집니다.</p>
+        <h3>마음을 삭제할까요?</h3>
+        <p>삭제하면 이 마음은 복구할 수 없고, 연결된 기록에서도 함께 사라집니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-diary-edit-delete-cancel>취소</button>
           <button class="primary-btn" type="button" data-diary-edit-delete-confirm>삭제</button>
@@ -12863,7 +12863,7 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const heading = duariNormalizeDiaryHeading(args.heading);
-  const displayHeading = heading === "일기 수정" ? "일기 수정" : heading === "일기 추가" ? "일기 남기기" : heading === "일기 상세" ? "일기 보기" : heading;
+  const displayHeading = heading === "일기 수정" ? "마음 수정" : heading === "일기 추가" ? "마음 남기기" : heading === "일기 상세" ? "마음 보기" : heading;
   const diary = args.diary || {};
   const originalIdentity = diary._duariOriginal || {
     title: diary.title || "",
@@ -12899,7 +12899,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         </div>
         <div class="form-field">
           <div class="field-label-row">
-            <label>마음 제목</label>
+            <label>제목</label>
             <span class="input-count" data-diary-title-count>${title.length}/24</span>
           </div>
           <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="24" />
@@ -12909,11 +12909,11 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
           <input id="diaryDate" type="date" value="${dateValue}" />
         </div>
         <div class="form-field">
-          <label>내용</label>
-          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘 남기고 싶은 마음을 적어보세요.">${duariEscapeHtml(body)}</textarea>
+          <label>마음 내용</label>
+          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘 남기고 싶은 마음을 적어주세요.">${duariEscapeHtml(body)}</textarea>
         </div>
         <div class="form-field">
-          <label>오늘의 감정</label>
+          <label>감정</label>
           ${emotionChipRow(["고마움", "안정", "서운함", "그리움", "기대"], feelings, "data-diary-feelings")}
         </div>
         ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
@@ -14889,13 +14889,13 @@ openLinkedDiarySelectPage = function openLinkedDiarySelectPage({ mode = "edit", 
         <button class="primary-btn" data-linked-diary-pick="${diaryIndex}">선택</button>
       </div>
     </article>
-  `).join("") : `<p class="linked-record-empty">작성된 일기가 없습니다.</p>`;
+  `).join("") : `<p class="linked-record-empty">작성된 마음이 없습니다.</p>`;
 
   openModal(`
     <div class="modal-sheet notification-page diary-record-picker-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-linked-diary-select-back aria-label="뒤로가기">←</button>
-        <h3>연결한 일기 선택</h3>
+        <h3>연결할 마음 선택</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -15346,7 +15346,7 @@ renderDiary = function renderDiary() {
       ${duariJournalSubTabsHtml("diary")}
       <div class="diary-filter-grid">
         <div class="form-field">
-          <label for="diarySearch">일기 검색</label>
+          <label for="diarySearch">마음 검색</label>
           <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목 또는 내용 검색" />
         </div>
         <div class="form-field">
@@ -15365,7 +15365,7 @@ renderDiary = function renderDiary() {
       </div>
       <div class="diary-list-toolbar">
         <p class="meta diary-list-count">총 ${filteredEntries.length}개</p>
-        <button class="primary-btn" data-action="diary-scope-first">일기 남기기</button>
+        <button class="primary-btn" data-action="diary-scope-first">마음 남기기</button>
       </div>
       <div class="list">
         ${visibleEntries.length ? visibleEntries.map((entry, index) => `
@@ -16869,13 +16869,15 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "기록 수정": "기록 수정",
     "기록 추가": "기록 남기기",
     "새 기록 남기기": "기록 남기기",
-    "일기 상세": "일기 보기",
-    "마음 일기": "일기 보기",
-    "일기 수정": "일기 수정",
-    "일기 다듬기": "일기 수정",
-    "일기 쓰기": "일기 남기기",
-    "일기 추가": "일기 남기기",
-    "새 마음 남기기": "일기 남기기",
+    "일기 상세": "마음 보기",
+    "일기 보기": "마음 보기",
+    "마음 일기": "마음 보기",
+    "일기 수정": "마음 수정",
+    "일기 다듬기": "마음 수정",
+    "일기 쓰기": "마음 남기기",
+    "일기 추가": "마음 남기기",
+    "일기 남기기": "마음 남기기",
+    "새 마음 남기기": "마음 남기기",
     "사진 상세": "사진 보기",
     "사진으로 보는 순간": "사진 보기",
     "기록 선택": "기록 선택",
@@ -16911,11 +16913,13 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "질문 더 보기": "다른 질문",
     "이 질문에 답하기": "답변 남기기",
     "답변 추가": "답변 남기기",
-    "일기 연결 추가": "일기 추가",
-    "연결된 일기 추가": "일기 추가",
-    "마음 일기 추가": "일기 추가",
-    "연결한 일기 선택": "일기 선택",
-    "이어진 마음 선택": "일기 선택",
+    "일기 연결 추가": "마음 추가",
+    "연결된 일기 추가": "마음 추가",
+    "마음 일기 추가": "마음 추가",
+    "일기 추가": "마음 추가",
+    "연결한 일기 선택": "마음 선택",
+    "이어진 마음 선택": "마음 선택",
+    "일기 선택": "마음 선택",
     "기록 연결 추가": "기록 선택",
     "연결할 기록 선택": "기록 선택",
     "이어질 순간 선택": "기록 선택",
@@ -16932,7 +16936,8 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "수정한 순간 저장": "저장",
     "임시 저장": "초안 저장",
     "초안으로 보관": "초안 저장",
-    "일기 쓰기": "일기 남기기",
+    "일기 쓰기": "마음 남기기",
+    "일기 남기기": "마음 남기기",
     "기록 상세 보기": "기록 보기",
     "상대에게 마음 보내기": "상대에게 보내기",
     "상세 보기": "보기",
@@ -16961,13 +16966,13 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     qsa(".diary-write-page .form-field label", root).forEach((label) => {
       const text = label.textContent.trim();
       if (text === "공개 범위") label.textContent = "공개 범위";
-      if (text === "제목") label.textContent = "마음 제목";
+      if (text === "마음 제목") label.textContent = "제목";
       if (text === "날짜") label.textContent = "작성일";
-      if (text === "본문") label.textContent = "내용";
-      if (text === "내 감정") label.textContent = "오늘의 감정";
+      if (text === "본문" || text === "내용") label.textContent = "마음 내용";
+      if (text === "내 감정" || text === "오늘의 감정") label.textContent = "감정";
     });
     qsa(".diary-write-page textarea[placeholder='오늘의 마음을 적어보세요.']", root).forEach((textarea) => {
-      textarea.setAttribute("placeholder", "오늘 남기고 싶은 마음을 적어보세요.");
+      textarea.setAttribute("placeholder", "오늘 남기고 싶은 마음을 적어주세요.");
     });
   }
 
