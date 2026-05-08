@@ -1712,9 +1712,15 @@ const notificationTypeLabelsFinal = {
 function renderNotificationItemsFinal(filter = "all") {
   const list = qs("[data-notification-list]");
   if (!list) return;
+  state.notificationVisibleCounts = state.notificationVisibleCounts || {};
+  if (!state.notificationVisibleCounts[filter]) state.notificationVisibleCounts[filter] = 10;
   const notificationItems = [...duariAnniversaryNotificationItems(), ...notificationItemsFinal];
   const filtered = filter === "all" ? notificationItems : notificationItems.filter((item) => item.type === filter);
-  list.innerHTML = filtered.map((item) => `
+  const visibleCount = state.notificationVisibleCounts[filter];
+  const visibleItems = filtered.slice(0, visibleCount);
+  const hasMoreItems = filtered.length > visibleItems.length;
+  list.innerHTML = `
+    ${visibleItems.map((item) => `
     <section class="card notification-item">
       <div class="notification-title-row">
         <strong>${item.title}</strong>
@@ -1722,7 +1728,13 @@ function renderNotificationItemsFinal(filter = "all") {
       </div>
       <p>${item.body}</p>
     </section>
-  `).join("") || `<section class="card notification-item"><strong>알림이 없어요</strong><p>선택한 유형의 알림이 아직 없습니다.</p></section>`;
+    `).join("") || `<section class="card notification-item"><strong>알림이 없어요</strong><p>선택한 유형의 알림이 아직 없습니다.</p></section>`}
+    ${hasMoreItems ? `<button class="ghost-btn full diary-load-more" type="button" data-notification-load-more>더보기</button>` : ""}
+  `;
+  qs("[data-notification-load-more]", list)?.addEventListener("click", () => {
+    state.notificationVisibleCounts[filter] = visibleCount + 10;
+    renderNotificationItemsFinal(filter);
+  });
   bindActions(list);
 }
 
@@ -1745,6 +1757,8 @@ function openNotificationPageV4() {
   qs("#modal").classList.add("page-modal");
   renderNotificationItemsFinal("all");
   qs("[data-notification-filter]").addEventListener("change", (event) => {
+    state.notificationVisibleCounts = state.notificationVisibleCounts || {};
+    state.notificationVisibleCounts[event.target.value] = 10;
     renderNotificationItemsFinal(event.target.value);
   });
 }
