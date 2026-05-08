@@ -16337,3 +16337,52 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     }, true);
   }
 })();
+
+(function installTrueFinalQuestionRotationAfterAnswer() {
+  const questions = [
+    "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?",
+    "오늘 하루 중 가장 기억에 남는 순간은 뭐야?",
+    "요즘 우리 사이에서 고마웠던 일은 뭐야?",
+    "다음에 함께 해보고 싶은 작은 일은 뭐야?",
+    "최근에 나에게 전하고 싶었던 마음은 뭐야?",
+    "우리의 어떤 습관이 오래 이어졌으면 좋겠어?",
+    "지금 가장 듣고 싶은 말은 뭐야?"
+  ];
+  const storageKey = "duari.currentQuestionIndex";
+  const normalizeIndex = (value) => {
+    const index = Number(value);
+    return Number.isFinite(index) ? ((index % questions.length) + questions.length) % questions.length : 0;
+  };
+  const currentIndex = () => normalizeIndex(localStorage.getItem(storageKey) ?? state.currentQuestionIndex);
+  const setQuestionIndex = (index) => {
+    const nextIndex = normalizeIndex(index);
+    state.currentQuestionIndex = nextIndex;
+    localStorage.setItem(storageKey, String(nextIndex));
+    duariQuestionAnswerDraft.question = questions[nextIndex];
+    return questions[nextIndex];
+  };
+  const refreshQuestionSurfaces = () => {
+    const activeTab = qs(".screen.active")?.id || state.tab;
+    if (activeTab === "home") renderHome();
+    if (activeTab === "diary" && state.journalView === "question") renderDiary();
+  };
+  window.duariAdvanceTodayQuestion = function duariAdvanceTodayQuestion() {
+    const nextQuestion = setQuestionIndex(currentIndex() + 1);
+    refreshQuestionSurfaces();
+    return nextQuestion;
+  };
+  duariCurrentQuestionText = function duariCurrentQuestionText() {
+    return questions[currentIndex()] || questions[0];
+  };
+  setQuestionIndex(currentIndex());
+  if (typeof openQuestionSendConfirmOverlay === "function") {
+    const originalOpenQuestionSendConfirmOverlay = openQuestionSendConfirmOverlay;
+    openQuestionSendConfirmOverlay = function openQuestionSendConfirmOverlayWithTrueFinalQuestionRotation(...args) {
+      const result = originalOpenQuestionSendConfirmOverlay.apply(this, args);
+      qs(".question-answer-page [data-question-send-confirm]")?.addEventListener("click", () => {
+        window.duariAdvanceTodayQuestion?.();
+      }, { capture: true, once: true });
+      return result;
+    };
+  }
+})();
