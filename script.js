@@ -14342,16 +14342,23 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
   window.duariRemoveCardClasses = removeCardClasses;
 })();
 
-function duariTriggeredAnniversaries() {
-  const anniversaries = Array.isArray(state.anniversaries) ? state.anniversaries : [];
-  if (!anniversaries.length) return [];
+function duariDateParts(dateText = "") {
+  const parts = String(dateText || "").replaceAll(".", "-").split("-").map(Number);
+  if (parts.length < 3 || parts.some((part) => !Number.isFinite(part))) return null;
+  return parts;
+}
+
+function duariTodayMidnight() {
   const today = new Date();
-  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+}
+
+function duariTriggeredCustomAnniversaries(todayDate = duariTodayMidnight()) {
+  const anniversaries = Array.isArray(state.anniversaries) ? state.anniversaries : [];
   return anniversaries
     .map((item) => {
-      const dateValue = String(item.date || "").replaceAll(".", "-");
-      const parts = dateValue.split("-").map(Number);
-      if (parts.length < 3 || parts.some((part) => !Number.isFinite(part))) return null;
+      const parts = duariDateParts(item.date);
+      if (!parts) return null;
       let target = new Date(parts[0], parts[1] - 1, parts[2]);
       if (item.repeat && target < todayDate) target = new Date(todayDate.getFullYear(), parts[1] - 1, parts[2]);
       if (item.repeat && target < todayDate) target = new Date(todayDate.getFullYear() + 1, parts[1] - 1, parts[2]);
@@ -14362,6 +14369,50 @@ function duariTriggeredAnniversaries() {
     .filter(Boolean)
     .filter((item) => [0, 1, 7].includes(item.diff))
     .sort((a, b) => a.diff - b.diff);
+}
+
+function duariAutomaticAnniversaries(todayDate = duariTodayMidnight()) {
+  const relation = typeof currentRelationInfo === "function" ? currentRelationInfo() : null;
+  const parts = duariDateParts(relation?.date);
+  if (!parts) return [];
+  const start = new Date(parts[0], parts[1] - 1, parts[2]);
+  const relationDays = Math.max(1, Math.floor((todayDate - start) / 86400000) + 1);
+  const autoItems = [];
+
+  [0, 1, 7].forEach((diff) => {
+    const milestoneDay = relationDays + diff;
+    if (milestoneDay >= 100 && milestoneDay % 100 === 0) {
+      autoItems.push({
+        name: `${milestoneDay}일`,
+        diff,
+        autoType: "hundred-day",
+      });
+    }
+  });
+
+  const currentYear = todayDate.getFullYear();
+  [currentYear, currentYear + 1].forEach((year) => {
+    const years = year - parts[0];
+    if (years < 1) return;
+    const target = new Date(year, parts[1] - 1, parts[2]);
+    const diff = Math.round((target - todayDate) / 86400000);
+    if (![0, 1, 7].includes(diff)) return;
+    autoItems.push({
+      name: `${years}주년`,
+      diff,
+      autoType: "yearly",
+    });
+  });
+
+  return autoItems;
+}
+
+function duariTriggeredAnniversaries() {
+  const todayDate = duariTodayMidnight();
+  return [
+    ...duariAutomaticAnniversaries(todayDate),
+    ...duariTriggeredCustomAnniversaries(todayDate),
+  ].sort((a, b) => a.diff - b.diff);
 }
 
 function duariAnniversaryDdayLabel(diff) {
