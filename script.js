@@ -16573,3 +16573,17 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     });
   };
 })();
+
+(function clearQuestionHistoryOnceForRetest() {
+  try {
+    const resetKey = `${duariContentStorageKey()}.questionHistoryCleared.20260509`;
+    if (localStorage.getItem(resetKey)) return;
+    state.questionHistory = [];
+    localStorage.setItem(resetKey, "1");
+    duariSavePersistentContent();
+    const activeTab = qs(".screen.active")?.id || state.tab;
+    if (activeTab === "diary" && state.journalView === "question") renderDiary();
+  } catch {
+    state.questionHistory = [];
+  }
+})();
