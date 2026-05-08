@@ -1565,6 +1565,10 @@ h3 {
   gap: 8px;
 }
 
+.anniversary-item-card {
+  border: 0;
+}
+
 .anniversary-item-header {
   align-items: flex-start;
 }

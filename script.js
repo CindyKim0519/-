@@ -2625,7 +2625,7 @@ function openAnniversarySettingsPage() {
           </div>
           <div class="list">
             ${state.anniversaries.map((item, index) => `
-              <article class="card inner-card">
+              <article class="card inner-card anniversary-item-card">
                 <div class="between anniversary-item-header">
                   <div class="anniversary-item-text">
                     <strong>${item.name}</strong>
