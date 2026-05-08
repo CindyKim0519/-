@@ -12914,7 +12914,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         </div>
         <div class="form-field">
           <label>감정</label>
-          ${emotionChipRow(["고마움", "안정", "서운함", "그리움", "기대"], feelings, "data-diary-feelings")}
+          ${emotionChipRow(["고마움", "설렘", "편안함", "행복", "다정함", "서운함", "미안함", "그리움"], feelings, "data-diary-feelings")}
         </div>
         ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
@@ -17217,4 +17217,19 @@ ${photoSection}
   observer.observe(document.body, { childList: true, subtree: true });
   window.duariPatchIonicons = patchIonicons;
   window.setTimeout(() => patchIonicons(document), 0);
+})();
+
+(function installDuariDiaryFeelingOptions() {
+  if (window.__duariDiaryFeelingOptionsInstalled) return;
+  window.__duariDiaryFeelingOptionsInstalled = true;
+
+  const diaryFeelingOptions = ["고마움", "설렘", "편안함", "행복", "다정함", "서운함", "미안함", "그리움"];
+  const originalEmotionChipRow = emotionChipRow;
+
+  emotionChipRow = function emotionChipRowWithDiaryOptions(items, selected = [], attr = "data-emotion-feelings") {
+    const nextItems = String(attr || "").includes("data-diary-feelings") ? diaryFeelingOptions : items;
+    return originalEmotionChipRow(nextItems, selected, attr);
+  };
+
+  window.duariDiaryFeelingOptions = diaryFeelingOptions;
 })();
