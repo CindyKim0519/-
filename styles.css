@@ -4061,6 +4061,11 @@ h3 {
   padding: 14px;
 }
 
+.question-history-page .question-history-card {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
 .memory-detail-page .linked-diary-card,
 .memory-edit-page .linked-diary-card {
   border: 1px solid var(--border-default);
