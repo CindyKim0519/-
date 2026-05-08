@@ -1799,6 +1799,10 @@ function setTab(tab) {
     state.journalView = "question";
     tab = "diary";
   }
+  const previousTab = state.tab;
+  if (tab === "diary" && previousTab !== "diary" && state.journalView !== "question" && typeof duariResetDiaryVisibleCount === "function") {
+    duariResetDiaryVisibleCount();
+  }
   state.tab = tab;
   qsa(".nav-item").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
   qsa(".screen").forEach((screen) => screen.classList.toggle("active", screen.id === tab));
@@ -15007,6 +15011,11 @@ function duariIncreaseDiaryVisibleCount() {
   state.diaryVisibleCounts[view] = duariDiaryVisibleCount() + 5;
 }
 
+function duariResetDiaryVisibleCount() {
+  state.diaryVisibleCounts = state.diaryVisibleCounts || {};
+  state.diaryVisibleCounts.all = 5;
+}
+
 function duariDiaryFilterForCurrentView() {
   state.diaryFilters = state.diaryFilters || {};
   const view = "all";
@@ -15155,6 +15164,7 @@ function duariBindJournalSubTabs(root) {
   qsa("[data-journal-view]", root).forEach((button) => {
     button.addEventListener("click", () => {
       state.journalView = button.dataset.journalView || "diary";
+      if (state.journalView === "diary") duariResetDiaryVisibleCount();
       renderDiary();
     });
   });
@@ -15237,8 +15247,7 @@ renderDiary = function renderDiary() {
     filter.query = searchInput?.value || "";
     filter.month = monthInput?.value || "";
     filter.type = typeInput?.value || "all";
-    state.diaryVisibleCounts = state.diaryVisibleCounts || {};
-    state.diaryVisibleCounts.all = 5;
+    duariResetDiaryVisibleCount();
     renderDiary();
   };
   searchInput?.addEventListener("input", () => {
