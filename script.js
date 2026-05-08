@@ -16488,8 +16488,8 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     openQuestionSendConfirmOverlay = function openQuestionSendConfirmOverlayWithTrueFinalQuestionRotation(...args) {
       const result = originalOpenQuestionSendConfirmOverlay.apply(this, args);
       qs(".question-answer-page [data-question-send-confirm]")?.addEventListener("click", () => {
-        window.duariAdvanceTodayQuestion?.();
-      }, { capture: true, once: true });
+        window.setTimeout(() => window.duariAdvanceTodayQuestion?.(), 0);
+      }, { once: true });
       return result;
     };
   }
