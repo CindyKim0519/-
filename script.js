@@ -16617,6 +16617,12 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     if (!memory) return;
     const photoCount = duariPhotoCountForMemory(safeIndex);
     const linkedDiaries = linkedDiariesForMemory(safeIndex);
+    const photoSection = photoCount > 0 ? `
+          <section class="memory-photo-gallery" aria-label="사진 영역">
+            <div class="memory-photo-main">
+              <div class="memory-photo-scroll">${memoryPhotoScrollerLatest(photoCount, safeIndex)}</div>
+            </div>
+          </section>` : "";
     const previousTab = qs(".screen.active")?.id || state.tab || "home";
     const goBack = backAction || (() => {
       closeModal();
@@ -16630,11 +16636,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
         <div class="section-stack">
-          <section class="memory-photo-gallery" aria-label="사진 영역">
-            <div class="memory-photo-main">
-              <div class="memory-photo-scroll">${memoryPhotoScrollerLatest(photoCount, safeIndex)}</div>
-            </div>
-          </section>
+${photoSection}
           <section class="card">
             <div class="between">
               <h3 class="memory-limited-title" title="${duariEscapeHtml(memory.title)}">${limitMemoryTitleLatest(memory.title)}</h3>
