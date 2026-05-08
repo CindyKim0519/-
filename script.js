@@ -2629,8 +2629,8 @@ function openAnniversarySettingsPage() {
       <div class="section-stack">
         <section class="card">
           <h3>자동 기념일</h3>
-          <p>우리의 시작일을 기준으로 100일 단위와 주년을 자동으로 보여줍니다.</p>
-          <p>D-7과 D-day에 알려주고, 홈에는 가장 가까운 기념일 1개만 표시합니다.</p>
+          <p>우리의 시작일을 기준으로 100일 단위와 주년을 자동으로 계산해요.</p>
+          <p>D-7, D-1, D-day에 홈과 알림에서 알려주고, 홈에는 대표 기념일 1개만 표시합니다.</p>
         </section>
         <section class="card">
           <h3>추가한 기념일</h3>
