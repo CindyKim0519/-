@@ -14853,6 +14853,12 @@ renderDiary = function renderDiary() {
   const searchInput = qs("#diarySearch", diary);
   const monthInput = qs("#diaryMonthFilter", diary);
   const typeInput = qs("#diaryTypeFilter", diary);
+  if (state.diarySearchFocus) {
+    searchInput?.focus();
+    const caretPosition = searchInput?.value?.length || 0;
+    searchInput?.setSelectionRange?.(caretPosition, caretPosition);
+    state.diarySearchFocus = false;
+  }
   const applyDiaryFilters = () => {
     const filter = duariDiaryFilterForCurrentView();
     filter.query = searchInput?.value || "";
@@ -14862,6 +14868,13 @@ renderDiary = function renderDiary() {
     state.diaryVisibleCounts.all = 5;
     renderDiary();
   };
+  searchInput?.addEventListener("input", () => {
+    window.clearTimeout(state.diarySearchDebounce);
+    state.diarySearchDebounce = window.setTimeout(() => {
+      state.diarySearchFocus = true;
+      applyDiaryFilters();
+    }, 200);
+  });
   searchInput?.addEventListener("change", applyDiaryFilters);
   monthInput?.addEventListener("input", applyDiaryFilters);
   monthInput?.addEventListener("change", applyDiaryFilters);
