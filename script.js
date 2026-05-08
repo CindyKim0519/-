@@ -15254,11 +15254,9 @@ function duariQuestionPanelHtml() {
       </div>
       <div class="question-history-search-grid">
         <div class="form-field">
-          <label for="questionHistoryInlineSearch">질문 검색</label>
           <input id="questionHistoryInlineSearch" placeholder="질문 또는 답변 검색" />
         </div>
         <div class="form-field">
-          <label for="questionHistoryInlineDate">월</label>
           <input id="questionHistoryInlineDate" type="month" />
         </div>
       </div>
@@ -15366,11 +15364,9 @@ renderDiary = function renderDiary() {
       </div>
       <div class="diary-filter-grid">
         <div class="form-field">
-          <label for="diarySearch">마음 검색</label>
           <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목 또는 내용 검색" />
         </div>
         <div class="form-field">
-          <label for="diaryMonthFilter">월</label>
           <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
         </div>
       </div>
@@ -15617,11 +15613,9 @@ function renderQuestions() {
         </div>
         <div class="question-history-search-grid">
           <div class="form-field">
-            <label for="questionHistoryInlineSearch">나눈 질문 검색</label>
             <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
           </div>
           <div class="form-field">
-            <label for="questionHistoryInlineDate">월</label>
             <input id="questionHistoryInlineDate" type="month" />
           </div>
         </div>
@@ -15684,11 +15678,9 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
         </div>
         <div class="question-history-search-grid">
           <div class="form-field">
-            <label for="questionHistorySearch">질문 검색</label>
             <input id="questionHistorySearch" value="${duariEscapeHtml(query)}" placeholder="질문이나 답변 검색" />
           </div>
           <div class="form-field">
-            <label for="questionHistoryDate">월</label>
             <input id="questionHistoryDate" type="month" value="${String(date || "").slice(0, 7).replaceAll(".", "-")}" />
           </div>
         </div>
