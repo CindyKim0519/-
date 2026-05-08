@@ -14180,6 +14180,90 @@ function openStartAlonePage() {
   onboarding?.classList.add("is-visible");
 })();
 
+renderHome = function renderHome() {
+  const home = qs("#home");
+  if (!home) return;
+
+  const questionCard = `
+    <section class="question-card">
+      <p class="eyebrow">오늘의 질문</p>
+      <h3>${duariEscapeHtml(duariCurrentQuestionText?.() || "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?")}</h3>
+      <div class="home-question-actions">
+        <button class="primary-btn" data-action="answer-question">답변 추가</button>
+        <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+      </div>
+    </section>
+  `;
+
+  if (!state.connected) {
+    home.innerHTML = `
+      <div class="section-stack">
+        <div class="between">
+          <div>
+            <p class="eyebrow">내 공간</p>
+            <h3>${duariEscapeHtml(state.nickname || "하린")}</h3>
+          </div>
+          <button class="chip-btn" data-action="connect">상대 초대</button>
+        </div>
+        ${state.aloneCtaHidden ? "" : `
+          <section class="hero-card">
+            <h3>함께 쓸 공간을 만들어볼까요?</h3>
+            <p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p>
+            <div class="row" style="margin-top:14px">
+              <button class="primary-btn" data-action="connect">상대 초대하기</button>
+              <button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button>
+            </div>
+          </section>
+        `}
+        ${questionCard}
+        <section class="card home-records-card">
+          <h3>최근 기록</h3>
+          <p>아직 최근 기록이 없어요.</p>
+          <button class="primary-btn full" data-action="new-memory">기록 추가</button>
+        </section>
+      </div>
+    `;
+    bindActions(home);
+    return;
+  }
+
+  const recentMemories = (state.memories || []).slice(0, 2);
+  const homeRecentMemoryCards = recentMemories.length
+    ? memoryCards(recentMemories, true)
+    : `<p>아직 최근 기록이 없어요.</p>`;
+  const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
+  const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
+
+  home.innerHTML = `
+    <div class="section-stack">
+      <section class="hero-card home-hero">
+        <div class="between">
+          <div>
+            <p class="relationship-name">${duariEscapeHtml(currentRelation.name)}</p>
+            <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">${relationshipDays}</strong><span>일</span></h3>
+          </div>
+          <span class="anniversary-pill">D-7 여행 1주년</span>
+        </div>
+      </section>
+      ${questionCard}
+      <section class="card home-records-card">
+        <div class="between">
+          <h3>최근 기록</h3>
+          <button class="chip-btn" data-tab-go="album">더보기</button>
+        </div>
+        <div class="list">${homeRecentMemoryCards}</div>
+        <button class="primary-btn full" data-action="new-memory">기록 추가</button>
+      </section>
+    </div>
+  `;
+  bindActions(home);
+};
+
+window.setTimeout(() => {
+  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
+  if ((qs(".screen.active")?.id || state.tab) === "home") renderHome();
+}, 0);
+
 // Final diary date display across every diary card/detail surface.
 function duariTodayDiaryDate() {
   const now = new Date();
