@@ -14181,10 +14181,20 @@ function openStartAlonePage() {
 })();
 
 (function installCardClassRemoval() {
+  const cardStyleAllowedPages = [
+    ".memory-detail-page",
+    ".memory-edit-page",
+    ".memory-create-page",
+    ".diary-detail-page",
+    ".diary-write-page"
+  ].join(", ");
+  const shouldKeepCardClass = (element) => Boolean(element?.closest?.(cardStyleAllowedPages));
   const removeCardClasses = (root = document) => {
     if (!root) return;
-    if (root.classList?.contains("card")) root.classList.remove("card");
-    root.querySelectorAll?.(".card").forEach((element) => element.classList.remove("card"));
+    if (root.classList?.contains("card") && !shouldKeepCardClass(root)) root.classList.remove("card");
+    root.querySelectorAll?.(".card").forEach((element) => {
+      if (!shouldKeepCardClass(element)) element.classList.remove("card");
+    });
   };
 
   const wrapRender = (name) => {
