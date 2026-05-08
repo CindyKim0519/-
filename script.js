@@ -4107,10 +4107,6 @@ function openAccountModal() {
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
         </section>
-        <div class="account-danger-actions">
-          <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
-          <button class="ghost-btn danger-outline full" type="button" data-action="danger-withdraw">회원 탈퇴</button>
-        </div>
       </div>
     </div>
   `);
