@@ -4284,3 +4284,29 @@ textarea {
   border-radius: 14px;
   overflow: hidden;
 }
+
+/* Readability pass for Ssurround Air: small card metadata needs a little more size. */
+.memory-card .meta,
+.diary-card .meta,
+.record-picker-card .meta,
+.memory-detail-page .meta,
+.diary-detail-page .meta,
+.diary-write-page .meta,
+.diary-date-meta,
+.question-history-meta,
+.home-memory-meta {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.memory-card .linked-record-scope,
+.memory-card .linked-diary-type,
+.diary-card .linked-diary-type,
+.record-picker-card .linked-diary-type,
+.question-history-card .linked-diary-type,
+.notification-type-label {
+  font-size: 11px;
+  line-height: 16px;
+  min-height: 24px;
+  padding: 4px 9px;
+}
