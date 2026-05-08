@@ -14180,6 +14180,105 @@ function openStartAlonePage() {
   onboarding?.classList.add("is-visible");
 })();
 
+openAnotherQuestionModal = function openAnotherQuestionPage() {
+  const previousTab = qs(".screen.active")?.id || state.tab || "home";
+  const questions = [
+    "요즘 가장 자주 떠오르는 감정은 뭐야?",
+    "우리의 작은 습관 중 좋아하는 건?",
+    "최근에 고마웠던 순간은?",
+    "앞으로 함께 기대하는 일은?",
+    "내가 요즘 더 듣고 싶은 말은 뭐야?",
+    "다음 데이트에서 꼭 하고 싶은 건?"
+  ];
+
+  openModal(`
+    <div class="modal-sheet notification-page another-question-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+        <h3>다른 질문 보기</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        ${questions.map((question) => `
+          <article class="question-history-card">
+            <h3>${duariEscapeHtml(question)}</h3>
+            <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+          </article>
+        `).join("")}
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  qs("[data-another-question-back]")?.addEventListener("click", () => {
+    closeModal();
+    setTab(previousTab === "questions" ? "diary" : previousTab);
+  });
+  qsa("[data-question-option]").forEach((button) => {
+    button.addEventListener("click", () => {
+      duariQuestionAnswerDraft.question = button.dataset.questionOption || "";
+      openQuestionModal();
+    });
+  });
+};
+
+(function installAnotherQuestionPageFinalFlow() {
+  const originalOpenQuestionModal = openQuestionModal;
+  openQuestionModal = function openQuestionModalWithSelectedQuestion(...args) {
+    const selectedQuestion = state.selectedQuestionForAnswer;
+    const result = originalOpenQuestionModal.apply(this, args);
+    if (selectedQuestion) {
+      duariQuestionAnswerDraft.question = selectedQuestion;
+      const title = qs(".question-answer-page .card h3") || qs(".question-answer-page h3");
+      const questionTitle = qs(".question-answer-page .section-stack h3");
+      if (questionTitle) questionTitle.textContent = selectedQuestion;
+      state.selectedQuestionForAnswer = "";
+    }
+    return result;
+  };
+
+  openAnotherQuestionModal = function openAnotherQuestionPageFinal() {
+    const previousTab = qs(".screen.active")?.id || state.tab || "home";
+    const questions = [
+      "요즘 가장 자주 떠오르는 감정은 뭐야?",
+      "우리의 작은 습관 중 좋아하는 건?",
+      "최근에 고마웠던 순간은?",
+      "앞으로 함께 기대하는 일은?",
+      "내가 요즘 더 듣고 싶은 말은 뭐야?",
+      "다음 데이트에서 꼭 하고 싶은 건?"
+    ];
+
+    openModal(`
+      <div class="modal-sheet notification-page another-question-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+          <h3>다른 질문 보기</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          ${questions.map((question) => `
+            <article class="question-history-card">
+              <h3>${duariEscapeHtml(question)}</h3>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `);
+    qs("#modal").classList.add("page-modal");
+    qs("[data-another-question-back]")?.addEventListener("click", () => {
+      closeModal();
+      setTab(previousTab === "questions" ? "diary" : previousTab);
+    });
+    qsa("[data-question-option]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.selectedQuestionForAnswer = button.dataset.questionOption || "";
+        duariQuestionAnswerDraft.question = state.selectedQuestionForAnswer;
+        openQuestionModal();
+      });
+    });
+  };
+})();
+
 (function installCardClassRemoval() {
   const cardStyleAllowedPages = [
     ".memory-detail-page",
@@ -16394,4 +16493,20 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       return result;
     };
   }
+})();
+
+(function installTrueFinalSelectedQuestionFlow() {
+  if (typeof openQuestionModal !== "function") return;
+  const originalOpenQuestionModal = openQuestionModal;
+  openQuestionModal = function openQuestionModalWithTrueFinalSelectedQuestion(...args) {
+    const selectedQuestion = state.selectedQuestionForAnswer;
+    const result = originalOpenQuestionModal.apply(this, args);
+    if (selectedQuestion) {
+      duariQuestionAnswerDraft.question = selectedQuestion;
+      const questionTitle = qs(".question-answer-page .section-stack h3");
+      if (questionTitle) questionTitle.textContent = selectedQuestion;
+      state.selectedQuestionForAnswer = "";
+    }
+    return result;
+  };
 })();
