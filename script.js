@@ -1767,7 +1767,8 @@ const notificationButtonFinal = qs("#openNotifications");
 notificationButtonFinal.onclick = (event) => {
   event.preventDefault();
   event.stopPropagation();
-  openNotificationPageV4();
+  if (state.tab === "my") openNotificationSettingsModal();
+  else openNotificationPageV4();
 };
 
 function renderHome() {
@@ -4527,7 +4528,8 @@ const notificationButtonV3 = qs("#openNotifications");
 notificationButtonV3.onclick = (event) => {
   event.preventDefault();
   event.stopPropagation();
-  openNotificationPageV4();
+  if (state.tab === "my") openNotificationSettingsModal();
+  else openNotificationPageV4();
 };
 
 function openDiaryModal() {
