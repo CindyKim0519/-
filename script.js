@@ -65,7 +65,6 @@ const state = {
     { type: "기록", text: "상대가 새 우리 기록을 추가함" },
     { type: "다이어리", text: "상대가 내 공유 일기에 반응함" },
     { type: "기념일", text: "가까운 기념일 D-7" },
-    { type: "시스템", text: "공유 동의 요청이 도착함" },
   ],
 };
 
@@ -1701,7 +1700,6 @@ const notificationItemsFinal = [
   { type: "anniversary", title: "기념일 D-day", body: "오늘은 여행 1주년이에요." },
   { type: "anniversary", title: "가까운 기념일 D-7", body: "여행 1주년이 7일 남았어요." },
   { type: "system", title: "커플 연결 완료", body: "봄이와 하린의 공간이 연결되었어요." },
-  { type: "system", title: "공유 동의 요청이 도착함", body: "상대 콘텐츠가 포함된 공유 요청을 확인해 주세요.", action: "share-consent-list" },
 ];
 
 const notificationTypeLabelsFinal = {
@@ -1723,7 +1721,6 @@ function renderNotificationItemsFinal(filter = "all") {
         <span class="notification-type-label">${notificationTypeLabelsFinal[item.type] || item.type}</span>
       </div>
       <p>${item.body}</p>
-      ${item.action ? '<button class="ghost-btn full" data-action="share-consent-list">공유 요청 보기</button>' : ""}
     </section>
   `).join("") || `<section class="card notification-item"><strong>알림이 없어요</strong><p>선택한 유형의 알림이 아직 없습니다.</p></section>`;
   bindActions(list);
@@ -2227,7 +2224,6 @@ const notificationItemsV4 = [
   { type: "anniversary", title: "기념일 D-day", body: "오늘은 여행 1주년이에요." },
   { type: "anniversary", title: "가까운 기념일 D-7", body: "여행 1주년이 7일 남았어요." },
   { type: "system", title: "커플 연결 완료", body: "봄이와 하린의 공간이 연결되었어요." },
-  { type: "system", title: "공유 동의 요청이 도착함", body: "상대 콘텐츠가 포함된 공유 요청을 확인해 주세요.", action: "share-consent-list" },
 ];
 
 function renderNotificationItemsV4(filter = "all") {
@@ -2239,7 +2235,6 @@ function renderNotificationItemsV4(filter = "all") {
       <section class="card notification-item">
         <strong>${item.title}</strong>
         <p>${item.body}</p>
-        ${item.action ? '<button class="ghost-btn full" data-action="share-consent-list">공유 요청 보기</button>' : ""}
       </section>
     `).join("")
     : `<section class="card notification-item"><strong>알림이 없어요</strong><p>선택한 유형의 알림이 아직 없습니다.</p></section>`;
@@ -4430,7 +4425,7 @@ function openNotificationPage() {
     ["기념일", "D"],
     ["시스템", "⚙"],
   ];
-  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent">공유 요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
+  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.filter((item) => !item.text.includes("공유 동의")).map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p></section>`).join("")}</div></div>`);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
@@ -4439,7 +4434,7 @@ renderOnboarding();
 
 qs("#startApp")?.addEventListener("click", startSetup);
 qs("#openNotifications").addEventListener("click", () => {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>알림</h3><button class="icon-btn" data-close>닫기</button></div><div class="tabs" style="margin:10px 0">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}">${item}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card"><div class="between"><strong>${item.type}</strong><span class="meta">알림</span></div><p>${item.text}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent">요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>알림</h3><button class="icon-btn" data-close>닫기</button></div><div class="tabs" style="margin:10px 0">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}">${item}</button>`).join("")}</div><div class="list">${state.notifications.filter((item) => !item.text.includes("공유 동의")).map((item) => `<section class="card"><div class="between"><strong>${item.type}</strong><span class="meta">알림</span></div><p>${item.text}</p></section>`).join("")}</div></div>`);
   bindActions(qs(".modal-sheet"));
 });
 
@@ -4456,7 +4451,7 @@ function openNotificationPageV2() {
     ["기념일", "D"],
     ["시스템", "⚙"],
   ];
-  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent">공유 요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
+  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.filter((item) => !item.text.includes("공유 동의")).map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p></section>`).join("")}</div></div>`);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
@@ -4478,7 +4473,7 @@ function openNotificationPageV3() {
     ["기념일", "D"],
     ["시스템", "⚙"],
   ];
-  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p>${item.text.includes("공유 동의") ? '<button class="ghost-btn full" data-action="share-consent-list">공유 요청 보기</button>' : ""}</section>`).join("")}</div></div>`);
+  openModal(`<div class="modal-sheet notification-page"><header class="notification-header"><button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button><h3>알림</h3><button class="notification-nav-btn" data-close aria-label="닫기">×</button></header><div class="notification-tabs" aria-label="알림 필터">${filters.map(([label, icon], index) => `<button class="notification-tab ${index === 0 ? "active" : ""}" aria-label="${label}" title="${label}">${icon}</button>`).join("")}</div><div class="list">${state.notifications.filter((item) => !item.text.includes("공유 동의")).map((item) => `<section class="card notification-item"><strong>${item.text}</strong><p class="meta">${item.type}</p></section>`).join("")}</div></div>`);
   qs("#modal").classList.add("page-modal");
   bindActions(qs(".modal-sheet"));
 }
