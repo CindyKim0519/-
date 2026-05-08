@@ -14346,6 +14346,31 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
   window.duariRemoveCardClasses = removeCardClasses;
 })();
 
+function duariHomeAnniversaryPillHtml() {
+  const anniversaries = Array.isArray(state.anniversaries) ? state.anniversaries : [];
+  if (!anniversaries.length) return "";
+  const today = new Date();
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const upcoming = anniversaries
+    .map((item) => {
+      const dateValue = String(item.date || "").replaceAll(".", "-");
+      const parts = dateValue.split("-").map(Number);
+      if (parts.length < 3 || parts.some((part) => !Number.isFinite(part))) return null;
+      let target = new Date(parts[0], parts[1] - 1, parts[2]);
+      if (item.repeat && target < todayDate) target = new Date(todayDate.getFullYear(), parts[1] - 1, parts[2]);
+      if (item.repeat && target < todayDate) target = new Date(todayDate.getFullYear() + 1, parts[1] - 1, parts[2]);
+      if (!item.repeat && target < todayDate) return null;
+      const diff = Math.round((target - todayDate) / 86400000);
+      return { ...item, diff };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.diff - b.diff);
+  const next = upcoming[0];
+  if (!next) return "";
+  const label = next.diff === 0 ? "D-day" : `D-${next.diff}`;
+  return `<span class="anniversary-pill">${label} ${duariEscapeHtml(next.name || "기념일")}</span>`;
+}
+
 renderHome = function renderHome() {
   const home = qs("#home");
   if (!home) return;
@@ -14399,6 +14424,7 @@ renderHome = function renderHome() {
     : `<p>아직 최근 기록이 없어요.</p>`;
   const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
   const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
+  const anniversaryPill = duariHomeAnniversaryPillHtml();
 
   home.innerHTML = `
     <div class="section-stack">
@@ -14408,7 +14434,7 @@ renderHome = function renderHome() {
             <p class="relationship-name">${duariEscapeHtml(currentRelation.name)}</p>
             <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">${relationshipDays}</strong><span>일</span></h3>
           </div>
-          <span class="anniversary-pill">D-7 여행 1주년</span>
+          ${anniversaryPill}
         </div>
       </section>
       ${questionCard}
