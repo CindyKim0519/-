@@ -206,7 +206,7 @@ function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.questionHistory);
 }
 
-const titles = { home: "우리 홈", album: "우리 기록", diary: "마음", questions: "질문", my: "설정" };
+const titles = { home: "오늘의 우리", album: "우리 기록", diary: "마음", questions: "질문", my: "설정" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -475,7 +475,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>우리 순간 다듬기</h3>
+        <h3>기록 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -664,7 +664,7 @@ function openLinkedDiaryEditLatest(diary, backAction = restorePreviousModal) {
     linkedMemoryIndex: detail.linkedMemoryIndex
   });
   const saveButton = qs("[data-save-diary]");
-  if (saveButton) saveButton.textContent = "수정한 마음 저장";
+  if (saveButton) saveButton.textContent = "저장";
   const backButton = qs(".diary-write-page .notification-header .notification-nav-btn[data-close]");
   if (backButton) {
     backButton.addEventListener("click", (event) => {
@@ -726,7 +726,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>우리 순간 다듬기</h3>
+        <h3>기록 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -792,7 +792,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>우리 순간 다듬기</h3>
+        <h3>기록 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -2353,7 +2353,7 @@ function renderQuestions() {
   qs("#questions").innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘 나눌 질문</p>
+        <p class="eyebrow">오늘의 질문</p>
         <h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3>
         <p>개인 질문 70%, 관계 질문 30% 비율로 부담 없이 이어집니다.</p>
         <div class="row" style="margin-top:12px">
@@ -9706,7 +9706,7 @@ function openLinkedDiaryEditLatest(diary, backAction = restorePreviousModal) {
     linkedMemoryIndex: hasRecord ? detail.linkedMemoryIndex : null
   });
   const saveButton = qs("[data-save-diary]");
-  if (saveButton) saveButton.textContent = "수정한 마음 저장";
+  if (saveButton) saveButton.textContent = "저장";
   const backButton = qs(".diary-write-page .notification-header .notification-nav-btn[data-close]");
   if (backButton) {
     backButton.addEventListener("click", (event) => {
@@ -10481,7 +10481,7 @@ function openMemoryCreatePage(backAction = null) {
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(null));
   qs("[data-save-memory-create]").addEventListener("click", () => {
-    const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 순간";
+    const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
     const place = qs("#memoryPlace")?.value.trim() || "";
     const type = qs("#memoryType")?.value || "일상";
@@ -10499,7 +10499,7 @@ function openMemoryCreatePage(backAction = null) {
     });
     closeModal();
     render();
-    showToast("새로운 우리 순간을 저장했어요.");
+    showToast("기록을 저장했어요.");
   });
   bindActions(qs(".modal-sheet"));
 }
@@ -11134,8 +11134,8 @@ function duariCurrentPhotoManageCount(fallback = 0) {
 
 function recordLinkedDiaryActionsHtml() {
   return actionPairHtml(
-    `<button class="ghost-btn" data-linked-diary-select>이어진 마음 선택</button>`,
-    `<button class="ghost-btn" data-linked-diary-add>마음 일기 추가</button>`
+    `<button class="ghost-btn" data-linked-diary-select>일기 선택</button>`,
+    `<button class="ghost-btn" data-linked-diary-add>일기 추가</button>`
   );
 }
 
@@ -11153,8 +11153,8 @@ function openMemoryEditBackConfirm(resolvedBack, memoryIndex = 0, originalMemory
   modal.insertAdjacentHTML("beforeend", `
     <div class="photo-delete-overlay" role="dialog" aria-modal="true">
       <section class="photo-delete-sheet">
-        <h3>수정한 순간을 남기지 않고 나갈까요?</h3>
-        <p>지금 바꾼 날짜, 장소, 사진, 연결된 마음은 저장해야 기록에 반영돼요. 나가면 저장하지 않은 변경사항은 사라집니다.</p>
+        <h3>저장하지 않고 나갈까요?</h3>
+        <p>저장하지 않고 나가면 방금 바꾼 내용이 기록에 반영되지 않아요.</p>
         <div class="inline-action-pair">
           <button class="primary-btn" type="button" data-memory-edit-leave>나가기</button>
           <button class="ghost-btn" type="button" data-memory-edit-stay>취소</button>
@@ -11189,19 +11189,19 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>우리 순간 다듬기</h3>
+        <h3>기록 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(memory.scope)}
-        <div class="form-field"><div class="field-label-row"><label>순간 제목</label><span class="input-count">${editTitle.length}/24</span></div><input class="memory-title-input" value="${editTitle}" maxlength="24" /></div>
-        <div class="form-field"><label>함께한 날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
-        <div class="form-field"><label>함께한 장소</label><input value="${memory.place}" /></div>
-        <div class="form-field"><label>순간 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${editTitle.length}/24</span></div><input class="memory-title-input" value="${editTitle}" maxlength="24" /></div>
+        <div class="form-field"><label>날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
+        <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
+        <div class="form-field"><label>유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: memory.photos || [], representativeIndex: memory.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>이 순간에 이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <section class="card linked-diary-section"><div class="between"><h3>이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <div class="diary-detail-actions">
-          <button class="primary-btn" data-save-memory-edit>수정한 순간 저장</button>
+          <button class="primary-btn" data-save-memory-edit>저장</button>
           <button class="ghost-btn" data-delete-memory-edit>기록 삭제</button>
         </div>
       </div>
@@ -11242,7 +11242,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     renderAlbum();
     renderDiary();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
-    showToast("수정한 순간을 저장했어요.");
+    showToast("기록을 저장했어요.");
   });
   qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
   qs("[data-photo-order-page]")?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack, editOriginalMemory)));
@@ -11264,18 +11264,18 @@ function openMemoryCreatePage(backAction = null) {
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page memory-create-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-memory-create-back aria-label="뒤로가기">←</button>
-        <h3>새로운 순간 남기기</h3>
+        <h3>새 기록 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(draft.scope || (state.connected ? "우리 둘이 보기" : "나만 보기"))}
-        <div class="form-field"><div class="field-label-row"><label>순간 제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
-        <div class="form-field"><label>함께한 날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
-        <div class="form-field"><label>함께한 장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
-        <div class="form-field"><label>순간 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
+        <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
+        <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
+        <div class="form-field"><label>유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: draftPhotos, representativeIndex: draft.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>이 순간에 이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
-        <button class="primary-btn full" data-save-memory-create>우리 순간 저장</button>
+        <section class="card linked-diary-section"><div class="between"><h3>이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <button class="primary-btn full" data-save-memory-create>저장</button>
       </div>
     </div>
   `);
@@ -11362,7 +11362,7 @@ let aiDiaryEditorDraft = null;
 function normalizeDiaryEditorHeading(heading) {
   const text = String(heading || "").trim();
   if (!text || text === "일기 쓰기" || text === "새 마음 남기기") return "일기 추가";
-  if (text === "마음 일기 다듬기") return "일기 수정";
+  if (text === "마음 일기 다듬기" || text === "일기 다듬기") return "일기 수정";
   if (text === "마음 일기") return "일기 상세";
   return text;
 }
@@ -12512,7 +12512,7 @@ let duariDiaryAiDraft = null;
 function duariNormalizeDiaryHeading(heading) {
   const text = String(heading || "").trim();
   if (!text || text === "일기 쓰기" || text === "새 마음 남기기") return "일기 추가";
-  if (text === "마음 일기 다듬기") return "일기 수정";
+  if (text === "마음 일기 다듬기" || text === "일기 다듬기") return "일기 수정";
   if (text === "마음 일기") return "일기 상세";
   return text;
 }
@@ -12592,18 +12592,18 @@ function duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex) {
         </span>
       </div>
     </article>
-  ` : `<p class="linked-record-empty">아직 이 마음과 이어진 우리 순간이 없어요. 관련된 기록을 연결하면 그날의 장면과 감정을 함께 볼 수 있어요.</p>`;
+  ` : `<p class="linked-record-empty">아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.</p>`;
 
   return `
     <section class="card linked-record-card">
       <div class="between">
-        <h3>이 마음과 이어진 순간</h3>
+        <h3>이어진 기록</h3>
         <span class="meta">${hasLinked ? "1개" : "0개"}</span>
       </div>
       <div class="linked-record-list">${recordHtml}</div>
       <div class="inline-action-pair">
-        <button class="ghost-btn" type="button" data-duari-record-picker>이어질 순간 선택</button>
-        <button class="ghost-btn" type="button" data-duari-new-record>새 순간 기록</button>
+        <button class="ghost-btn" type="button" data-duari-record-picker>기록 선택</button>
+        <button class="ghost-btn" type="button" data-duari-new-record>기록 남기기</button>
       </div>
     </section>
   `;
@@ -12863,7 +12863,7 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const heading = duariNormalizeDiaryHeading(args.heading);
-  const displayHeading = heading === "일기 수정" ? "마음 일기 다듬기" : heading === "일기 추가" ? "새 마음 남기기" : heading;
+  const displayHeading = heading === "일기 수정" ? "일기 다듬기" : heading === "일기 추가" ? "새 마음 남기기" : heading;
   const diary = args.diary || {};
   const originalIdentity = diary._duariOriginal || {
     title: diary.title || "",
@@ -12891,7 +12891,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
       </header>
       <div class="section-stack">
         <div class="form-field">
-          <label>이 마음을 볼 사람</label>
+          <label>공개 범위</label>
           <div class="chip-row" data-diary-scope data-original-scope="${scope}">
           <button class="chip-btn ${scope !== "공유" ? "active" : ""}" type="button">나만 보기</button>
           <button class="chip-btn ${scope === "공유" ? "active" : ""} ${state.connected ? "" : "is-disabled"}" type="button" ${state.connected ? "" : "disabled"}>상대에게 공유</button>
@@ -12905,12 +12905,12 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
           <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="24" />
         </div>
         <div class="form-field">
-          <label>마음을 남긴 날</label>
+          <label>작성일</label>
           <input id="diaryDate" type="date" value="${dateValue}" />
         </div>
         <div class="form-field">
-          <label>마음 내용</label>
-          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘 상대에게 전하고 싶거나 나만 간직하고 싶은 마음을 적어보세요.">${duariEscapeHtml(body)}</textarea>
+          <label>내용</label>
+          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘 남기고 싶은 마음을 적어보세요.">${duariEscapeHtml(body)}</textarea>
         </div>
         <div class="form-field">
           <label>오늘의 감정</label>
@@ -12919,7 +12919,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
           <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 마음 다듬기</button>
-          ${isEditMode ? `<button class="ghost-btn" type="button" data-delete-diary-edit>삭제</button><button class="primary-btn" type="button" data-save-diary>수정한 마음 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>이 마음 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>초안으로 보관</button>`}
+          ${isEditMode ? `<button class="ghost-btn" type="button" data-delete-diary-edit>삭제</button><button class="primary-btn" type="button" data-save-diary>저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>그대로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>초안 저장</button>`}
         </div>
       </div>
     </div>
@@ -13208,19 +13208,19 @@ function openQuestionModal() {
     <div class="modal-sheet notification-page question-answer-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
-        <h3>마음 남기기</h3>
+        <h3>답변 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘 나눌 질문</p>
+          <p class="eyebrow">오늘의 질문</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
           <label>내 마음</label>
-          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 마음을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 답변을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
         </div>
-        <p class="meta question-delivery-note">남긴 마음은 상대방에게 전달됩니다.</p>
+        <p class="meta question-delivery-note">작성한 답변은 상대에게 전달됩니다.</p>
         <div class="diary-editor-action-stack">
           <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬어서 보내기</button>
           <button class="primary-btn full" type="button" data-question-send-original>원문으로 보내기</button>
@@ -13256,8 +13256,8 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>이 마음을 보낼까요?</h3>
-        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>답변을 보낼까요?</h3>
+        <p>작성한 답변이 상대에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
           <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
@@ -13270,7 +13270,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("home");
-    showToast("마음을 상대방에게 보냈어요.");
+    showToast("답변을 보냈어요.");
   });
 }
 
@@ -14498,11 +14498,11 @@ renderHome = function renderHome() {
 
   const questionCard = `
     <section class="question-card">
-      <p class="eyebrow">오늘 나눌 질문</p>
+      <p class="eyebrow">오늘의 질문</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText?.() || "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?")}</h3>
       <div class="home-question-actions">
-        <button class="primary-btn" data-action="answer-question">마음 남기기</button>
-        <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
+        <button class="primary-btn" data-action="answer-question">답변 남기기</button>
+        <button class="ghost-btn" data-action="another-question">다른 질문</button>
       </div>
     </section>
   `;
@@ -14512,26 +14512,26 @@ renderHome = function renderHome() {
       <div class="section-stack">
         <div class="between">
           <div>
-            <p class="eyebrow">나의 듀아리</p>
+            <p class="eyebrow">내 듀아리</p>
             <h3>${duariEscapeHtml(state.nickname || "하린")}</h3>
           </div>
-          <button class="chip-btn" data-action="connect">함께 시작</button>
+          <button class="chip-btn" data-action="connect">초대하기</button>
         </div>
         ${state.aloneCtaHidden ? "" : `
           <section class="hero-card">
-            <h3>둘만의 다이어리를 만들어볼까요?</h3>
-            <p>상대와 연결하면 순간 기록과 마음 일기를 함께 남길 수 있어요.</p>
+            <h3>둘만의 공간을 열어볼까요?</h3>
+            <p>상대와 연결하면 함께한 순간과 마음 일기를 한곳에 남길 수 있어요.</p>
             <div class="row" style="margin-top:14px">
-              <button class="primary-btn" data-action="connect">함께 시작하기</button>
+              <button class="primary-btn" data-action="connect">상대 초대하기</button>
               <button class="ghost-btn" data-action="continue-alone">나만 먼저 쓰기</button>
             </div>
           </section>
         `}
         ${questionCard}
         <section class="card home-records-card">
-          <h3>최근 우리 기록</h3>
-          <p>아직 이 공간에 남긴 순간이 없어요. 오늘의 작은 장면부터 둘만의 기록으로 남겨보세요.</p>
-          <button class="primary-btn full" data-action="new-memory">순간 기록하기</button>
+          <h3>최근 기록</h3>
+          <p>아직 남긴 기록이 없어요. 오늘의 작은 장면부터 편하게 남겨보세요.</p>
+          <button class="primary-btn full" data-action="new-memory">기록 남기기</button>
         </section>
       </div>
     `;
@@ -14542,7 +14542,7 @@ renderHome = function renderHome() {
   const recentMemories = (state.memories || []).slice(0, 3);
   const homeRecentMemoryCards = recentMemories.length
     ? memoryCards(recentMemories, true)
-    : `<p>아직 이 공간에 남긴 순간이 없어요. 오늘의 작은 장면부터 둘만의 기록으로 남겨보세요.</p>`;
+    : `<p>아직 남긴 기록이 없어요. 오늘의 작은 장면부터 편하게 남겨보세요.</p>`;
   const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
   const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
   const anniversaryPill = duariHomeAnniversaryPillHtml();
@@ -14561,11 +14561,11 @@ renderHome = function renderHome() {
       ${questionCard}
       <section class="card home-records-card">
         <div class="between">
-          <h3>최근 우리 기록</h3>
+          <h3>최근 기록</h3>
           <button class="chip-btn" data-tab-go="album">더보기</button>
         </div>
         <div class="list">${homeRecentMemoryCards}</div>
-        <button class="primary-btn full" data-action="new-memory">순간 기록하기</button>
+        <button class="primary-btn full" data-action="new-memory">기록 남기기</button>
       </section>
     </div>
   `;
@@ -15202,17 +15202,17 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
 
 function duariEmptyDiaryMessage() {
   const type = duariDiaryFilterForCurrentView().type || "all";
-  if (type === "mineShared") return "아직 상대와 함께 나눈 마음이 없어요. 함께 보고 싶은 이야기를 남겨보세요.";
-  if (type === "private") return "아직 나만 볼 수 있는 마음이 없어요. 정리되지 않은 생각도 편하게 적어둘 수 있어요.";
-  if (type === "draft") return "아직 저장해 둔 초안이 없어요. 바로 보내기 어려운 마음은 잠시 보관해둘 수 있어요.";
-  return "아직 남긴 마음이 없어요. 오늘의 감정이나 기억하고 싶은 말을 천천히 적어보세요.";
+  if (type === "mineShared") return "아직 함께 나눈 일기가 없어요. 같이 보고 싶은 마음을 남겨보세요.";
+  if (type === "private") return "아직 나만 보는 일기가 없어요. 정리되지 않은 마음도 편하게 적어둘 수 있어요.";
+  if (type === "draft") return "아직 보관한 초안이 없어요. 바로 보내기 어려운 마음은 잠시 보관해둘 수 있어요.";
+  return "아직 남긴 일기가 없어요. 오늘의 감정이나 기억하고 싶은 말을 적어보세요.";
 }
 
 function duariJournalSubTabsHtml(activeView = "diary") {
   return `
     <div class="tabs diary-tabs">
       <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">질문</button>
-      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">마음 일기</button>
+      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">일기</button>
     </div>
   `;
 }
@@ -15223,16 +15223,16 @@ function duariQuestionPanelHtml() {
   const visibleCount = 10;
   return `
     <section class="question-card">
-      <p class="eyebrow">오늘 나눌 질문</p>
+      <p class="eyebrow">오늘의 질문</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
       <div class="home-question-actions question-action-row">
-        <button class="primary-btn" data-action="answer-question">마음 남기기</button>
-        <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
+        <button class="primary-btn" data-action="answer-question">답변 남기기</button>
+        <button class="ghost-btn" data-action="another-question">다른 질문</button>
       </div>
     </section>
     <section class="card question-history-section">
       <div class="between">
-        <h3>함께 나눈 질문</h3>
+        <h3>나눈 질문</h3>
         <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
       </div>
       <div class="chip-row question-history-filters">
@@ -15240,8 +15240,8 @@ function duariQuestionPanelHtml() {
       </div>
       <div class="question-history-search-grid">
         <div class="form-field">
-          <label for="questionHistoryInlineSearch">나눈 질문 검색</label>
-          <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
+          <label for="questionHistoryInlineSearch">질문 검색</label>
+          <input id="questionHistoryInlineSearch" placeholder="질문 또는 답변 검색" />
         </div>
         <div class="form-field">
           <label for="questionHistoryInlineDate">월</label>
@@ -15346,15 +15346,15 @@ renderDiary = function renderDiary() {
       ${duariJournalSubTabsHtml("diary")}
       <div class="diary-filter-grid">
         <div class="form-field">
-          <label for="diarySearch">마음 검색</label>
-          <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목이나 본문 검색" />
+          <label for="diarySearch">일기 검색</label>
+          <input id="diarySearch" value="${duariEscapeHtml(diaryFilter.query || "")}" placeholder="제목 또는 내용 검색" />
         </div>
         <div class="form-field">
           <label for="diaryMonthFilter">월</label>
           <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
         </div>
         <div class="form-field">
-          <label for="diaryTypeFilter">공개 범위</label>
+          <label for="diaryTypeFilter">유형</label>
           <select id="diaryTypeFilter">
             <option value="all" ${diaryFilter.type === "all" ? "selected" : ""}>전체</option>
             <option value="mineShared" ${diaryFilter.type === "mineShared" ? "selected" : ""}>내 공유</option>
@@ -15364,8 +15364,8 @@ renderDiary = function renderDiary() {
         </div>
       </div>
       <div class="diary-list-toolbar">
-        <p class="meta diary-list-count">총 ${filteredEntries.length}개의 마음</p>
-        <button class="primary-btn" data-action="diary-scope-first">마음 남기기</button>
+        <p class="meta diary-list-count">총 ${filteredEntries.length}개</p>
+        <button class="primary-btn" data-action="diary-scope-first">일기 남기기</button>
       </div>
       <div class="list">
         ${visibleEntries.length ? visibleEntries.map((entry, index) => `
@@ -15467,8 +15467,8 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>이 마음을 보낼까요?</h3>
-        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>답변을 보낼까요?</h3>
+        <p>작성한 답변이 상대에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
           <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
@@ -15485,7 +15485,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("questions");
-    showToast("마음을 상대방에게 보냈어요.");
+    showToast("답변을 보냈어요.");
   });
 }
 
@@ -15582,16 +15582,16 @@ function renderQuestions() {
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘 나눌 질문</p>
+        <p class="eyebrow">오늘의 질문</p>
         <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
         <div class="home-question-actions question-action-row">
-          <button class="primary-btn" data-action="answer-question">마음 남기기</button>
-          <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
+          <button class="primary-btn" data-action="answer-question">답변 남기기</button>
+          <button class="ghost-btn" data-action="another-question">다른 질문</button>
         </div>
       </section>
       <section class="card question-history-section">
         <div class="between">
-          <h3>함께 나눈 질문</h3>
+          <h3>나눈 질문</h3>
           <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
         </div>
         <div class="chip-row question-history-filters">
@@ -15641,7 +15641,7 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
 
 function duariQuestionHistoryListHtml(history, filtered, limit = filtered.length) {
   const visible = filtered.slice(0, limit);
-  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 함께 나눈 질문이 없어요. 오늘의 질문에 마음을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
+  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 나눈 질문이 없어요. 오늘의 질문에 답변을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
 }
 
 function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 10) {
@@ -15757,8 +15757,8 @@ function openQuestionSendConfirmOverlay() {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>이 마음을 보낼까요?</h3>
-        <p>작성한 마음이 최종 메시지로 상대방에게 전달됩니다.</p>
+        <h3>답변을 보낼까요?</h3>
+        <p>작성한 답변이 상대에게 전달됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-question-send-cancel>취소</button>
           <button class="primary-btn" type="button" data-question-send-confirm>보내기</button>
@@ -15775,7 +15775,7 @@ function openQuestionSendConfirmOverlay() {
     qs(".ai-confirm-overlay", page)?.remove();
     closeModal();
     setTab("questions");
-    showToast("마음을 상대방에게 보냈어요.");
+    showToast("답변을 보냈어요.");
   });
 }
 
@@ -15962,11 +15962,11 @@ function renderAlbumCalendar(memories = state.memories) {
     </section>
     <section class="card selected-calendar-records">
       <div class="between">
-        <h3>${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일의 순간</h3>
+        <h3>${Number(selectedDate.slice(5, 7))}월 ${Number(selectedDate.slice(8, 10))}일 기록</h3>
         <span class="meta">${selectedMemories.length}개</span>
       </div>
       <div class="list">
-        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날에는 아직 남긴 순간이 없어요. 기억하고 싶은 일이 있었다면 새 기록으로 남겨보세요.</p>`}
+        ${selectedMemories.length ? memoryCards(selectedMemories) : `<p class="linked-record-empty">이 날에는 아직 기록이 없어요. 기억하고 싶은 장면이 있다면 새로 남겨보세요.</p>`}
       </div>
     </section>
   `;
@@ -16011,8 +16011,8 @@ function renderAlbum() {
     <div class="section-stack">
       <div class="album-record-toolbar">
         <div class="between">
-          <span class="meta">총 ${state.memories.length}개의 순간</span>
-          <button class="primary-btn" type="button" data-action="new-memory">순간 기록하기</button>
+          <span class="meta">총 ${state.memories.length}개</span>
+          <button class="primary-btn" type="button" data-action="new-memory">기록 남기기</button>
         </div>
       </div>
       ${renderAlbumCalendar()}
@@ -16213,22 +16213,22 @@ function openQuestionModal() {
     <div class="modal-sheet notification-page question-answer-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-back aria-label="뒤로가기">←</button>
-        <h3>마음 남기기</h3>
+        <h3>답변 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘 나눌 질문</p>
+          <p class="eyebrow">오늘의 질문</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
-          <label>내 마음</label>
-          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 마음을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+          <label>답변</label>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 답변을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
         </div>
-        <p class="meta question-delivery-note">남긴 마음은 상대방에게 전달됩니다.</p>
+        <p class="meta question-delivery-note">작성한 답변은 상대에게 전달됩니다.</p>
         <div class="diary-editor-action-stack">
-          <button class="ghost-btn full" type="button" data-question-ai>AI로 부드럽게 다듬기</button>
-          <button class="primary-btn full" type="button" data-question-send-original>상대에게 마음 보내기</button>
+          <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬기</button>
+          <button class="primary-btn full" type="button" data-question-send-original>상대에게 보내기</button>
         </div>
       </div>
     </div>
@@ -16566,8 +16566,8 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     if (typeof renderEmptyLinkedRecordSection === "function") return renderEmptyLinkedRecordSection(showPicker);
     return `
       <section class="card linked-record-card">
-        <div class="between"><h3>이 마음과 이어진 순간</h3><span class="meta">0개</span></div>
-        <p class="linked-record-empty">아직 이 마음과 연결된 기록이 없어요. 함께한 순간을 연결하면 그때의 마음을 더 쉽게 다시 떠올릴 수 있어요.</p>
+        <div class="between"><h3>이어진 기록</h3><span class="meta">0개</span></div>
+        <p class="linked-record-empty">아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.</p>
       </section>
     `;
   };
@@ -16583,7 +16583,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     const record = state.memories[index];
     return `
       <section class="card linked-record-card">
-        <div class="between"><h3>이 마음과 이어진 순간</h3><span class="meta">1개</span></div>
+        <div class="between"><h3>이어진 기록</h3><span class="meta">1개</span></div>
         <div class="linked-record-list">
           <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
             <div class="linked-record-title-row title-between">
@@ -16595,7 +16595,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
             </div>
           </article>
         </div>
-        ${options.showPicker === false ? "" : `<button class="ghost-btn full" data-diary-record-picker>이어질 순간 선택</button>`}
+        ${options.showPicker === false ? "" : `<button class="ghost-btn full" data-diary-record-picker>기록 선택</button>`}
       </section>
     `;
   };
@@ -16616,7 +16616,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       <div class="modal-sheet notification-page memory-detail-page">
         <header class="notification-header">
           <button class="notification-nav-btn" data-memory-detail-back aria-label="뒤로가기">←</button>
-          <h3>우리 순간</h3>
+          <h3>순간 기록</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
         <div class="section-stack">
@@ -16634,12 +16634,12 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
           </section>
           <section class="card linked-diary-section">
             <div class="between">
-              <h3>이 순간에 이어진 마음</h3>
+              <h3>이어진 마음</h3>
               <span class="meta">${linkedDiaries.length}개</span>
             </div>
-            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.</p>`}
+            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 이어진 일기가 없어요. 이 순간에 남기고 싶은 마음을 나중에 연결할 수 있어요.</p>`}
           </section>
-          <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">이 순간 다듬기</button>
+          <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">기록 다듬기</button>
         </div>
       </div>
     `);
@@ -16859,36 +16859,51 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
   window.__duariCoupleDiaryModalCopyPolish = true;
 
   const titleCopy = {
-    "기록 상세": "우리 순간",
-    "기록 수정": "우리 순간 다듬기",
-    "기록 추가": "새로운 순간 남기기",
+    "기록 상세": "순간 기록",
+    "우리 순간": "순간 기록",
+    "우리 순간 다듬기": "기록 다듬기",
+    "새로운 순간 남기기": "새 기록 남기기",
+    "기록 수정": "기록 다듬기",
+    "기록 추가": "새 기록 남기기",
     "일기 상세": "마음 일기",
-    "일기 수정": "마음 일기 다듬기",
+    "일기 수정": "일기 다듬기",
     "일기 추가": "새 마음 남기기",
     "사진 상세": "사진으로 보는 순간",
-    "기록 선택": "이어질 순간 선택"
+    "기록 선택": "기록 선택",
+    "마음 남기기": "답변 남기기",
+    "다른 질문 보기": "다른 질문"
   };
   const sectionCopy = {
     "사진 관리": "사진으로 남긴 장면",
-    "연결된 일기": "이 순간에 이어진 마음",
-    "관련 기록 연결": "이 마음과 이어진 순간",
-    "연결된 기록": "이 마음과 이어진 순간"
+    "연결된 일기": "이어진 마음",
+    "이 순간에 이어진 마음": "이어진 마음",
+    "관련 기록 연결": "이어진 기록",
+    "연결된 기록": "이어진 기록",
+    "이 마음과 이어진 순간": "이어진 기록"
   };
   const buttonCopy = {
-    "기록 수정": "이 순간 다듬기",
-    "일기 연결 추가": "마음 일기 추가",
-    "연결된 일기 추가": "마음 일기 추가",
-    "연결한 일기 선택": "이어진 마음 선택",
-    "기록 연결 추가": "이어질 순간 선택",
-    "연결할 기록 선택": "이어질 순간 선택",
-    "기록 선택": "이어질 순간 선택",
-    "이 기록 추가": "이 순간 연결",
+    "기록 수정": "기록 다듬기",
+    "이 순간 다듬기": "기록 다듬기",
+    "순간 기록하기": "기록 남기기",
+    "마음 남기기": "답변 남기기",
+    "질문 더 보기": "다른 질문",
+    "이 질문에 답하기": "답변 남기기",
+    "일기 연결 추가": "일기 추가",
+    "연결된 일기 추가": "일기 추가",
+    "연결한 일기 선택": "일기 선택",
+    "기록 연결 추가": "기록 선택",
+    "연결할 기록 선택": "기록 선택",
+    "이어질 순간 선택": "기록 선택",
+    "기록 선택": "기록 선택",
+    "이 기록 추가": "기록 연결",
     "AI로 정리하기": "AI로 마음 다듬기",
     "전할 말로 정리하기": "AI로 마음 다듬기",
     "전할 말 정리하기": "AI로 마음 다듬기",
-    "원본으로 저장": "이 마음 저장",
-    "수정 저장": "수정한 마음 저장",
-    "임시 저장": "초안으로 보관"
+    "원본으로 저장": "그대로 저장",
+    "수정한 마음 저장": "저장",
+    "수정 저장": "저장",
+    "수정한 순간 저장": "저장",
+    "임시 저장": "초안 저장"
   };
 
   function replaceExactText(elements, copy) {
@@ -16901,33 +16916,50 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
   function replaceDiaryLabels(root) {
     qsa(".diary-write-page .form-field label", root).forEach((label) => {
       const text = label.textContent.trim();
-      if (text === "공개 범위") label.textContent = "이 마음을 볼 사람";
+      if (text === "공개 범위") label.textContent = "공개 범위";
       if (text === "제목") label.textContent = "마음 제목";
-      if (text === "날짜") label.textContent = "마음을 남긴 날";
-      if (text === "본문") label.textContent = "마음 내용";
+      if (text === "날짜") label.textContent = "작성일";
+      if (text === "본문") label.textContent = "내용";
       if (text === "내 감정") label.textContent = "오늘의 감정";
     });
     qsa(".diary-write-page textarea[placeholder='오늘의 마음을 적어보세요.']", root).forEach((textarea) => {
-      textarea.setAttribute("placeholder", "오늘 상대에게 전하고 싶거나 나만 간직하고 싶은 마음을 적어보세요.");
+      textarea.setAttribute("placeholder", "오늘 남기고 싶은 마음을 적어보세요.");
     });
   }
 
   function replaceMemoryLabels(root) {
     qsa(".memory-edit-page .form-field label", root).forEach((label) => {
       const text = label.textContent.trim();
-      if (text === "제목") label.textContent = "순간 제목";
-      if (text === "날짜") label.textContent = "함께한 날짜";
-      if (text === "장소") label.textContent = "함께한 장소";
-      if (text === "기록 유형") label.textContent = "순간 유형";
+      if (text === "제목") label.textContent = "기록 제목";
+      if (text === "날짜") label.textContent = "날짜";
+      if (text === "장소") label.textContent = "장소";
+      if (text === "기록 유형") label.textContent = "유형";
+    });
+  }
+
+  function replaceQuestionLabels(root) {
+    qsa(".question-answer-page .form-field label", root).forEach((label) => {
+      if (label.textContent.trim() === "내 마음") label.textContent = "답변";
+    });
+    qsa(".question-answer-page textarea[placeholder='상대에게 전하고 싶은 마음을 적어보세요.']", root).forEach((textarea) => {
+      textarea.setAttribute("placeholder", "상대에게 전하고 싶은 답변을 적어보세요.");
+    });
+    qsa(".question-delivery-note", root).forEach((note) => {
+      if (note.textContent.trim() === "남긴 마음은 상대방에게 전달됩니다.") note.textContent = "작성한 답변은 상대에게 전달됩니다.";
     });
   }
 
   function replaceEmptyCopy(root) {
     qsa(".linked-record-empty", root).forEach((node) => {
       const text = node.textContent.trim();
-      if (text === "연결된 일기가 없습니다.") node.textContent = "아직 이 순간에 이어진 마음 일기가 없어요.";
-      if (text === "연결된 기록이 없습니다.") node.textContent = "아직 이 마음과 이어진 우리 순간이 없어요. 관련된 기록을 연결하면 그날의 장면과 감정을 함께 볼 수 있어요.";
-      if (text === "추가된 사진이 없습니다.") node.textContent = "아직 이 순간에 담긴 사진이 없어요. 함께한 장면을 더하면 기억이 더 또렷해져요.";
+      if (text === "연결된 일기가 없습니다.") node.textContent = "아직 이어진 일기가 없어요.";
+      if (text === "아직 이 순간에 이어진 마음 일기가 없어요.") node.textContent = "아직 이어진 일기가 없어요.";
+      if (text === "아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.") node.textContent = "아직 이어진 일기가 없어요. 이 순간에 남기고 싶은 마음을 나중에 연결할 수 있어요.";
+      if (text === "연결된 기록이 없습니다.") node.textContent = "아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.";
+      if (text === "아직 이 마음과 연결된 기록이 없어요. 함께한 순간을 연결하면 그때의 마음을 더 쉽게 다시 떠올릴 수 있어요.") node.textContent = "아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.";
+      if (text === "아직 이 마음과 이어진 우리 순간이 없어요. 관련된 기록을 연결하면 그날의 장면과 감정을 함께 볼 수 있어요.") node.textContent = "아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.";
+      if (text === "추가된 사진이 없습니다.") node.textContent = "아직 사진이 없어요. 함께한 장면을 추가해 보세요.";
+      if (text === "아직 이 순간에 담긴 사진이 없어요. 함께한 장면을 더하면 기억이 더 또렷해져요.") node.textContent = "아직 사진이 없어요. 함께한 장면을 추가해 보세요.";
     });
   }
 
@@ -16937,6 +16969,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     replaceExactText(qsa("button", root), buttonCopy);
     replaceDiaryLabels(root);
     replaceMemoryLabels(root);
+    replaceQuestionLabels(root);
     replaceEmptyCopy(root);
   }
 
