@@ -10655,7 +10655,7 @@ function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backActi
     <div class="modal-sheet notification-page diary-record-picker-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-linked-diary-select-back aria-label="뒤로가기">←</button>
-        <h3>연결할 마음 선택</h3>
+        <h3>마음 선택</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -16938,6 +16938,8 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "일기 추가": "마음 남기기",
     "연결한 일기 선택": "마음 선택",
     "이어진 마음 선택": "마음 선택",
+    "연결할 마음 선택": "마음 선택",
+    "연결된 마음 선택": "마음 선택",
     "일기 선택": "마음 선택",
     "기록 연결 추가": "기록 선택",
     "연결할 기록 선택": "기록 선택",
@@ -16960,6 +16962,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "기록 상세 보기": "기록 보기",
     "상대에게 마음 보내기": "상대에게 보내기",
     "상세 보기": "보기",
+    "선택 추가": "선택",
     "수정하기": "수정"
   };
 
@@ -17094,6 +17097,13 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     });
     qsa(".diary-write-page [data-delete-diary-edit]", root).forEach((button) => {
       button.textContent = "마음 삭제";
+    });
+    qsa(".diary-record-picker-page [data-linked-diary-select-back]", root).forEach((button) => {
+      const title = button.closest(".notification-header")?.querySelector("h3");
+      if (title) title.textContent = "마음 선택";
+    });
+    qsa(".diary-record-picker-page [data-record-select]", root).forEach((button) => {
+      button.textContent = "선택";
     });
   }
 
