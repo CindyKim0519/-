@@ -10052,7 +10052,7 @@ function openLinkedDiaryUnlinkConfirm(index, backAction = null) {
   qs(".ai-confirm-overlay", page)?.remove();
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
-      <section class="ai-confirm-card">
+      <section class="ai-confirm-sheet">
         <h3>연결을 해제할까요?</h3>
         <p>이 일기는 삭제되지 않고 현재 기록과의 연결만 해제돼요.</p>
         <div class="ai-action-grid">
