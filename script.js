@@ -14180,6 +14180,56 @@ function openStartAlonePage() {
   onboarding?.classList.add("is-visible");
 })();
 
+(function installCardClassRemoval() {
+  const removeCardClasses = (root = document) => {
+    if (!root) return;
+    if (root.classList?.contains("card")) root.classList.remove("card");
+    root.querySelectorAll?.(".card").forEach((element) => element.classList.remove("card"));
+  };
+
+  const wrapRender = (name) => {
+    const original = window[name];
+    if (typeof original !== "function" || original.__duariCardRemovalWrapped) return;
+    window[name] = function cardRemovalWrappedRender(...args) {
+      const result = original.apply(this, args);
+      removeCardClasses(document);
+      return result;
+    };
+    window[name].__duariCardRemovalWrapped = true;
+  };
+
+  ["renderHome", "renderAlbum", "renderDiary", "renderQuestions", "renderMy", "renderApp"].forEach(wrapRender);
+
+  if (typeof openModal === "function" && !openModal.__duariCardRemovalWrapped) {
+    const originalOpenModal = openModal;
+    openModal = function cardRemovalWrappedOpenModal(...args) {
+      const result = originalOpenModal.apply(this, args);
+      removeCardClasses(qs("#modal") || document);
+      return result;
+    };
+    openModal.__duariCardRemovalWrapped = true;
+  }
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === "attributes") {
+        removeCardClasses(mutation.target);
+        return;
+      }
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) removeCardClasses(node);
+      });
+    });
+  });
+
+  [document.body].filter(Boolean).forEach((root) => {
+    observer.observe(root, { attributes: true, attributeFilter: ["class"], childList: true, subtree: true });
+  });
+
+  removeCardClasses(document);
+  window.duariRemoveCardClasses = removeCardClasses;
+})();
+
 renderHome = function renderHome() {
   const home = qs("#home");
   if (!home) return;
