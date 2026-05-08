@@ -15764,7 +15764,7 @@ function renderAlbumCalendar(memories = state.memories) {
   const firstDay = new Date(year, monthNumber - 1, 1);
   const daysInMonth = new Date(year, monthNumber, 0).getDate();
   const leadingBlankCount = firstDay.getDay();
-  const todayValue = "2026-05-02";
+  const todayValue = duariTodayDateText().replaceAll(".", "-");
   const memoriesByDate = (memories || []).reduce((acc, memory) => {
     const dateValue = duariMemoryDateValue(memory);
     if (!dateValue) return acc;
