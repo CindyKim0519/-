@@ -16510,3 +16510,66 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     return result;
   };
 })();
+
+(function installTrueFinalOtherQuestionPool() {
+  const questionPool = [
+    "요즘 가장 자주 떠오르는 감정은 뭐야?",
+    "우리의 작은 습관 중 좋아하는 건?",
+    "최근에 고마웠던 순간은?",
+    "앞으로 함께 기대하는 일은?",
+    "내가 요즘 더 듣고 싶은 말은 뭐야?",
+    "다음 데이트에서 꼭 하고 싶은 건?",
+    "요즘 나를 웃게 한 우리 순간은 뭐야?",
+    "내가 더 잘 표현하고 싶은 마음은 뭐야?",
+    "우리에게 새로 만들고 싶은 약속은 뭐야?",
+    "함께 쉬고 싶은 날에는 뭘 하고 싶어?",
+    "최근에 내가 놓친 네 마음이 있다면 뭐야?",
+    "서로에게 더 편안해지려면 뭐가 필요할까?",
+    "기억하고 싶은 대화가 있다면 뭐야?",
+    "다음에 꼭 같이 먹고 싶은 음식은 뭐야?",
+    "내가 해주면 힘이 될 것 같은 일은 뭐야?"
+  ];
+
+  const otherQuestionItems = () => {
+    const answered = new Set((state.questionHistory || []).map((item) => String(item.question || "").trim()).filter(Boolean));
+    const current = typeof duariCurrentQuestionText === "function" ? duariCurrentQuestionText() : "";
+    const fresh = questionPool.filter((question) => !answered.has(question) && question !== current);
+    const fallback = questionPool.filter((question) => question !== current);
+    return (fresh.length ? fresh : fallback).slice(0, 6);
+  };
+
+  openAnotherQuestionModal = function openAnotherQuestionPageWithFreshPool() {
+    const previousTab = qs(".screen.active")?.id || state.tab || "home";
+    const questions = otherQuestionItems();
+
+    openModal(`
+      <div class="modal-sheet notification-page another-question-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">‹</button>
+          <h3>다른 질문 보기</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          ${questions.map((question) => `
+            <article class="question-history-card">
+              <h3>${duariEscapeHtml(question)}</h3>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+    `);
+    qs("#modal").classList.add("page-modal");
+    qs("[data-another-question-back]")?.addEventListener("click", () => {
+      closeModal();
+      setTab(previousTab === "questions" ? "diary" : previousTab);
+    });
+    qsa("[data-question-option]").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.selectedQuestionForAnswer = button.dataset.questionOption || "";
+        duariQuestionAnswerDraft.question = state.selectedQuestionForAnswer;
+        openQuestionModal();
+      });
+    });
+  };
+})();
