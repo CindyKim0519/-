@@ -14878,6 +14878,23 @@ openLinkedDiarySelectPage = function openLinkedDiarySelectPage({ mode = "edit", 
   const diaries = state.diaries || [];
   const safeMemoryIndex = Number.isFinite(Number(memoryIndex)) ? Number(memoryIndex) : 0;
   const returnToOwner = () => mode === "create" ? openMemoryCreatePage(backAction) : openMemoryEditPageLatest(safeMemoryIndex, backAction);
+  const connectDiary = (diaryIndex) => {
+    const diary = diaries[diaryIndex];
+    if (!diary) return;
+    if (mode === "create") {
+      memoryLinkedDiarySelection.create = diaryIndex;
+    } else {
+      const memory = state.memories?.[safeMemoryIndex];
+      if (memory) {
+        state.diaries[diaryIndex] = { ...diary, linked: memory.title, linkedMemoryTitle: memory.title };
+        memoryLinkedDiarySelection.edit[safeMemoryIndex] = null;
+        duariInstallContentPersistenceHooks();
+        duariSavePersistentContent();
+      }
+    }
+    runWithoutModalHistory(returnToOwner);
+    showToast("마음을 연결했어요.");
+  };
   const cards = diaries.length ? diaries.map((diary, diaryIndex) => `
     <article class="record-picker-card">
       <div class="between"><h3>${duariEscapeHtml(diary.title || "제목 없는 일기")}</h3><span class="linked-diary-type">${duariEscapeHtml(diary.type || diaryScopeLabel?.(diary.scope) || "나만 보기")}</span></div>
@@ -14907,29 +14924,26 @@ openLinkedDiarySelectPage = function openLinkedDiarySelectPage({ mode = "edit", 
   qs("[data-linked-diary-select-back]")?.addEventListener("click", () => runWithoutModalHistory(returnToOwner));
   qsa("[data-linked-diary-preview]").forEach((button) => {
     button.addEventListener("click", () => {
-      const diary = diaries[Number(button.dataset.linkedDiaryPreview)];
+      const diaryIndex = Number(button.dataset.linkedDiaryPreview);
+      const diary = diaries[diaryIndex];
       if (!diary) return;
       renderDiaryDetailReadOnly(normalizeDiaryForDetail(diary), () => openLinkedDiarySelectPage({ mode, memoryIndex: safeMemoryIndex, backAction }));
+      qs(".diary-detail-page .diary-detail-actions")?.remove();
+      qs(".diary-detail-page .section-stack")?.insertAdjacentHTML("beforeend", `
+        <div class="diary-detail-actions inline-action-pair">
+          <button class="ghost-btn" data-linked-diary-preview-cancel>취소</button>
+          <button class="primary-btn" data-linked-diary-preview-connect>마음 연결</button>
+        </div>
+      `);
+      qs("[data-linked-diary-preview-cancel]")?.addEventListener("click", () => {
+        openLinkedDiarySelectPage({ mode, memoryIndex: safeMemoryIndex, backAction });
+      });
+      qs("[data-linked-diary-preview-connect]")?.addEventListener("click", () => connectDiary(diaryIndex));
     });
   });
   qsa("[data-linked-diary-pick]").forEach((button) => {
     button.addEventListener("click", () => {
-      const diaryIndex = Number(button.dataset.linkedDiaryPick);
-      const diary = diaries[diaryIndex];
-      if (!diary) return;
-      if (mode === "create") {
-        memoryLinkedDiarySelection.create = diaryIndex;
-      } else {
-        const memory = state.memories?.[safeMemoryIndex];
-        if (memory) {
-          state.diaries[diaryIndex] = { ...diary, linked: memory.title, linkedMemoryTitle: memory.title };
-          memoryLinkedDiarySelection.edit[safeMemoryIndex] = null;
-          duariInstallContentPersistenceHooks();
-          duariSavePersistentContent();
-        }
-      }
-      runWithoutModalHistory(returnToOwner);
-      showToast("연결할 일기를 선택했어요.");
+      connectDiary(Number(button.dataset.linkedDiaryPick));
     });
   });
 };
@@ -17068,4 +17082,36 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
   window.duariPolishCoupleDiaryCopy = polishCoupleDiaryCopy;
   window.setTimeout(() => polishCoupleDiaryCopy(document), 0);
+})();
+
+(function installHeartActionCopyPatch() {
+  if (window.__duariHeartActionCopyPatch) return;
+  window.__duariHeartActionCopyPatch = true;
+
+  function patchHeartActionCopy(root = document) {
+    qsa(".diary-detail-page [data-diary-edit]", root).forEach((button) => {
+      button.textContent = "마음 수정";
+    });
+    qsa(".diary-write-page [data-delete-diary-edit]", root).forEach((button) => {
+      button.textContent = "마음 삭제";
+    });
+  }
+
+  const previousOpenModal = openModal;
+  openModal = function openModalWithHeartActionCopy(html) {
+    previousOpenModal(html);
+    patchHeartActionCopy(qs("#modal") || document);
+  };
+
+  ["render", "renderHome", "renderAlbum", "renderDiary", "renderQuestions"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function heartActionCopyWrapper(...args) {
+      const result = original.apply(this, args);
+      patchHeartActionCopy(document);
+      return result;
+    };
+  });
+
+  window.setTimeout(() => patchHeartActionCopy(document), 0);
 })();
