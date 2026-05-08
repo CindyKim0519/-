@@ -11135,7 +11135,7 @@ function duariCurrentPhotoManageCount(fallback = 0) {
 function recordLinkedDiaryActionsHtml() {
   return actionPairHtml(
     `<button class="ghost-btn" data-linked-diary-select>마음 선택</button>`,
-    `<button class="ghost-btn" data-linked-diary-add>마음 추가</button>`
+    `<button class="ghost-btn" data-linked-diary-add>마음 남기기</button>`
   );
 }
 
@@ -11199,9 +11199,9 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
         <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
         <div class="form-field"><label>유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: memory.photos || [], representativeIndex: memory.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <section class="card linked-diary-section"><div class="between"><h3>연결된 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <div class="diary-detail-actions">
-          <button class="primary-btn" data-save-memory-edit>저장</button>
+          <button class="primary-btn" data-save-memory-edit>수정 저장</button>
           <button class="ghost-btn" data-delete-memory-edit>기록 삭제</button>
         </div>
       </div>
@@ -11274,7 +11274,7 @@ function openMemoryCreatePage(backAction = null) {
         <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: draftPhotos, representativeIndex: draft.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <section class="card linked-diary-section"><div class="between"><h3>연결된 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <button class="primary-btn full" data-save-memory-create>저장</button>
       </div>
     </div>
@@ -15202,17 +15202,17 @@ function duariFilterDiaryEntries(entries = [], filter = {}) {
 
 function duariEmptyDiaryMessage() {
   const type = duariDiaryFilterForCurrentView().type || "all";
-  if (type === "mineShared") return "아직 함께 나눈 일기가 없어요. 같이 보고 싶은 마음을 남겨보세요.";
-  if (type === "private") return "아직 나만 보는 일기가 없어요. 정리되지 않은 마음도 편하게 적어둘 수 있어요.";
+  if (type === "mineShared") return "아직 함께 나눈 마음이 없어요. 같이 보고 싶은 마음을 남겨보세요.";
+  if (type === "private") return "아직 나만 보는 마음이 없어요. 정리되지 않은 마음도 편하게 적어둘 수 있어요.";
   if (type === "draft") return "아직 보관한 초안이 없어요. 바로 보내기 어려운 마음은 잠시 보관해둘 수 있어요.";
-  return "아직 남긴 일기가 없어요. 오늘의 감정이나 기억하고 싶은 말을 적어보세요.";
+  return "아직 남긴 마음이 없어요. 오늘의 감정이나 기억하고 싶은 말을 적어보세요.";
 }
 
 function duariJournalSubTabsHtml(activeView = "diary") {
   return `
     <div class="tabs diary-tabs">
       <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">질문</button>
-      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">일기</button>
+      <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">마음</button>
     </div>
   `;
 }
@@ -15226,7 +15226,7 @@ function duariQuestionPanelHtml() {
       <p class="eyebrow">오늘의 질문</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
       <div class="home-question-actions question-action-row">
-        <button class="primary-btn" data-action="answer-question">답변 남기기</button>
+        <button class="primary-btn" data-action="answer-question">마음 남기기</button>
         <button class="ghost-btn" data-action="another-question">다른 질문</button>
       </div>
     </section>
@@ -16634,10 +16634,10 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
           </section>
           <section class="card linked-diary-section">
             <div class="between">
-              <h3>연결된 일기</h3>
+              <h3>연결된 마음</h3>
               <span class="meta">${linkedDiaries.length}개</span>
             </div>
-            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 연결된 일기가 없어요. 이 기록에 남기고 싶은 마음을 나중에 연결할 수 있어요.</p>`}
+            ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 연결된 마음이 없어요. 이 기록에 남기고 싶은 마음을 나중에 연결할 수 있어요.</p>`}
           </section>
           <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">기록 수정</button>
         </div>
@@ -16881,25 +16881,28 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "사진 상세": "사진 보기",
     "사진으로 보는 순간": "사진 보기",
     "기록 선택": "기록 선택",
-    "마음 남기기": "답변 남기기",
+    "마음 남기기": "마음 남기기",
     "다른 질문 보기": "다른 질문",
     "질문 상세": "질문 보기",
-    "최근 공유 일기": "최근 일기",
-    "일기 추가 제안": "일기 추가",
+    "최근 공유 일기": "최근 마음",
+    "최근 일기": "최근 마음",
+    "일기 추가 제안": "마음 남기기",
     "함께 나눈 질문": "나눈 질문",
     "전달한 질문": "나눈 질문"
   };
   const sectionCopy = {
     "사진 관리": "사진",
     "사진으로 남긴 장면": "사진",
-    "연결된 일기": "연결된 일기",
-    "이어진 마음": "연결된 일기",
-    "이 순간에 이어진 마음": "연결된 일기",
+    "연결된 일기": "연결된 마음",
+    "연결된 마음": "연결된 마음",
+    "이어진 마음": "연결된 마음",
+    "이 순간에 이어진 마음": "연결된 마음",
     "관련 기록 연결": "연결된 기록",
     "연결된 기록": "연결된 기록",
     "이어진 기록": "연결된 기록",
     "이 마음과 이어진 순간": "연결된 기록",
-    "최근 공유 일기": "최근 일기",
+    "최근 공유 일기": "최근 마음",
+    "최근 일기": "최근 마음",
     "최근 우리 기록": "최근 기록"
   };
   const buttonCopy = {
@@ -16909,14 +16912,16 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     "순간 기록하기": "기록 남기기",
     "우리 기록 남기기": "기록 남기기",
     "새 기록 추가": "기록 남기기",
-    "마음 남기기": "답변 남기기",
+    "마음 남기기": "마음 남기기",
     "질문 더 보기": "다른 질문",
-    "이 질문에 답하기": "답변 남기기",
-    "답변 추가": "답변 남기기",
-    "일기 연결 추가": "마음 추가",
-    "연결된 일기 추가": "마음 추가",
-    "마음 일기 추가": "마음 추가",
-    "일기 추가": "마음 추가",
+    "답변 남기기": "마음 남기기",
+    "이 질문에 답하기": "마음 남기기",
+    "답변 추가": "마음 남기기",
+    "일기 연결 추가": "마음 남기기",
+    "연결된 일기 추가": "마음 남기기",
+    "마음 일기 추가": "마음 남기기",
+    "마음 추가": "마음 남기기",
+    "일기 추가": "마음 남기기",
     "연결한 일기 선택": "마음 선택",
     "이어진 마음 선택": "마음 선택",
     "일기 선택": "마음 선택",
@@ -16955,10 +16960,14 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     qsa("p, span, strong, li", root).forEach((node) => {
       const text = node.textContent?.trim();
       if (text === "오늘 나눌 질문") node.textContent = "오늘의 질문";
-      if (text === "남긴 마음은 상대방에게 전달됩니다.") node.textContent = "작성한 답변은 상대에게 전달됩니다.";
-      if (text === "연결 전에는 공유 일기를 사용할 수 없어요.") node.textContent = "연결 전에는 함께 보는 일기를 사용할 수 없어요.";
-      if (text === "아직 공유 일기가 없어요.") node.textContent = "아직 최근 일기가 없어요.";
-      if (text === "기록 수정 내용이 저장됐어요.") node.textContent = "기록을 저장했어요.";
+      if (text === "남긴 마음은 상대방에게 전달됩니다.") node.textContent = "작성한 마음은 상대에게 전달됩니다.";
+      if (text === "작성한 답변은 상대에게 전달됩니다.") node.textContent = "작성한 마음은 상대에게 전달됩니다.";
+      if (text === "연결 전에는 공유 일기를 사용할 수 없어요.") node.textContent = "연결 전에는 함께 보는 마음을 사용할 수 없어요.";
+      if (text === "연결 전에는 함께 보는 일기를 사용할 수 없어요.") node.textContent = "연결 전에는 함께 보는 마음을 사용할 수 없어요.";
+      if (text === "아직 공유 일기가 없어요.") node.textContent = "아직 최근 마음이 없어요.";
+      if (text === "아직 최근 일기가 없어요.") node.textContent = "아직 최근 마음이 없어요.";
+      if (text === "기록 수정 내용이 저장됐어요.") node.textContent = "기록을 수정 저장했어요.";
+      if (text === "기록을 저장했어요.") node.textContent = "기록을 수정 저장했어요.";
     });
   }
 
@@ -16988,23 +16997,24 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
 
   function replaceQuestionLabels(root) {
     qsa(".question-answer-page .form-field label", root).forEach((label) => {
-      if (label.textContent.trim() === "내 마음") label.textContent = "답변";
+      if (label.textContent.trim() === "내 마음" || label.textContent.trim() === "답변") label.textContent = "마음";
     });
     qsa(".question-answer-page textarea[placeholder='상대에게 전하고 싶은 마음을 적어보세요.']", root).forEach((textarea) => {
-      textarea.setAttribute("placeholder", "상대에게 전하고 싶은 답변을 적어보세요.");
+      textarea.setAttribute("placeholder", "상대에게 전하고 싶은 마음을 적어보세요.");
     });
     qsa(".question-delivery-note", root).forEach((note) => {
-      if (note.textContent.trim() === "남긴 마음은 상대방에게 전달됩니다.") note.textContent = "작성한 답변은 상대에게 전달됩니다.";
+      if (note.textContent.trim() === "남긴 마음은 상대방에게 전달됩니다." || note.textContent.trim() === "작성한 답변은 상대에게 전달됩니다.") note.textContent = "작성한 마음은 상대에게 전달됩니다.";
     });
   }
 
   function replaceEmptyCopy(root) {
     qsa(".linked-record-empty", root).forEach((node) => {
       const text = node.textContent.trim();
-      if (text === "연결된 일기가 없습니다.") node.textContent = "아직 연결된 일기가 없어요.";
-      if (text === "아직 이어진 일기가 없어요.") node.textContent = "아직 연결된 일기가 없어요.";
-      if (text === "아직 이 순간에 이어진 마음 일기가 없어요.") node.textContent = "아직 연결된 일기가 없어요.";
-      if (text === "아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.") node.textContent = "아직 연결된 일기가 없어요. 이 기록에 남기고 싶은 마음을 나중에 연결할 수 있어요.";
+      if (text === "연결된 일기가 없습니다.") node.textContent = "아직 연결된 마음이 없어요.";
+      if (text === "아직 연결된 일기가 없어요.") node.textContent = "아직 연결된 마음이 없어요.";
+      if (text === "아직 이어진 일기가 없어요.") node.textContent = "아직 연결된 마음이 없어요.";
+      if (text === "아직 이 순간에 이어진 마음 일기가 없어요.") node.textContent = "아직 연결된 마음이 없어요.";
+      if (text === "아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.") node.textContent = "아직 연결된 마음이 없어요. 이 기록에 남기고 싶은 마음을 나중에 연결할 수 있어요.";
       if (text === "연결된 기록이 없습니다.") node.textContent = "아직 연결된 기록이 없어요. 관련된 기록을 선택해 보세요.";
       if (text === "아직 이어진 기록이 없어요. 관련된 순간을 연결해 보세요.") node.textContent = "아직 연결된 기록이 없어요. 관련된 기록을 선택해 보세요.";
       if (text === "아직 이 마음과 연결된 기록이 없어요. 함께한 순간을 연결하면 그때의 마음을 더 쉽게 다시 떠올릴 수 있어요.") node.textContent = "아직 연결된 기록이 없어요. 관련된 기록을 선택해 보세요.";
@@ -17014,15 +17024,30 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     });
   }
 
+  function replaceDiaryWord(root) {
+    qsa("h3, p, span, strong, li, button, label, option", root).forEach((node) => {
+      if (!node.textContent?.includes("일기")) return;
+      node.textContent = node.textContent.replaceAll("일기", "마음");
+    });
+    qsa("input[placeholder], textarea[placeholder]", root).forEach((field) => {
+      const placeholder = field.getAttribute("placeholder") || "";
+      if (placeholder.includes("일기")) field.setAttribute("placeholder", placeholder.replaceAll("일기", "마음"));
+    });
+  }
+
   function polishCoupleDiaryCopy(root = document) {
     replaceExactText(qsa(".notification-header h3, .modal-sheet > .between h3", root), titleCopy);
     replaceExactText(qsa("section h3, .between h3", root), sectionCopy);
     replaceExactText(qsa("button", root), buttonCopy);
+    qsa(".memory-edit-page [data-save-memory-edit]", root).forEach((button) => {
+      button.textContent = "수정 저장";
+    });
     replaceDiaryLabels(root);
     replaceMemoryLabels(root);
     replaceQuestionLabels(root);
     replaceInlineText(root);
     replaceEmptyCopy(root);
+    replaceDiaryWord(root);
   }
 
   const previousOpenModal = openModal;
