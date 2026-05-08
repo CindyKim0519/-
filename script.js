@@ -14562,7 +14562,7 @@ renderHome = function renderHome() {
       <section class="card home-records-card">
         <div class="between">
           <h3>최근 기록</h3>
-          <button class="chip-btn" data-tab-go="album">더보기</button>
+          <button class="chip-btn more-chip-btn" data-tab-go="album">더보기 <ion-icon class="duari-ion-icon" name="chevron-forward-outline" aria-hidden="true"></ion-icon></button>
         </div>
         <div class="list">${homeRecentMemoryCards}</div>
         <button class="primary-btn full" data-action="new-memory">기록 남기기</button>
@@ -15358,6 +15358,12 @@ renderDiary = function renderDiary() {
   diary.innerHTML = `
     <div class="section-stack">
       ${duariJournalSubTabsHtml("diary")}
+      <div class="diary-type-chip-row" data-diary-type-filter>
+        <button class="chip-btn ${diaryFilter.type === "all" ? "active" : ""}" type="button" data-diary-type-option="all">전체</button>
+        <button class="chip-btn ${diaryFilter.type === "mineShared" ? "active" : ""}" type="button" data-diary-type-option="mineShared">내 공유</button>
+        <button class="chip-btn ${diaryFilter.type === "private" ? "active" : ""}" type="button" data-diary-type-option="private">나만보기</button>
+        <button class="chip-btn ${diaryFilter.type === "draft" ? "active" : ""}" type="button" data-diary-type-option="draft">임시 저장</button>
+      </div>
       <div class="diary-filter-grid">
         <div class="form-field">
           <label for="diarySearch">마음 검색</label>
@@ -15366,15 +15372,6 @@ renderDiary = function renderDiary() {
         <div class="form-field">
           <label for="diaryMonthFilter">월</label>
           <input id="diaryMonthFilter" type="month" value="${String(diaryFilter.month || "").slice(0, 7).replaceAll(".", "-")}" />
-        </div>
-        <div class="form-field">
-          <label for="diaryTypeFilter">유형</label>
-          <select id="diaryTypeFilter">
-            <option value="all" ${diaryFilter.type === "all" ? "selected" : ""}>전체</option>
-            <option value="mineShared" ${diaryFilter.type === "mineShared" ? "selected" : ""}>내 공유</option>
-            <option value="private" ${diaryFilter.type === "private" ? "selected" : ""}>나만보기</option>
-            <option value="draft" ${diaryFilter.type === "draft" ? "selected" : ""}>임시 저장</option>
-          </select>
         </div>
       </div>
       <div class="diary-list-toolbar">
@@ -15399,7 +15396,6 @@ renderDiary = function renderDiary() {
   duariBindJournalSubTabs(diary);
   const searchInput = qs("#diarySearch", diary);
   const monthInput = qs("#diaryMonthFilter", diary);
-  const typeInput = qs("#diaryTypeFilter", diary);
   if (state.diarySearchFocus) {
     searchInput?.focus();
     const caretPosition = searchInput?.value?.length || 0;
@@ -15410,7 +15406,6 @@ renderDiary = function renderDiary() {
     const filter = duariDiaryFilterForCurrentView();
     filter.query = searchInput?.value || "";
     filter.month = monthInput?.value || "";
-    filter.type = typeInput?.value || "all";
     duariResetDiaryVisibleCount();
     renderDiary();
   };
@@ -15424,7 +15419,16 @@ renderDiary = function renderDiary() {
   searchInput?.addEventListener("change", applyDiaryFilters);
   monthInput?.addEventListener("input", applyDiaryFilters);
   monthInput?.addEventListener("change", applyDiaryFilters);
-  typeInput?.addEventListener("change", applyDiaryFilters);
+  qsa("[data-diary-type-option]", diary).forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = duariDiaryFilterForCurrentView();
+      filter.query = searchInput?.value || "";
+      filter.month = monthInput?.value || "";
+      filter.type = button.dataset.diaryTypeOption || "all";
+      duariResetDiaryVisibleCount();
+      renderDiary();
+    });
+  });
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
     const openEntry = () => {
       const entry = filteredEntries[Number(card.dataset.diaryEntryIndex)] || filteredEntries[0] || entries[0];
