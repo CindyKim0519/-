@@ -261,7 +261,7 @@ function openMemoryDetailLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
-        <h3>기록 상세</h3>
+        <h3>우리 순간</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -439,7 +439,7 @@ function openLinkedDiaryDetailLatest(index) {
     <div class="modal-sheet notification-page diary-write-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
-        <h3>일기 상세</h3>
+        <h3>마음 일기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -475,7 +475,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>기록 수정</h3>
+        <h3>우리 순간 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -623,7 +623,7 @@ function renderDiaryDetailReadOnly(diary, backAction = restorePreviousModal) {
     <div class="modal-sheet notification-page diary-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-diary-detail-back aria-label="뒤로가기">←</button>
-        <h3>일기 상세</h3>
+        <h3>마음 일기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -664,7 +664,7 @@ function openLinkedDiaryEditLatest(diary, backAction = restorePreviousModal) {
     linkedMemoryIndex: detail.linkedMemoryIndex
   });
   const saveButton = qs("[data-save-diary]");
-  if (saveButton) saveButton.textContent = "수정 저장";
+  if (saveButton) saveButton.textContent = "수정한 마음 저장";
   const backButton = qs(".diary-write-page .notification-header .notification-nav-btn[data-close]");
   if (backButton) {
     backButton.addEventListener("click", (event) => {
@@ -726,7 +726,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>기록 수정</h3>
+        <h3>우리 순간 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -792,7 +792,7 @@ function openMemoryEditPageLatest(index) {
     <div class="modal-sheet notification-page memory-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>기록 수정</h3>
+        <h3>우리 순간 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -1288,7 +1288,7 @@ function openLinkedDiaryDetailLatest(index, backAction = restorePreviousModal) {
     <div class="modal-sheet notification-page diary-write-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-linked-diary-back aria-label="뒤로가기">←</button>
-        <h3>일기 상세</h3>
+        <h3>마음 일기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -7560,7 +7560,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
           </div>
           ${detail.editable ? `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>` : ""}
         </section>
-        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>수정</button></div>` : ""}
+        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>마음 다듬기</button></div>` : ""}
       </div>
     </div>
   `);
@@ -7616,7 +7616,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
           </div>
           ${canEditLinks ? `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>` : ""}
         </section>
-        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>수정</button></div>` : ""}
+        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>마음 다듬기</button></div>` : ""}
       </div>
     </div>
   `);
@@ -7666,7 +7666,7 @@ function renderDiaryDetailReadOnly(diary, backAction = null) {
           </div>
           ${canEditLinks ? `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>` : ""}
         </section>
-        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>수정</button></div>` : ""}
+        ${detail.editable ? `<div class="diary-detail-actions"><button class="primary-btn" data-diary-edit>마음 다듬기</button></div>` : ""}
       </div>
     </div>
   `);
@@ -9706,7 +9706,7 @@ function openLinkedDiaryEditLatest(diary, backAction = restorePreviousModal) {
     linkedMemoryIndex: hasRecord ? detail.linkedMemoryIndex : null
   });
   const saveButton = qs("[data-save-diary]");
-  if (saveButton) saveButton.textContent = "수정 저장";
+  if (saveButton) saveButton.textContent = "수정한 마음 저장";
   const backButton = qs(".diary-write-page .notification-header .notification-nav-btn[data-close]");
   if (backButton) {
     backButton.addEventListener("click", (event) => {
@@ -10481,7 +10481,7 @@ function openMemoryCreatePage(backAction = null) {
   qs("[data-photo-add-choice]").addEventListener("click", openPhotoAddChoiceModal);
   qs("[data-linked-diary-add]").addEventListener("click", () => openDiaryModal(null));
   qs("[data-save-memory-create]").addEventListener("click", () => {
-    const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 기록";
+    const title = limitMemoryEditTitle(qs("#memoryTitle")?.value.trim() || "") || "제목 없는 순간";
     const dateValue = qs("#memoryDate")?.value || new Date().toISOString().slice(0, 10);
     const place = qs("#memoryPlace")?.value.trim() || "";
     const type = qs("#memoryType")?.value || "일상";
@@ -10499,7 +10499,7 @@ function openMemoryCreatePage(backAction = null) {
     });
     closeModal();
     render();
-    showToast("기록이 저장됐어요.");
+    showToast("새로운 우리 순간을 저장했어요.");
   });
   bindActions(qs(".modal-sheet"));
 }
@@ -10643,10 +10643,10 @@ function selectedLinkedDiaryCardsHtml(mode = "edit", index = null) {
     const diaries = linkedDiariesLatest();
     return {
       count: diaries.length,
-      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>`
     };
   }
-  return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
+  return { count: 0, html: `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>` };
 }
 
 function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backAction = null } = {}) {
@@ -10914,8 +10914,8 @@ function openMemoryDeleteConfirmOverlay(index, backAction = null) {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>기록을 삭제할까요?</h3>
-        <p>삭제한 기록은 복구할 수 없어요. 연결된 일기는 유지되고, 기록 연결만 해제됩니다.</p>
+        <h3>이 순간 기록을 삭제할까요?</h3>
+        <p>삭제한 순간은 다시 복구할 수 없어요. 연결된 마음 일기는 남지만, 이 기록과의 연결은 함께 해제됩니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-memory-delete-cancel>취소</button>
           <button class="primary-btn" type="button" data-memory-delete-confirm>삭제</button>
@@ -11117,12 +11117,12 @@ function recordPhotoActionsHtml() {
   );
 }
 
-function recordPhotoManageHtml(photoCount = 0, { title = "사진 관리", photos = [], representativeIndex = 0 } = {}) {
+function recordPhotoManageHtml(photoCount = 0, { title = "사진으로 남긴 장면", photos = [], representativeIndex = 0 } = {}) {
   const photoList = Array.isArray(photos) ? photos : [];
   const safeCount = Math.max(0, Number(photoCount) || photoList.length || 0);
   const photoBody = safeCount > 0
     ? `<div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photoList, { showDelete: true, representativeIndex })}</div>${recordPhotoActionsHtml()}`
-    : `<div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 추가된 사진이 없어요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
+    : `<div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 이 순간에 담긴 사진이 없어요. 함께한 장면을 더하면 기억이 더 또렷해져요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
   return `<section class="card" data-photo-manage-card><div class="between"><h3>${title}</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div>${photoBody}</section>`;
 }
 
@@ -11134,8 +11134,8 @@ function duariCurrentPhotoManageCount(fallback = 0) {
 
 function recordLinkedDiaryActionsHtml() {
   return actionPairHtml(
-    `<button class="ghost-btn" data-linked-diary-select>연결한 일기 선택</button>`,
-    `<button class="ghost-btn" data-linked-diary-add>일기 추가</button>`
+    `<button class="ghost-btn" data-linked-diary-select>이어진 마음 선택</button>`,
+    `<button class="ghost-btn" data-linked-diary-add>마음 일기 추가</button>`
   );
 }
 
@@ -11153,8 +11153,8 @@ function openMemoryEditBackConfirm(resolvedBack, memoryIndex = 0, originalMemory
   modal.insertAdjacentHTML("beforeend", `
     <div class="photo-delete-overlay" role="dialog" aria-modal="true">
       <section class="photo-delete-sheet">
-        <h3>저장하지 않고 나갈까요?</h3>
-        <p>수정한 내용이 있다면 저장해야 반영돼요. 나가면 저장하지 않은 변경사항은 사라질 수 있어요.</p>
+        <h3>수정한 순간을 남기지 않고 나갈까요?</h3>
+        <p>지금 바꾼 날짜, 장소, 사진, 연결된 마음은 저장해야 기록에 반영돼요. 나가면 저장하지 않은 변경사항은 사라집니다.</p>
         <div class="inline-action-pair">
           <button class="primary-btn" type="button" data-memory-edit-leave>나가기</button>
           <button class="ghost-btn" type="button" data-memory-edit-stay>취소</button>
@@ -11189,20 +11189,20 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-back-memory aria-label="뒤로가기">←</button>
-        <h3>기록 수정</h3>
+        <h3>우리 순간 다듬기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(memory.scope)}
-        <div class="form-field"><div class="field-label-row"><label>제목</label><span class="input-count">${editTitle.length}/24</span></div><input class="memory-title-input" value="${editTitle}" maxlength="24" /></div>
-        <div class="form-field"><label>날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
-        <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
-        <div class="form-field"><label>기록 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
+        <div class="form-field"><div class="field-label-row"><label>순간 제목</label><span class="input-count">${editTitle.length}/24</span></div><input class="memory-title-input" value="${editTitle}" maxlength="24" /></div>
+        <div class="form-field"><label>함께한 날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
+        <div class="form-field"><label>함께한 장소</label><input value="${memory.place}" /></div>
+        <div class="form-field"><label>순간 유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: memory.photos || [], representativeIndex: memory.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <section class="card linked-diary-section"><div class="between"><h3>이 순간에 이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
         <div class="diary-detail-actions">
-          <button class="primary-btn" data-save-memory-edit>저장</button>
-          <button class="ghost-btn" data-delete-memory-edit>삭제</button>
+          <button class="primary-btn" data-save-memory-edit>수정한 순간 저장</button>
+          <button class="ghost-btn" data-delete-memory-edit>기록 삭제</button>
         </div>
       </div>
     </div>
@@ -11242,7 +11242,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
     renderAlbum();
     renderDiary();
     runWithoutModalHistory(() => openMemoryDetailLatestV3(index, backAction));
-    showToast("기록 수정 내용이 저장됐어요.");
+    showToast("수정한 순간을 저장했어요.");
   });
   qs("[data-delete-memory-edit]")?.addEventListener("click", () => openMemoryDeleteConfirmOverlay(index, resolvedBack));
   qs("[data-photo-order-page]")?.addEventListener("click", () => openPhotoOrderManagerPageLatest(() => openMemoryEditPageLatest(index, resolvedBack, editOriginalMemory)));
@@ -11264,18 +11264,18 @@ function openMemoryCreatePage(backAction = null) {
     <div class="modal-sheet notification-page memory-detail-page memory-edit-page memory-create-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-memory-create-back aria-label="뒤로가기">←</button>
-        <h3>기록 추가</h3>
+        <h3>새로운 순간 남기기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(draft.scope || (state.connected ? "우리 둘이 보기" : "나만 보기"))}
-        <div class="form-field"><div class="field-label-row"><label>제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
-        <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
-        <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
-        <div class="form-field"><label>기록 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
+        <div class="form-field"><div class="field-label-row"><label>순간 제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
+        <div class="form-field"><label>함께한 날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
+        <div class="form-field"><label>함께한 장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
+        <div class="form-field"><label>순간 유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
         ${recordPhotoManageHtml(photoCount, { photos: draftPhotos, representativeIndex: draft.representativePhotoIndex || 0 })}
-        <section class="card linked-diary-section"><div class="between"><h3>연결된 일기</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
-        <button class="primary-btn full" data-save-memory-create>저장</button>
+        <section class="card linked-diary-section"><div class="between"><h3>이 순간에 이어진 마음</h3><span class="meta">${diarySelection.count}개</span></div>${diarySelection.html}${recordLinkedDiaryActionsHtml()}</section>
+        <button class="primary-btn full" data-save-memory-create>우리 순간 저장</button>
       </div>
     </div>
   `);
@@ -12586,18 +12586,18 @@ function duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex) {
         </span>
       </div>
     </article>
-  ` : `<p class="linked-record-empty">연결된 기록이 없습니다.</p>`;
+  ` : `<p class="linked-record-empty">아직 이 마음과 이어진 우리 순간이 없어요. 관련된 기록을 연결하면 그날의 장면과 감정을 함께 볼 수 있어요.</p>`;
 
   return `
     <section class="card linked-record-card">
       <div class="between">
-        <h3>연결된 기록</h3>
+        <h3>이 마음과 이어진 순간</h3>
         <span class="meta">${hasLinked ? "1개" : "0개"}</span>
       </div>
       <div class="linked-record-list">${recordHtml}</div>
       <div class="inline-action-pair">
-        <button class="ghost-btn" type="button" data-duari-record-picker>기록 선택</button>
-        <button class="ghost-btn" type="button" data-duari-new-record>기록 추가</button>
+        <button class="ghost-btn" type="button" data-duari-record-picker>이어질 순간 선택</button>
+        <button class="ghost-btn" type="button" data-duari-new-record>새 순간 기록</button>
       </div>
     </section>
   `;
@@ -12786,8 +12786,8 @@ function openDiaryEditDeleteConfirmOverlay(args = {}) {
   page.insertAdjacentHTML("beforeend", `
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
-        <h3>일기를 삭제할까요?</h3>
-        <p>삭제한 일기는 복구할 수 없어요.</p>
+        <h3>이 마음 일기를 삭제할까요?</h3>
+        <p>삭제하면 이 마음은 다시 복구할 수 없어요. 연결된 기록에서도 함께 사라집니다.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-diary-edit-delete-cancel>취소</button>
           <button class="primary-btn" type="button" data-diary-edit-delete-confirm>삭제</button>
@@ -12857,6 +12857,7 @@ function duariUpdateEditedDiaryAndOpenTab(args = {}) {
 
 renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const heading = duariNormalizeDiaryHeading(args.heading);
+  const displayHeading = heading === "일기 수정" ? "마음 일기 다듬기" : heading === "일기 추가" ? "새 마음 남기기" : heading;
   const diary = args.diary || {};
   const originalIdentity = diary._duariOriginal || {
     title: diary.title || "",
@@ -12879,12 +12880,12 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
     <div class="modal-sheet notification-page diary-write-page" data-original-title="${duariEscapeHtml(originalIdentity.title)}" data-original-body="${duariEscapeHtml(originalIdentity.body)}" data-original-linked="${duariEscapeHtml(originalIdentity.linked)}" data-original-date="${duariEscapeHtml(originalIdentity.date)}">
       <header class="notification-header">
         <button class="notification-nav-btn" data-duari-diary-back aria-label="뒤로가기">←</button>
-        <h3>${heading}</h3>
+        <h3>${displayHeading}</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <div class="form-field">
-          <label>공개 범위</label>
+          <label>이 마음을 볼 사람</label>
           <div class="chip-row" data-diary-scope data-original-scope="${scope}">
           <button class="chip-btn ${scope !== "공유" ? "active" : ""}" type="button">나만 보기</button>
           <button class="chip-btn ${scope === "공유" ? "active" : ""} ${state.connected ? "" : "is-disabled"}" type="button" ${state.connected ? "" : "disabled"}>상대에게 공유</button>
@@ -12892,27 +12893,27 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         </div>
         <div class="form-field">
           <div class="field-label-row">
-            <label>제목</label>
+            <label>마음 제목</label>
             <span class="input-count" data-diary-title-count>${title.length}/24</span>
           </div>
           <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="24" />
         </div>
         <div class="form-field">
-          <label>날짜</label>
+          <label>마음을 남긴 날</label>
           <input id="diaryDate" type="date" value="${dateValue}" />
         </div>
         <div class="form-field">
-          <label>본문</label>
-          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘의 마음을 적어보세요.">${duariEscapeHtml(body)}</textarea>
+          <label>마음 내용</label>
+          <textarea id="diaryBody" class="diary-body-large" placeholder="오늘 상대에게 전하고 싶거나 나만 간직하고 싶은 마음을 적어보세요.">${duariEscapeHtml(body)}</textarea>
         </div>
         <div class="form-field">
-          <label>내 감정</label>
+          <label>오늘의 감정</label>
           ${emotionChipRow(["고마움", "안정", "서운함", "그리움", "기대"], feelings, "data-diary-feelings")}
         </div>
         ${forceNoLinkedRecord ? "" : duariLinkedRecordEditorHtml(linkedTitle, linkedMemoryIndex)}
         <div class="${isEditMode ? "diary-editor-action-row" : "diary-editor-action-stack"}">
-          <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 정리하기</button>
-          ${isEditMode ? `<button class="ghost-btn" type="button" data-delete-diary-edit>삭제</button><button class="primary-btn" type="button" data-save-diary>수정 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>원본으로 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>임시 저장</button>`}
+          <button class="ghost-btn ${isEditMode ? "" : "full"}" type="button" data-duari-ai-message>AI로 마음 다듬기</button>
+          ${isEditMode ? `<button class="ghost-btn" type="button" data-delete-diary-edit>삭제</button><button class="primary-btn" type="button" data-save-diary>수정한 마음 저장</button>` : `<button class="ghost-btn full" type="button" data-save-original-diary>이 마음 저장</button><button class="primary-btn full" type="button" data-save-draft-diary>초안으로 보관</button>`}
         </div>
       </div>
     </div>
@@ -13398,11 +13399,11 @@ function duariRefreshPhotoManageCard(count, options = {}) {
     : (Number(state.memories?.[memoryIndex]?.representativePhotoIndex) || 0);
   const openAddChoice = () => openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
   if (safeCount <= 0) {
-    card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 이 기록에 담긴 사진이 없어요. 함께한 장면을 추가하면 기록이 더 선명해져요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
+    card.innerHTML = `<div class="between"><h3>사진으로 남긴 장면</h3><span class="meta" data-photo-manage-count>0장</span></div><div class="photo-empty-state" data-photo-manage-grid><p class="linked-record-empty photo-empty-line">아직 이 순간에 담긴 사진이 없어요. 함께한 장면을 추가하면 기억이 더 선명해져요.</p></div><button class="primary-btn full" data-photo-add-choice>사진 추가</button>`;
     qs("[data-photo-add-choice]", card)?.addEventListener("click", openAddChoice);
     return;
   }
-  card.innerHTML = `<div class="between"><h3>사진 관리</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photos, { showDelete: true, representativeIndex })}</div>${recordPhotoActionsHtml()}`;
+  card.innerHTML = `<div class="between"><h3>사진으로 남긴 장면</h3><span class="meta" data-photo-manage-count>${safeCount}장</span></div><div class="photo-order-grid compact" data-photo-manage-grid>${memoryPhotoCardsLatest(safeCount, photos, { showDelete: true, representativeIndex })}</div>${recordPhotoActionsHtml()}`;
   qs("[data-photo-order-page]", card)?.addEventListener("click", () => {
     if (createMode) {
       state.memoryCreateDraft = {
@@ -14686,10 +14687,10 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
     const diaries = linkedDiariesLatest();
     return {
       count: diaries.length,
-      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+      html: diaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest()}</div>` : `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>`
     };
   }
-  return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
+  return { count: 0, html: `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>` };
 };
 
 function duariLinkedDiaryMenuHtml(index, diary = {}) {
@@ -14796,10 +14797,10 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
       html: diaries.length ? `<div class="linked-diary-list">${diaries.map((diary, diaryIndex) => duariLinkedDiaryCardHtml(diary, diaryIndex, {
         dataAttr: `data-linked-diary-index="${diaryIndex}" data-no-linked-diary-menu="true"`,
         showMenu: false
-      })).join("")}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+      })).join("")}</div>` : `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>`
     };
   }
-  return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
+  return { count: 0, html: `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>` };
 };
 
 function duariMemoryEditLinkedDiaryCardHtml(diary, index) {
@@ -14861,10 +14862,10 @@ selectedLinkedDiaryCardsHtml = function selectedLinkedDiaryCardsHtml(mode = "edi
     const diaries = linkedDiariesLatest();
     return {
       count: diaries.length,
-      html: diaries.length ? `<div class="linked-diary-list">${diaries.map((diary, diaryIndex) => duariMemoryEditLinkedDiaryCardHtml(diary, diaryIndex)).join("")}</div>` : `<p class="linked-record-empty">연결된 일기가 없습니다.</p>`
+      html: diaries.length ? `<div class="linked-diary-list">${diaries.map((diary, diaryIndex) => duariMemoryEditLinkedDiaryCardHtml(diary, diaryIndex)).join("")}</div>` : `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>`
     };
   }
-  return { count: 0, html: `<p class="linked-record-empty">연결된 일기가 없습니다.</p>` };
+  return { count: 0, html: `<p class="linked-record-empty">아직 이 순간에 이어진 마음 일기가 없어요.</p>` };
 };
 
 openLinkedDiarySelectPage = function openLinkedDiarySelectPage({ mode = "edit", memoryIndex = null, backAction = null } = {}) {
@@ -16068,7 +16069,7 @@ function openPhotoDetail(trigger = null) {
     <div class="modal-sheet notification-page photo-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" type="button" data-photo-detail-back aria-label="뒤로가기">←</button>
-        <h3>사진 상세</h3>
+        <h3>사진으로 보는 순간</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -16559,7 +16560,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     if (typeof renderEmptyLinkedRecordSection === "function") return renderEmptyLinkedRecordSection(showPicker);
     return `
       <section class="card linked-record-card">
-        <div class="between"><h3>연결된 기록</h3><span class="meta">0개</span></div>
+        <div class="between"><h3>이 마음과 이어진 순간</h3><span class="meta">0개</span></div>
         <p class="linked-record-empty">아직 이 마음과 연결된 기록이 없어요. 함께한 순간을 연결하면 그때의 마음을 더 쉽게 다시 떠올릴 수 있어요.</p>
       </section>
     `;
@@ -16576,7 +16577,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     const record = state.memories[index];
     return `
       <section class="card linked-record-card">
-        <div class="between"><h3>연결된 기록</h3><span class="meta">1개</span></div>
+        <div class="between"><h3>이 마음과 이어진 순간</h3><span class="meta">1개</span></div>
         <div class="linked-record-list">
           <article class="linked-record-pill"${showMenu ? "" : ` role="button" tabindex="0" data-linked-record-detail="${index}"`}>
             <div class="linked-record-title-row title-between">
@@ -16588,7 +16589,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
             </div>
           </article>
         </div>
-        ${options.showPicker === false ? "" : `<button class="ghost-btn full" data-diary-record-picker>연결할 기록 선택</button>`}
+        ${options.showPicker === false ? "" : `<button class="ghost-btn full" data-diary-record-picker>이어질 순간 선택</button>`}
       </section>
     `;
   };
@@ -16609,7 +16610,7 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
       <div class="modal-sheet notification-page memory-detail-page">
         <header class="notification-header">
           <button class="notification-nav-btn" data-memory-detail-back aria-label="뒤로가기">←</button>
-          <h3>기록 상세</h3>
+          <h3>우리 순간</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
         <div class="section-stack">
@@ -16627,12 +16628,12 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
           </section>
           <section class="card linked-diary-section">
             <div class="between">
-              <h3>연결된 일기</h3>
+              <h3>이 순간에 이어진 마음</h3>
               <span class="meta">${linkedDiaries.length}개</span>
             </div>
             ${linkedDiaries.length ? `<div class="linked-diary-list">${linkedDiaryCardsLatest(safeIndex)}</div>` : `<p class="linked-record-empty">아직 이 기록에 이어진 마음 일기가 없어요. 같은 순간을 보며 떠오른 마음을 나중에 연결해둘 수 있어요.</p>`}
           </section>
-          <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">기록 수정</button>
+          <button class="primary-btn full" data-memory-edit-page data-index="${safeIndex}">이 순간 다듬기</button>
         </div>
       </div>
     `);
