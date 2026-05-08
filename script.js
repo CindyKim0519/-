@@ -15433,117 +15433,13 @@ openModal = function openModalWithTwoButtonRows(html) {
 
 function renderAlbum() {
   const album = qs("#album");
-  const views = ["record", "photo", "calendar"];
-  const labels = { record: "기록", photo: "사진", calendar: "캘린더" };
-  const currentView = views.includes(state.albumView) ? state.albumView : "record";
-  const recordTypes = ["데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
-  state.albumView = currentView;
-
-  let content = "";
-  if (currentView === "record") {
-    const recordList = renderAlbumRecordList(state.memories);
-    content = `
-      <div class="album-record-toolbar">
-        <div class="between">
-          <span class="meta" data-record-count>총 ${state.memories.length}개</span>
-          <button class="primary-btn" type="button" data-action="new-memory">기록 추가</button>
-        </div>
-      </div>
-      <div class="list album-record-list" data-album-record-list>${recordList.html}</div>
-      <button class="ghost-btn full album-record-load-more" type="button" data-record-load-more ${recordList.hasMore ? "" : "hidden"}>더보기</button>
-    `;
-  }
-  if (currentView === "photo") {
-    content = `
-      <div class="album-photo-summary">
-        <span class="meta" data-photo-count>총 ${state.memories.reduce((sum, _memory, index) => sum + duariActualPhotoCountForMemory(index), 0)}장</span>
-      </div>
-      <div class="album-photo-groups" data-album-photo-groups>${renderAlbumPhotoGroups(state.memories)}</div>
-    `;
-  }
-  if (currentView === "calendar") {
-    content = renderAlbumCalendar();
-  }
+  state.albumView = "calendar";
 
   album.innerHTML = `
     <div class="section-stack">
-      <div class="tabs">
-        ${views.map((view) => `<button class="chip-btn ${currentView === view ? "active" : ""}" type="button" data-album-view="${view}">${labels[view]}</button>`).join("")}
-      </div>
-      ${currentView === "record" || currentView === "photo" ? `
-        <div class="form-field">
-          <label for="albumSearch">기록 검색</label>
-          <input id="albumSearch" placeholder="제목, 장소, 기록 유형" />
-        </div>
-      ` : ""}
-      ${currentView === "record" || currentView === "photo" ? `
-        <div class="album-filter-grid">
-          <div class="form-field">
-            <label for="albumDateFilter">월</label>
-            <input id="albumDateFilter" type="month" />
-          </div>
-          <div class="form-field">
-            <label for="albumTypeFilter">기록 유형</label>
-            <select id="albumTypeFilter">
-              <option>전체</option>
-              ${recordTypes.map((type) => `<option>${type}</option>`).join("")}
-            </select>
-          </div>
-        </div>
-      ` : ""}
-      ${content}
+      ${renderAlbumCalendar()}
     </div>
   `;
-  qsa("[data-album-view]", album).forEach((button) => {
-    button.addEventListener("click", () => {
-      state.albumView = button.dataset.albumView;
-      if (state.albumView === "calendar") {
-        state.calendarTouched = false;
-        state.calendarMonth = "";
-        state.calendarSelectedDate = "";
-      }
-      renderAlbum();
-    });
-  });
-  if (currentView === "record" || currentView === "photo") {
-    const searchInput = qs("#albumSearch", album);
-    const dateInput = qs("#albumDateFilter", album);
-    const typeSelect = qs("#albumTypeFilter", album);
-    let filteredRecords = state.memories;
-    const renderRecordList = (filtered) => {
-      const recordList = renderAlbumRecordList(filtered);
-      qs("[data-album-record-list]", album).innerHTML = recordList.html;
-      qs("[data-record-count]", album).textContent = `총 ${filtered.length}개`;
-      const loadMoreButton = qs("[data-record-load-more]", album);
-      if (loadMoreButton) loadMoreButton.hidden = !recordList.hasMore;
-    };
-    const applyFilters = () => {
-      const filtered = duariAlbumFilterMemories({
-        query: searchInput?.value,
-        date: dateInput?.value,
-        type: typeSelect?.value || "전체"
-      });
-      filteredRecords = filtered;
-      if (currentView === "record") {
-        state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
-        renderRecordList(filtered);
-      }
-      if (currentView === "photo") {
-        const totalPhotos = filtered.reduce((sum, memory) => sum + duariActualPhotoCountForMemory(state.memories.indexOf(memory)), 0);
-        qs("[data-album-photo-groups]", album).innerHTML = renderAlbumPhotoGroups(filtered);
-        qs("[data-photo-count]", album).textContent = `총 ${totalPhotos}장`;
-      }
-    };
-    [searchInput, dateInput, typeSelect].forEach((input) => {
-      input?.addEventListener("input", applyFilters);
-      input?.addEventListener("change", applyFilters);
-    });
-    qs("[data-record-load-more]", album)?.addEventListener("click", () => {
-      duariIncreaseAlbumRecordVisibleCount();
-      renderRecordList(filteredRecords);
-      bindActions(album);
-    });
-  }
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
     duariCalendarShiftMonth(-1);
     renderAlbum();
