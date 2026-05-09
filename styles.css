@@ -382,7 +382,7 @@ h3 {
 .ghost-btn:disabled {
   background: var(--color-gray-200);
   border-color: var(--color-gray-200);
-  color: var(--text-secondary);
+  color: #303030;
   cursor: not-allowed;
   transform: none;
 }
@@ -646,7 +646,7 @@ h3 {
   grid-template-columns: repeat(4, 1fr);
   height: var(--bottom-nav-height);
   left: 0;
-  padding: 5px 8px 10px;
+  padding: 6px 8px;
   position: absolute;
   right: 0;
   z-index: 12;
@@ -660,10 +660,12 @@ h3 {
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
-  font-size: 11px;
+  font-size: var(--font-size-md);
   gap: 2px;
-  height: 54px;
+  height: 100%;
   justify-content: center;
+  line-height: var(--line-height-sm);
+  min-height: 0;
 }
 
 .nav-item span {
@@ -2735,6 +2737,13 @@ h3 {
   background: none;
 }
 
+.memory-photo-main > img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
 .memory-photo-slide:has(> img)::before,
 .photo-detail-image:has(> img)::before,
 .photo-detail-image:has(> img)::after {
@@ -3163,11 +3172,17 @@ h3 {
   background: var(--color-white);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  color: var(--text-body);
-  line-height: var(--line-height-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
   margin: 0;
   padding: 12px;
   white-space: pre-wrap;
+}
+
+.ai-page .card > h3:has(+ .readonly-source) {
+  font-size: 15px !important;
+  line-height: var(--line-height-md);
 }
 
 .ai-page .tone-section {
@@ -5053,6 +5068,126 @@ button,
 
 .modal.page-modal .modal-sheet.notification-page :is(.record-picker-actions, .ai-action-grid, .modal-actions) > :is(.primary-btn, .ghost-btn) {
   min-width: 0;
+}
+
+.memory-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memory-info-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+}
+
+.memory-readable-title {
+  font-size: 22px !important;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.memory-readable-meta {
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.memory-detail-feelings {
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.memory-body-copy {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  line-height: 1.7;
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+}
+
+.memory-feeling-picker {
+  justify-content: flex-start;
+}
+
+.required-text {
+  color: #e24b4b;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.memory-edit-page .inline-action-pair > [data-save-memory-edit] {
+  margin-top: 0 !important;
+}
+
+.ai-photo-memory-page .photo-empty-state {
+  display: none;
+}
+
+.modal .modal-sheet.ai-photo-upload-choice {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  max-height: none;
+  max-width: 344px;
+  padding: 18px;
+}
+
+.modal .modal-sheet.ai-photo-upload-choice .notification-header {
+  display: none;
+}
+
+.modal .modal-sheet.ai-photo-upload-choice .section-stack {
+  gap: 12px;
+  padding: 0;
+}
+
+.modal .modal-sheet.ai-photo-upload-choice :is(.primary-btn.full, .ghost-btn.full) {
+  margin-top: 0 !important;
+}
+
+.memory-create-dropdown {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  position: fixed;
+  width: 176px;
+  z-index: 80;
+}
+
+.memory-create-dropdown button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  display: flex;
+  font: inherit;
+  justify-content: flex-start;
+  min-height: 42px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.memory-create-dropdown button:active {
+  background: var(--surface-soft);
+}
+
+#home .home-records-card > .between {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+#home .home-records-card .home-memory-create-btn {
+  display: inline-flex !important;
 }
 
 /* App standard: keep every h3 title at 18px. */
