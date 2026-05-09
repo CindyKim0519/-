@@ -4344,11 +4344,11 @@ function bindRestoredModalInteractions(root) {
 
 function bindModalCloseButtons(modal) {
   modal.querySelectorAll(".icon-btn[data-close]").forEach((button) => {
-    button.textContent = "추억 남기기";
+    button.textContent = "×";
     button.setAttribute("aria-label", "닫기");
   });
   modal.querySelectorAll(".notification-header .notification-nav-btn[data-close]:last-child").forEach((button) => {
-    button.textContent = "추억 남기기";
+    button.textContent = "×";
     button.setAttribute("aria-label", "닫기");
   });
   modal.querySelectorAll("[data-close]").forEach((button) => {
@@ -4376,11 +4376,11 @@ function openModal(html) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   modal.querySelectorAll(".icon-btn[data-close]").forEach((button) => {
-    button.textContent = "추억 남기기";
+    button.textContent = "×";
     button.setAttribute("aria-label", "닫기");
   });
   modal.querySelectorAll(".notification-header .notification-nav-btn[data-close]:last-child").forEach((button) => {
-    button.textContent = "추억 남기기";
+    button.textContent = "×";
     button.setAttribute("aria-label", "닫기");
   });
   normalizePageDetailHeaders(modal);
@@ -14275,124 +14275,6 @@ function openStartAlonePage() {
   onboarding?.classList.add("is-visible");
 })();
 
-(function restoreHomeHeaderCreateDropdownState() {
-  if (window.__duariRestoreHomeHeaderCreateDropdownStateInstalled) return;
-  window.__duariRestoreHomeHeaderCreateDropdownStateInstalled = true;
-  window.__duariStableHomeRendererInstalled = true;
-
-  function patchHomeHeaderCreateButton() {
-    const section = qs("#home .home-records-card");
-    const header = section ? qs(":scope > .between", section) : null;
-    if (!section || !header) return;
-    let button = qs(":scope > button", header);
-    if (!button) {
-      header.insertAdjacentHTML("beforeend", `<button class="chip-btn" type="button" data-action="new-memory">추억 남기기</button>`);
-      button = qs(":scope > button", header);
-    }
-    if (!button) return;
-    button.removeAttribute("data-tab-go");
-    button.dataset.action = "new-memory";
-    button.classList.remove("more-chip-btn");
-    button.classList.add("chip-btn");
-    button.textContent = "추억 남기기";
-  }
-
-  const baseRenderHome = renderHome;
-  renderHome = function renderHomeWithHeaderCreateDropdownState(...args) {
-    const result = baseRenderHome.apply(this, args);
-    patchHomeHeaderCreateButton();
-    return result;
-  };
-  window.renderHome = renderHome;
-
-  function closeMemoryCreateDropdown() {
-    qs("[data-memory-create-dropdown]")?.remove();
-  }
-
-  function openMemoryCreateDirectly() {
-    closeMemoryCreateDropdown();
-    if (typeof openMemoryCreatePage === "function") openMemoryCreatePage();
-    else if (typeof openMemoryModal === "function") openMemoryModal();
-  }
-
-  function openMemoryPhotoPicker() {
-    closeMemoryCreateDropdown();
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.multiple = true;
-    input.hidden = true;
-    document.body.appendChild(input);
-    input.addEventListener("change", () => {
-      const files = Array.from(input.files || []).filter((file) => file.type.startsWith("image/"));
-      if (!files.length) {
-        input.remove();
-        return;
-      }
-      Promise.all(files.map((file) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ src: String(reader.result || ""), name: file.name, owner: "나" });
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(file);
-      }))).then((photos) => {
-        const safePhotos = photos.filter(Boolean);
-        state.memoryCreateDraft = {
-          ...(state.memoryCreateDraft || {}),
-          photos: safePhotos,
-          photoCount: safePhotos.length,
-          representativePhoto: safePhotos[0] || null,
-          representativePhotoIndex: 0,
-          date: new Date().toISOString().slice(0, 10),
-          type: "일상"
-        };
-        input.remove();
-        openMemoryCreateDirectly();
-      });
-    }, { once: true });
-    input.click();
-  }
-
-  function toggleMemoryCreateDropdown(button) {
-    const existing = qs("[data-memory-create-dropdown]");
-    if (existing) {
-      existing.remove();
-      return;
-    }
-    const rect = button.getBoundingClientRect();
-    const dropdown = document.createElement("div");
-    dropdown.className = "memory-create-dropdown";
-    dropdown.dataset.memoryCreateDropdown = "true";
-    dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 184)}px`;
-    dropdown.style.top = `${rect.bottom + 8}px`;
-    dropdown.innerHTML = `
-      <button type="button" data-memory-dropdown-photo>사진 선택하기</button>
-      <button type="button" data-memory-dropdown-direct>직접 남기기</button>
-    `;
-    document.body.appendChild(dropdown);
-    qs("[data-memory-dropdown-photo]", dropdown)?.addEventListener("click", openMemoryPhotoPicker);
-    qs("[data-memory-dropdown-direct]", dropdown)?.addEventListener("click", openMemoryCreateDirectly);
-    setTimeout(() => {
-      document.addEventListener("click", (event) => {
-        if (dropdown.contains(event.target) || button.contains(event.target)) return;
-        closeMemoryCreateDropdown();
-      }, { once: true });
-    }, 0);
-  }
-
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest?.("[data-action='new-memory']");
-    if (!button) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    toggleMemoryCreateDropdown(button);
-  }, true);
-
-  if (activeTab === "home" || state.tab === "home" || qs("#home")?.classList.contains("active")) {
-    patchHomeHeaderCreateButton();
-  }
-})();
-
 openAnotherQuestionModal = function openAnotherQuestionPage() {
   const previousTab = qs(".screen.active")?.id || state.tab || "home";
   const questions = [
@@ -14747,6 +14629,7 @@ renderHome = function renderHome() {
       <section class="card home-records-card">
         <div class="between">
           <h3>최근 기록</h3>
+          <button class="chip-btn more-chip-btn" data-tab-go="album">더보기 <ion-icon class="duari-ion-icon" name="chevron-forward-outline" aria-hidden="true"></ion-icon></button>
         </div>
         <div class="list">${homeRecentMemoryCards}</div>
         <button class="primary-btn full" data-action="new-memory">기록 남기기</button>
@@ -17278,7 +17161,7 @@ ${photoSection}
     replaceExactText(qsa("section h3, .between h3", root), sectionCopy);
     replaceExactText(qsa("button", root), buttonCopy);
     qsa(".memory-edit-page [data-save-memory-edit]", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "수정 저장";
     });
     replaceDiaryLabels(root);
     replaceMemoryLabels(root);
@@ -17314,17 +17197,17 @@ ${photoSection}
 
   function patchHeartActionCopy(root = document) {
     qsa(".diary-detail-page [data-diary-edit]", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "마음 수정";
     });
     qsa(".diary-write-page [data-delete-diary-edit]", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "마음 삭제";
     });
     qsa(".diary-record-picker-page [data-linked-diary-select-back]", root).forEach((button) => {
       const title = button.closest(".notification-header")?.querySelector("h3");
       if (title) title.textContent = "마음 선택";
     });
     qsa(".diary-record-picker-page [data-record-select]", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "선택";
     });
   }
 
@@ -17623,10 +17506,10 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
 
   function patchQuestionAnswerButtonCopy(root = document) {
     qsa(".question-card [data-action='answer-question'], .question-action-row [data-action='answer-question']", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "답변 남기기";
     });
     qsa("[data-question-option]", root).forEach((button) => {
-      button.textContent = "추억 남기기";
+      button.textContent = "답변 남기기";
     });
   }
 
