@@ -17653,3 +17653,815 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     };
   }
 })();
+
+(function installMemoryHeartRequiredFlow() {
+  if (window.__duariMemoryHeartRequiredFlowInstalled) return;
+  window.__duariMemoryHeartRequiredFlowInstalled = true;
+
+  const MEMORY_FEELINGS = ["고마움", "설렘", "편안함", "행복", "다정함", "소중함", "안도", "기대", "즐거움", "그리움", "미안함", "솔직함"];
+  const MEMORY_TYPES = ["데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
+
+  function escapeText(value = "") {
+    if (typeof duariEscapeHtml === "function") return duariEscapeHtml(value);
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[char]);
+  }
+
+  function todayInputValue() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function displayDate(value = "") {
+    const raw = String(value || "").trim();
+    if (!raw) return todayInputValue().replaceAll("-", ".");
+    return raw.includes("-") ? raw.replaceAll("-", ".") : raw;
+  }
+
+  function inputDate(value = "") {
+    if (typeof toDateInputValue === "function") return toDateInputValue(value);
+    const raw = String(value || "").trim();
+    if (/^\d{4}\.\d{2}\.\d{2}$/.test(raw)) return raw.replaceAll(".", "-");
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    return todayInputValue();
+  }
+
+  function memoryBody(memory = {}) {
+    return String(memory.body || memory.note || "").trim();
+  }
+
+  function memoryTitle(value = "") {
+    const raw = String(value || "").trim();
+    return raw ? raw.slice(0, 10) : "제목 없는 추억";
+  }
+
+  function selectedFeelingValues(root = document) {
+    return qsa("[data-memory-heart-feelings] .chip-btn.active", root)
+      .map((button) => button.textContent.trim())
+      .filter(Boolean)
+      .slice(0, 2);
+  }
+
+  function feelingChipButtons(selected = []) {
+    return `
+      <div class="chip-row diary-feelings-centered" data-memory-heart-feelings>
+        ${MEMORY_FEELINGS.map((feeling) => `<button class="chip-btn ${selected.includes(feeling) ? "active" : ""}" type="button">${feeling}</button>`).join("")}
+      </div>
+    `;
+  }
+
+  function feelingBadges(feelings = []) {
+    return `
+      <div class="tag-row diary-feelings-centered memory-heart-feelings-view">
+        ${(feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${escapeText(feeling)}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  function photoListFor(memoryIndex = 0, createMode = false) {
+    if (createMode) return Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : [];
+    return typeof duariPhotoListForMemory === "function" ? duariPhotoListForMemory(memoryIndex) : (state.memories?.[memoryIndex]?.photos || []);
+  }
+
+  function photoSrc(photo) {
+    return typeof duariPhotoSource === "function" ? duariPhotoSource(photo) : (typeof photo === "string" ? photo : (photo?.src || ""));
+  }
+
+  function memoryPhotoSection(memoryIndex = 0) {
+    const photos = photoListFor(memoryIndex, false).filter((photo) => !!photoSrc(photo));
+    if (!photos.length) return "";
+    return `
+      <section class="memory-photo-gallery memory-heart-photo-gallery" aria-label="사진">
+        <div class="memory-photo-scroll memory-heart-photo-scroll">
+          ${photos.map((photo, index) => `
+            <button class="memory-photo-slide" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${index}" data-photo-back="memory" aria-label="${index + 1}번째 사진">
+              <img src="${signupAttr(photoSrc(photo))}" alt="" />
+            </button>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function photoManageGridHtml(memoryIndex = 0, createMode = false) {
+    const photos = photoListFor(memoryIndex, createMode).filter((photo) => !!photoSrc(photo));
+    if (!photos.length) {
+      return `
+        <section class="card memory-heart-photo-manage" data-photo-manage-card>
+          <div class="between"><h3>사진</h3><span class="meta" data-photo-manage-count>0장</span></div>
+          <p class="linked-record-empty">아직 추가된 사진이 없어요.</p>
+          <button class="primary-btn full" type="button" data-photo-add-choice>사진 추가</button>
+        </section>
+      `;
+    }
+    return `
+      <section class="card memory-heart-photo-manage" data-photo-manage-card>
+        <div class="between"><h3>사진</h3><span class="meta" data-photo-manage-count>${photos.length}장</span></div>
+        <div class="photo-order-grid compact" data-photo-manage-grid>
+          ${photos.map((photo, index) => `
+            <div class="photo-order-card ${index === 0 ? "is-representative" : ""}">
+              <img src="${signupAttr(photoSrc(photo))}" alt="" />
+              <button class="photo-delete-mini" type="button" data-photo-manage-delete="${index}" aria-label="사진 삭제">×</button>
+            </div>
+          `).join("")}
+        </div>
+        <button class="primary-btn full" type="button" data-photo-add-choice>사진 추가</button>
+      </section>
+    `;
+  }
+
+  function bindPhotoManage(root, memoryIndex = 0, createMode = false) {
+    qs("[data-photo-add-choice]", root)?.addEventListener("click", () => {
+      if (typeof openPhotoAddChoiceModal === "function") openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
+    });
+    if (typeof bindPhotoManageDeleteButtons === "function") {
+      bindPhotoManageDeleteButtons(root, createMode ? { createMode: true } : { memoryIndex });
+    }
+  }
+
+  function typeOptions(selected = "일상") {
+    return MEMORY_TYPES.map((type) => `<option value="${type}" ${type === selected ? "selected" : ""}>${type}</option>`).join("");
+  }
+
+  function validateMemoryHeart(root = document) {
+    const feelings = selectedFeelingValues(root);
+    const body = qs("#memoryHeartBody", root)?.value.trim() || "";
+    if (!feelings.length) {
+      showToast("이 추억에 남길 감정을 하나 이상 선택해 주세요.");
+      return null;
+    }
+    if (!body) {
+      showToast("이 추억에 담긴 마음을 짧게라도 남겨 주세요.");
+      return null;
+    }
+    return { feelings, body };
+  }
+
+  function readMemoryEditorValues(root = document) {
+    const validation = validateMemoryHeart(root);
+    if (!validation) return null;
+    const title = memoryTitle(qs("#memoryTitle", root)?.value || "");
+    const date = displayDate(qs("#memoryDate", root)?.value || todayInputValue());
+    const place = qs("#memoryPlace", root)?.value.trim() || "";
+    const type = qs("#memoryType", root)?.value || "일상";
+    return { title, date, place, type, feelings: validation.feelings, body: validation.body, note: validation.body };
+  }
+
+  function bindMemoryHeartChips(root = document) {
+    const row = qs("[data-memory-heart-feelings]", root);
+    if (!row) return;
+    qsa(".chip-btn", row).forEach((button) => {
+      button.addEventListener("click", () => {
+        const isActive = button.classList.contains("active");
+        if (!isActive && qsa(".chip-btn.active", row).length >= 2) {
+          showToast("감정은 최대 2개까지 선택할 수 있어요.");
+          return;
+        }
+        button.classList.toggle("active");
+      });
+    });
+  }
+
+  function saveAndRefresh() {
+    if (typeof duariSavePersistentContent === "function") duariSavePersistentContent();
+    if (typeof renderAlbum === "function") renderAlbum();
+    if (typeof renderHome === "function") renderHome();
+  }
+
+  openMemoryDetailLatestV3 = function openMemoryDetailLatestV3(index, backAction = null) {
+    const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
+    state.activeMemoryIndex = safeIndex;
+    const memory = state.memories?.[safeIndex] || {};
+    const previousTab = qs(".screen.active")?.id || state.tab || "album";
+    const goBack = backAction || (() => {
+      closeModal();
+      setTab(previousTab === "home" ? "home" : "album");
+    });
+    const body = memoryBody(memory);
+    const feelings = (memory.feelings || []).slice(0, 2);
+
+    openModal(`
+      <div class="modal-sheet notification-page memory-detail-page memory-heart-detail-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-memory-detail-back aria-label="뒤로가기">←</button>
+          <h3>추억 보기</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          ${memoryPhotoSection(safeIndex)}
+          <section class="card detail-identity-card memory-heart-summary">
+            <h3 class="detail-identity-title memory-limited-title" title="${escapeText(memory.title || "")}">${escapeText(memory.title || "제목 없는 추억")}</h3>
+            <p class="meta detail-identity-meta">${escapeText([memory.date, memory.place, memory.type || "일상"].filter(Boolean).join(" · "))}</p>
+            ${feelingBadges(feelings)}
+            <p class="diary-detail-body memory-heart-body">${escapeText(body)}</p>
+          </section>
+          <button class="primary-btn full" type="button" data-memory-edit-page>추억 수정</button>
+        </div>
+      </div>
+    `);
+    qs("#modal")?.classList.add("page-modal");
+    qs("[data-memory-detail-back]")?.addEventListener("click", () => runFlowBack(goBack));
+    qs("[data-memory-edit-page]")?.addEventListener("click", () => openMemoryEditPageLatest(safeIndex, () => openMemoryDetailLatestV3(safeIndex, backAction)));
+    bindActions(qs(".modal-sheet"));
+  };
+  window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
+
+  openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction = null) {
+    const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
+    state.activeMemoryIndex = safeIndex;
+    const memory = state.memories?.[safeIndex] || {};
+    const body = memoryBody(memory);
+    const photos = photoListFor(safeIndex, false);
+
+    openModal(`
+      <div class="modal-sheet notification-page memory-edit-page memory-heart-edit-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-memory-edit-back aria-label="뒤로가기">←</button>
+          <h3>추억 수정</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          ${photoManageGridHtml(safeIndex, false)}
+          <div class="form-field">
+            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(memory.title || "").slice(0, 10).length}/10</span></div>
+            <input id="memoryTitle" maxlength="10" value="${escapeText(String(memory.title || "").slice(0, 10))}" />
+          </div>
+          <div class="form-field"><label for="memoryDate">날짜</label><input id="memoryDate" type="date" value="${inputDate(memory.date)}" required /></div>
+          <div class="form-field"><label for="memoryPlace">장소</label><input id="memoryPlace" value="${escapeText(memory.place || "")}" /></div>
+          <div class="form-field"><label for="memoryType">유형</label><select id="memoryType">${typeOptions(memory.type || "일상")}</select></div>
+          <div class="form-field memory-edit-feelings"><label>감정</label>${feelingChipButtons((memory.feelings || []).slice(0, 2))}</div>
+          <div class="form-field"><label for="memoryHeartBody">마음 본문</label><textarea id="memoryHeartBody" class="diary-body-large" required>${escapeText(body)}</textarea></div>
+          <button class="ghost-btn full" type="button" data-memory-heart-ai>AI로 다듬기</button>
+          <button class="primary-btn full" type="button" data-save-memory-edit>수정 저장</button>
+        </div>
+      </div>
+    `);
+    qs("#modal")?.classList.add("page-modal");
+    bindMemoryHeartChips(qs(".modal-sheet"));
+    bindPhotoManage(qs(".modal-sheet"), safeIndex, false);
+    qs("#memoryTitle")?.addEventListener("input", (event) => {
+      const count = event.target.closest(".form-field")?.querySelector(".input-count");
+      if (count) count.textContent = `${event.target.value.length}/10`;
+    });
+    qs("[data-memory-edit-back]")?.addEventListener("click", () => {
+      if (typeof openMemoryEditBackConfirm === "function") {
+        openMemoryEditBackConfirm(backAction || (() => openMemoryDetailLatestV3(safeIndex)), safeIndex, memory);
+      } else {
+        openMemoryDetailLatestV3(safeIndex);
+      }
+    });
+    qs("[data-memory-heart-ai]")?.addEventListener("click", () => {
+      const bodyValue = qs("#memoryHeartBody")?.value || "";
+      if (typeof openAiResultPage === "function") openAiResultPage({ original: bodyValue, result: typeof generateAiRefinement === "function" ? generateAiRefinement(bodyValue) : bodyValue });
+      else showToast("AI 다듬기는 현재 준비 중이에요.");
+    });
+    qs("[data-save-memory-edit]")?.addEventListener("click", () => {
+      const next = readMemoryEditorValues(qs(".modal-sheet"));
+      if (!next) return;
+      const target = state.memories?.[safeIndex];
+      if (!target) return;
+      Object.assign(target, {
+        ...next,
+        type: next.type || "일상",
+        photoCount: Array.isArray(target.photos) ? target.photos.length : Number(target.photoCount) || 0,
+        representativePhoto: target.representativePhoto || target.photos?.[0] || null,
+        representativePhotoIndex: Number(target.representativePhotoIndex) || 0,
+        scope: "우리 둘이 보기",
+        author: target.author || "나"
+      });
+      saveAndRefresh();
+      showToast("추억을 저장했어요.");
+      openMemoryDetailLatestV3(safeIndex, backAction);
+    });
+    bindActions(qs(".modal-sheet"));
+  };
+  window.openMemoryEditPageLatest = openMemoryEditPageLatest;
+
+  openMemoryCreatePage = function openMemoryCreatePage(backAction = null) {
+    const draft = state.memoryCreateDraft || {};
+    const photos = Array.isArray(draft.photos) ? draft.photos : [];
+    openModal(`
+      <div class="modal-sheet notification-page memory-create-page memory-heart-edit-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-memory-create-back aria-label="뒤로가기">←</button>
+          <h3>추억 남기기</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          ${photoManageGridHtml(0, true)}
+          <div class="form-field">
+            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(draft.title || "").slice(0, 10).length}/10</span></div>
+            <input id="memoryTitle" maxlength="10" value="${escapeText(String(draft.title || "").slice(0, 10))}" />
+          </div>
+          <div class="form-field"><label for="memoryDate">날짜</label><input id="memoryDate" type="date" value="${inputDate(draft.date || todayInputValue())}" required /></div>
+          <div class="form-field"><label for="memoryPlace">장소</label><input id="memoryPlace" value="${escapeText(draft.place || "")}" /></div>
+          <div class="form-field"><label for="memoryType">유형</label><select id="memoryType">${typeOptions(draft.type || "일상")}</select></div>
+          <div class="form-field memory-edit-feelings"><label>감정</label>${feelingChipButtons((draft.feelings || []).slice(0, 2))}</div>
+          <div class="form-field"><label for="memoryHeartBody">마음 본문</label><textarea id="memoryHeartBody" class="diary-body-large" required>${escapeText(draft.body || "")}</textarea></div>
+          <button class="primary-btn full" type="button" data-save-memory-create>저장</button>
+        </div>
+      </div>
+    `);
+    qs("#modal")?.classList.add("page-modal");
+    bindMemoryHeartChips(qs(".modal-sheet"));
+    bindPhotoManage(qs(".modal-sheet"), 0, true);
+    qs("#memoryTitle")?.addEventListener("input", (event) => {
+      const count = event.target.closest(".form-field")?.querySelector(".input-count");
+      if (count) count.textContent = `${event.target.value.length}/10`;
+    });
+    qs("[data-memory-create-back]")?.addEventListener("click", () => {
+      state.memoryCreateDraft = null;
+      if (typeof backAction === "function") backAction();
+      else {
+        closeModal();
+        setTab("album");
+      }
+    });
+    qs("[data-save-memory-create]")?.addEventListener("click", () => {
+      const next = readMemoryEditorValues(qs(".modal-sheet"));
+      if (!next) return;
+      const draftPhotos = Array.isArray(state.memoryCreateDraft?.photos) ? state.memoryCreateDraft.photos : photos;
+      const newMemory = {
+        ...next,
+        type: next.type || "일상",
+        photos: draftPhotos,
+        photoCount: draftPhotos.length,
+        representativePhoto: state.memoryCreateDraft?.representativePhoto || draftPhotos[0] || null,
+        representativePhotoIndex: Number(state.memoryCreateDraft?.representativePhotoIndex) || 0,
+        scope: "우리 둘이 보기",
+        reaction: "",
+        author: "나"
+      };
+      state.memories.unshift(newMemory);
+      state.activeMemoryIndex = 0;
+      state.memoryCreateDraft = null;
+      saveAndRefresh();
+      showToast("추억을 저장했어요.");
+      openMemoryDetailLatestV3(0, () => {
+        closeModal();
+        setTab("album");
+      });
+    });
+    bindActions(qs(".modal-sheet"));
+  };
+  window.openMemoryCreatePage = openMemoryCreatePage;
+
+  function polishMemoryPhotoManageCopy(root = document) {
+    const card = qs("[data-photo-manage-card]", root);
+    if (!card) return;
+    const title = qs(".between h3", card);
+    if (title) title.textContent = "사진";
+    const count = qs("[data-photo-manage-count]", card);
+    if (count) {
+      const number = Number((count.textContent || "").match(/\d+/)?.[0] || 0);
+      count.textContent = `${number}장`;
+    }
+    qsa("[data-photo-add-choice]", card).forEach((button) => { button.textContent = "사진 추가"; });
+    qsa("[data-photo-order-page]", card).forEach((button) => { button.textContent = "사진 순서 변경"; });
+    qsa(".linked-record-empty", card).forEach((node) => {
+      if (node.textContent.trim()) node.textContent = "아직 추가된 사진이 없어요.";
+    });
+  }
+
+  if (typeof duariRefreshPhotoManageCard === "function") {
+    const baseRefreshPhotoManageCard = duariRefreshPhotoManageCard;
+    duariRefreshPhotoManageCard = function duariRefreshPhotoManageCardWithHeartCopy(...args) {
+      const result = baseRefreshPhotoManageCard.apply(this, args);
+      polishMemoryPhotoManageCopy(document);
+      return result;
+    };
+  }
+
+  if (Array.isArray(state.memories)) {
+    state.memories.forEach((memory) => {
+      if (!memory.body && memory.note) memory.body = memory.note;
+      if (!Array.isArray(memory.feelings)) memory.feelings = [];
+    });
+  }
+})();
+
+(function installPhotoFirstMemoryAiFlow() {
+  if (window.__duariPhotoFirstMemoryAiFlowInstalled) return;
+  window.__duariPhotoFirstMemoryAiFlowInstalled = true;
+
+  function escapeText(value = "") {
+    if (typeof duariEscapeHtml === "function") return duariEscapeHtml(value);
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[char]);
+  }
+
+  function dateFromPhotoFiles(files = []) {
+    const file = files[0];
+    const date = file?.lastModified ? new Date(file.lastModified) : new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function displayDate(value = "") {
+    return String(value || new Date().toISOString().slice(0, 10)).replaceAll("-", ".");
+  }
+
+  function photoSource(photo) {
+    if (typeof duariPhotoSource === "function") return duariPhotoSource(photo);
+    return typeof photo === "string" ? photo : (photo?.src || "");
+  }
+
+  function fallbackMemoryAiDraft({ place, moment, scene, heart }) {
+    const text = [
+      place ? `${place}에서` : "함께한 순간에",
+      moment || scene || "기억하고 싶은 장면이 있었고",
+      heart || "그 시간이 오래 남을 것 같았다."
+    ].filter(Boolean).join(" ");
+    return text.replace(/\s+/g, " ").trim();
+  }
+
+  function recommendFeelings({ heart = "", moment = "", scene = "" } = {}) {
+    const source = `${heart} ${moment} ${scene}`;
+    if (/미안|서운|아쉬|속상/.test(source)) return ["솔직함", "미안함"];
+    if (/설레|좋아|행복|웃/.test(source)) return ["설렘", "행복"];
+    if (/고마|감사/.test(source)) return ["고마움", "소중함"];
+    if (/편|평온|안정/.test(source)) return ["편안함", "안도"];
+    return ["고마움", "편안함"];
+  }
+
+  async function requestAiMemoryBody(answers) {
+    const prompt = "내 감정과 말투는 유지하고, 문장 흐름과 표현만 자연스럽게 다듬어줘. 과장하거나 새로운 감정은 추가하지 마.";
+    const original = [
+      answers.moment && `어떤 순간: ${answers.moment}`,
+      answers.scene && `기억나는 장면: ${answers.scene}`,
+      answers.heart && `그때 마음: ${answers.heart}`,
+      answers.place && `장소: ${answers.place}`
+    ].filter(Boolean).join("\n");
+    try {
+      const response = await fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, original })
+      });
+      if (!response.ok) throw new Error("AI request failed");
+      const data = await response.json();
+      return String(data.result || data.text || data.message || "").trim() || fallbackMemoryAiDraft(answers);
+    } catch {
+      if (typeof makeAiResult === "function") return makeAiResult(fallbackMemoryAiDraft(answers), "부드럽게");
+      return fallbackMemoryAiDraft(answers);
+    }
+  }
+
+  function openPhotoFirstPicker() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+    input.hidden = true;
+    document.body.appendChild(input);
+    input.addEventListener("change", async () => {
+      const files = Array.from(input.files || []).filter((file) => file.type.startsWith("image/"));
+      if (!files.length) {
+        input.remove();
+        return;
+      }
+      const photos = typeof readSelectedPhotoFiles === "function"
+        ? await readSelectedPhotoFiles(input)
+        : await Promise.all(files.map((file) => new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({ src: String(reader.result || ""), name: file.name, owner: "나" });
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(file);
+        }))).then((items) => items.filter(Boolean));
+      input.remove();
+      if (!photos.length) return;
+      const date = dateFromPhotoFiles(files);
+      state.memoryAiPhotoDraft = {
+        photos,
+        date,
+        representativePhoto: photos[0],
+        representativePhotoIndex: 0
+      };
+      openMemoryPhotoQuestionPage();
+    }, { once: true });
+    input.click();
+  }
+
+  function openMemoryPhotoQuestionPage() {
+    const draft = state.memoryAiPhotoDraft || {};
+    const preview = photoSource(draft.representativePhoto || draft.photos?.[0]);
+    openModal(`
+      <div class="modal-sheet notification-page memory-ai-question-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-memory-ai-back aria-label="뒤로가기">←</button>
+          <h3>사진으로 추억 만들기</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="section-stack">
+          <section class="card memory-ai-photo-card">
+            ${preview ? `<img class="memory-ai-photo-preview" src="${signupAttr(preview)}" alt="" />` : ""}
+            <p class="meta">사진 날짜 ${escapeText(displayDate(draft.date))}</p>
+          </section>
+          <div class="form-field"><label for="memoryAiPlace">장소</label><input id="memoryAiPlace" placeholder="예: 롯데월드몰" /></div>
+          <div class="form-field"><label for="memoryAiMoment">어떤 순간이었나요?</label><textarea id="memoryAiMoment" class="diary-body-large"></textarea></div>
+          <div class="form-field"><label for="memoryAiScene">기억나는 장면</label><textarea id="memoryAiScene" class="diary-body-large"></textarea></div>
+          <div class="form-field"><label for="memoryAiHeart">그때의 마음</label><textarea id="memoryAiHeart" class="diary-body-large"></textarea></div>
+          <button class="primary-btn full" type="button" data-memory-ai-write>AI로 작성하기</button>
+        </div>
+      </div>
+    `);
+    qs("#modal")?.classList.add("page-modal");
+    qs("[data-memory-ai-back]")?.addEventListener("click", () => {
+      state.memoryAiPhotoDraft = null;
+      closeModal();
+      setTab(state.tab || "home");
+    });
+    qs("[data-memory-ai-write]")?.addEventListener("click", async () => {
+      const answers = {
+        place: qs("#memoryAiPlace")?.value.trim() || "",
+        moment: qs("#memoryAiMoment")?.value.trim() || "",
+        scene: qs("#memoryAiScene")?.value.trim() || "",
+        heart: qs("#memoryAiHeart")?.value.trim() || ""
+      };
+      const body = await requestAiMemoryBody(answers);
+      const feelings = recommendFeelings(answers);
+      const place = answers.place;
+      state.memoryCreateDraft = {
+        title: place ? `${place} 추억`.slice(0, 10) : "오늘의 추억",
+        date: draft.date || new Date().toISOString().slice(0, 10),
+        place,
+        type: "일상",
+        feelings,
+        body,
+        note: body,
+        photos: Array.isArray(draft.photos) ? draft.photos : [],
+        photoCount: Array.isArray(draft.photos) ? draft.photos.length : 0,
+        representativePhoto: draft.representativePhoto || draft.photos?.[0] || null,
+        representativePhotoIndex: Number(draft.representativePhotoIndex) || 0
+      };
+      state.memoryAiPhotoDraft = null;
+      openMemoryCreatePage(() => {
+        closeModal();
+        setTab(state.tab || "home");
+      });
+      showToast("AI가 추억 초안을 채웠어요. 저장 전에 마음을 확인해 주세요.");
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-action='new-memory']");
+    if (button?.hasAttribute("data-memory-create-menu")) return;
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openPhotoFirstPicker();
+  }, true);
+
+  window.openPhotoFirstMemoryFlow = openPhotoFirstPicker;
+})();
+
+(function installConversationTabAndMemoryDropdownFinal() {
+  if (window.__duariConversationTabAndMemoryDropdownFinalInstalled) return;
+  window.__duariConversationTabAndMemoryDropdownFinalInstalled = true;
+
+  const COPY = {
+    conversation: "\uB300\uD654",
+    todayConversation: "\uC624\uB298\uC758 \uB300\uD654",
+    sharedConversation: "\uB098\uB208 \uB300\uD654",
+    answer: "\uB2F5\uBCC0 \uB0A8\uAE30\uAE30",
+    otherQuestion: "\uB2E4\uB978 \uC9C8\uBB38",
+    noQuestions: "\uC544\uC9C1 \uB098\uB208 \uB300\uD654\uAC00 \uC5C6\uC5B4\uC694.",
+    more: "\uB354\uBCF4\uAE30",
+    createMemory: "\uCD94\uC5B5 \uB0A8\uAE30\uAE30",
+    photoPick: "\uC0AC\uC9C4 \uC120\uD0DD\uD558\uAE30",
+    directWrite: "\uC9C1\uC811 \uB0A8\uAE30\uAE30"
+  };
+
+  try { titles.diary = COPY.conversation; } catch {}
+
+  function escapeText(value = "") {
+    if (typeof duariEscapeHtml === "function") return duariEscapeHtml(value);
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    })[char]);
+  }
+
+  function currentQuestionTextFinal() {
+    if (typeof window.duariCurrentQuestionText === "function") return window.duariCurrentQuestionText();
+    if (typeof duariCurrentQuestionText === "function") return duariCurrentQuestionText();
+    return "\uC624\uB298 \uC6B0\uB9AC\uAC00 \uB098\uB204\uACE0 \uC2F6\uC740 \uB9D0\uC740 \uBB50\uC57C?";
+  }
+
+  function questionHistoryFinal() {
+    if (typeof duariQuestionHistorySeed === "function") return duariQuestionHistorySeed();
+    if (!Array.isArray(state.questionHistory)) state.questionHistory = [];
+    return state.questionHistory;
+  }
+
+  function questionHistoryCardFinal(item = {}, index = 0) {
+    return `
+      <article class="question-history-card" data-question-history-index="${index}">
+        <div class="question-history-title-row">
+          <h3>${escapeText(item.question || "\uB098\uB208 \uB300\uD654")}</h3>
+          <span class="linked-diary-type">${escapeText(item.status || "\uC804\uB2EC\uB428")}</span>
+        </div>
+        <p class="meta">${escapeText(item.date || "")}</p>
+        <p>${escapeText(item.sent || item.body || "")}</p>
+      </article>
+    `;
+  }
+
+  renderDiary = function renderDiaryConversationOnly() {
+    const diary = qs("#diary");
+    if (!diary) return;
+    const history = questionHistoryFinal();
+    const visibleCount = Number(state.questionHistoryVisibleCount || 5);
+    const visible = history.slice(0, visibleCount);
+    diary.innerHTML = `
+      <div class="section-stack conversation-tab-page">
+        <section class="question-card">
+          <p class="eyebrow">${COPY.todayConversation}</p>
+          <h3>${escapeText(currentQuestionTextFinal())}</h3>
+          <div class="home-question-actions question-action-row">
+            <button class="primary-btn" data-action="answer-question">${COPY.answer}</button>
+            <button class="ghost-btn" data-action="another-question">${COPY.otherQuestion}</button>
+          </div>
+        </section>
+        <section class="question-history-section">
+          <div class="between">
+            <h3>${COPY.sharedConversation}</h3>
+            <span class="meta">\uCD1D ${history.length}\uAC1C</span>
+          </div>
+          <div class="question-history-list">
+            ${visible.length ? visible.map(questionHistoryCardFinal).join("") : `<p class="linked-record-empty">${COPY.noQuestions}</p>`}
+          </div>
+          ${history.length > visible.length ? `<button class="ghost-btn full diary-load-more" type="button" data-conversation-load-more>${COPY.more}</button>` : ""}
+        </section>
+      </div>
+    `;
+    qs("[data-conversation-load-more]", diary)?.addEventListener("click", () => {
+      state.questionHistoryVisibleCount = visibleCount + 5;
+      renderDiary();
+    });
+    if (typeof bindQuestionHistoryCards === "function") bindQuestionHistoryCards(diary, () => setTab("diary"));
+    bindActions(diary);
+  };
+  window.renderDiary = renderDiary;
+
+  function representativePhoto(memory = {}) {
+    if (typeof duariRepresentativePhotoSource === "function") return duariRepresentativePhotoSource(memory);
+    const photos = Array.isArray(memory.photos) ? memory.photos : [];
+    const first = memory.representativePhoto || photos[Number(memory.representativePhotoIndex) || 0] || photos[0];
+    return typeof first === "string" ? first : (first?.src || "");
+  }
+
+  memoryCards = function memoryCardsWithoutScope(memories = [], homeCompact = false) {
+    return memories.map((memory, fallbackIndex) => {
+      const index = Array.isArray(state.memories) ? state.memories.indexOf(memory) : -1;
+      const safeIndex = index >= 0 ? index : fallbackIndex;
+      const src = representativePhoto(memory);
+      return `
+        <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-index="${safeIndex}" data-memory-open="${safeIndex}">
+          <div class="photo-stack" aria-label="\uC0AC\uC9C4 \uBBF8\uB9AC\uBCF4\uAE30">${src ? `<img src="${signupAttr(src)}" alt="" />` : ""}</div>
+          <div>
+            <div class="${homeCompact ? "home-memory-title" : "memory-card-title-row"}">
+              <strong>${escapeText(memory.title || "\uC81C\uBAA9 \uC5C6\uB294 \uCD94\uC5B5")}</strong>
+            </div>
+            <div class="tag-row ${homeCompact ? "home-memory-meta" : ""}" style="margin-top:8px">
+              <span class="meta">${escapeText(memory.date || "")}</span>
+              ${memory.place ? `<span class="meta">${escapeText(memory.place)}</span>` : ""}
+              <span class="meta">${escapeText(memory.type || "\uC77C\uC0C1")}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  };
+  window.memoryCards = memoryCards;
+
+  const baseMemoryDetail = openMemoryDetailLatestV3;
+  openMemoryDetailLatestV3 = function openMemoryDetailAlwaysBackToAlbum(index, backAction = null) {
+    return baseMemoryDetail(index, () => {
+      closeModal();
+      setTab("album");
+    });
+  };
+  window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
+
+  function normalizeMemoryCreateButtons(root = document) {
+    qsa("[data-action='new-memory']", root).forEach((button) => {
+      button.removeAttribute("data-action");
+      button.setAttribute("data-memory-create-menu", "true");
+      button.textContent = COPY.createMemory;
+    });
+  }
+
+  const baseRenderHome = renderHome;
+  renderHome = function renderHomeWithMemoryDropdownButtons(...args) {
+    const result = baseRenderHome.apply(this, args);
+    normalizeMemoryCreateButtons(qs("#home") || document);
+    return result;
+  };
+  window.renderHome = renderHome;
+
+  const baseRenderAlbum = renderAlbum;
+  renderAlbum = function renderAlbumWithMemoryDropdownButtons(...args) {
+    const result = baseRenderAlbum.apply(this, args);
+    normalizeMemoryCreateButtons(qs("#album") || document);
+    return result;
+  };
+  window.renderAlbum = renderAlbum;
+
+  function closeMemoryCreateDropdown() {
+    qs("[data-memory-create-dropdown]")?.remove();
+  }
+
+  function openMemoryPhotoFlowFromDropdown() {
+    closeMemoryCreateDropdown();
+    if (typeof window.openPhotoFirstMemoryFlow === "function") window.openPhotoFirstMemoryFlow();
+    else if (typeof openMemoryCreatePage === "function") openMemoryCreatePage();
+  }
+
+  function openMemoryCreateDirectFromDropdown() {
+    closeMemoryCreateDropdown();
+    state.memoryCreateDraft = {};
+    if (typeof openMemoryCreatePage === "function") openMemoryCreatePage();
+  }
+
+  function toggleMemoryCreateDropdown(button) {
+    const existing = qs("[data-memory-create-dropdown]");
+    if (existing) {
+      existing.remove();
+      return;
+    }
+    const rect = button.getBoundingClientRect();
+    const dropdown = document.createElement("div");
+    dropdown.className = "memory-create-dropdown";
+    dropdown.dataset.memoryCreateDropdown = "true";
+    dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 184)}px`;
+    dropdown.style.top = `${rect.bottom + 8}px`;
+    dropdown.innerHTML = `
+      <button type="button" data-memory-dropdown-photo>${COPY.photoPick}</button>
+      <button type="button" data-memory-dropdown-direct>${COPY.directWrite}</button>
+    `;
+    document.body.appendChild(dropdown);
+    qs("[data-memory-dropdown-photo]", dropdown)?.addEventListener("click", openMemoryPhotoFlowFromDropdown);
+    qs("[data-memory-dropdown-direct]", dropdown)?.addEventListener("click", openMemoryCreateDirectFromDropdown);
+    setTimeout(() => {
+      document.addEventListener("click", (event) => {
+        if (dropdown.contains(event.target) || button.contains(event.target)) return;
+        closeMemoryCreateDropdown();
+      }, { once: true });
+    }, 0);
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-memory-create-menu]");
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    toggleMemoryCreateDropdown(button);
+  }, true);
+
+  window.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-memory-create-menu], [data-action='new-memory']");
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    button.removeAttribute("data-action");
+    button.setAttribute("data-memory-create-menu", "true");
+    button.textContent = COPY.createMemory;
+    toggleMemoryCreateDropdown(button);
+  }, true);
+
+  const observer = new MutationObserver(() => normalizeMemoryCreateButtons(document));
+  observer.observe(document.body, { childList: true, subtree: true });
+  normalizeMemoryCreateButtons(document);
+
+  const diaryNav = qs(".nav-item[data-tab='diary']");
+  if (diaryNav) {
+    const icon = qs("span", diaryNav)?.outerHTML || "<span>\u270E</span>";
+    diaryNav.innerHTML = `${icon}${COPY.conversation}`;
+  }
+  if (state.tab === "diary" || qs("#diary")?.classList.contains("active")) {
+    qs("#screenTitle").textContent = COPY.conversation;
+    renderDiary();
+  }
+  if (!qs("#app")?.classList.contains("is-hidden")) {
+    if (state.tab === "home") renderHome();
+    if (state.tab === "album") renderAlbum();
+  }
+})();
