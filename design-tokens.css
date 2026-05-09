@@ -1,17 +1,3 @@
-@font-face {
-  font-family: "Cafe24SsurroundAir";
-  font-style: normal;
-  font-weight: 400;
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105@1.1/Cafe24SsurroundAir.woff") format("woff");
-}
-
-@font-face {
-  font-family: "Cafe24Ssurround";
-  font-style: normal;
-  font-weight: 700;
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105@1.1/Cafe24Ssurround.woff") format("woff");
-}
-
 :root {
   color-scheme: light;
 
@@ -47,8 +33,8 @@
   --accent-illustration: var(--color-mint-100);
   --gradient-header: linear-gradient(135deg, #ff8da3 0%, #ff6f8f 52%, #ff5f83 100%);
 
-  --font-body: "Cafe24SsurroundAir", "Pretendard", "Nunito", Arial, sans-serif;
-  --font-bold: "Cafe24Ssurround", "Cafe24SsurroundAir", "Pretendard", "Nunito", Arial, sans-serif;
+  --font-body: "Pretendard", Arial, sans-serif;
+  --font-bold: "Pretendard", Arial, sans-serif;
 
   --font-size-xs: 11px;
   --font-size-sm: 13px;

@@ -183,7 +183,7 @@ h2 {
 }
 
 h3 {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 25px;
   margin-bottom: 8px;
@@ -527,7 +527,7 @@ h3 {
 
 #openNotifications.is-settings::before {
   content: "\2699";
-  font-size: 19px;
+  font-size: 20px;
 }
 
 #openNotifications.has-ionicon::before,
@@ -538,7 +538,11 @@ h3 {
 .duari-ion-icon {
   display: inline-block;
   flex: 0 0 auto;
+  font-size: 20px;
+  height: 20px;
+  line-height: 1;
   pointer-events: none;
+  width: 20px;
 }
 
 .icon-btn .duari-ion-icon,
@@ -547,16 +551,22 @@ h3 {
 .terms-chevron-btn .duari-ion-icon,
 .chip-btn.icon-only .duari-ion-icon {
   font-size: 20px;
+  height: 20px;
+  width: 20px;
 }
 
 .nav-item .duari-ion-icon {
   font-size: 20px;
+  height: 20px;
   margin-bottom: 2px;
+  width: 20px;
 }
 
 .menu-chevron .duari-ion-icon,
 .anniversary-pill-chevron .duari-ion-icon {
-  font-size: 18px;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
 }
 
 .linked-diary-kebab .duari-ion-icon,
@@ -564,7 +574,9 @@ h3 {
 .anniversary-kebab .duari-ion-icon,
 .relation-kebab .duari-ion-icon {
   color: var(--text-secondary);
-  font-size: 18px;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
 }
 
 .screen {
@@ -572,6 +584,7 @@ h3 {
   display: none;
   height: 100%;
   isolation: isolate;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 138px 24px 92px;
   pointer-events: none;
@@ -900,7 +913,67 @@ h3 {
 .question-history-search-grid {
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(0, 1fr) 148px;
+  grid-template-columns: minmax(0, 1fr) minmax(132px, 0.72fr);
+}
+
+#questions .section-stack,
+#diary .question-card,
+#diary .question-history-section,
+#diary .question-history-list,
+#diary .question-history-card,
+#diary .question-history-search-grid,
+#diary .home-question-actions,
+#questions .question-card,
+#questions .question-history-section,
+#questions .question-history-list,
+#questions .question-history-card,
+#questions .question-history-search-grid,
+#questions .home-question-actions {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+#diary .question-history-section,
+#questions .question-history-section {
+  overflow: visible;
+}
+
+#diary .question-history-card,
+#questions .question-history-card {
+  overflow-wrap: anywhere;
+}
+
+#diary .question-history-search-grid .form-field,
+#questions .question-history-search-grid .form-field,
+#diary .question-history-search-grid input,
+#questions .question-history-search-grid input {
+  min-width: 0;
+}
+
+#diary .question-history-card .linked-diary-type,
+#questions .question-history-card .linked-diary-type {
+  align-self: start;
+  justify-self: end;
+  max-width: none;
+  min-width: fit-content;
+  white-space: nowrap;
+}
+
+#diary .question-history-card .between,
+#questions .question-history-card .between {
+  align-items: flex-start;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 10fr) minmax(70px, 2fr);
+}
+
+#diary .question-history-card h3,
+#questions .question-history-card h3 {
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .diary-list-count,
@@ -1300,6 +1373,11 @@ h3 {
   display: flex;
   font-size: 12px;
   gap: 8px;
+}
+
+.question-card-date {
+  color: var(--text-muted);
+  margin: 0;
 }
 
 .question-history-meta span + span::before {
@@ -2760,6 +2838,149 @@ h3 {
   white-space: nowrap;
 }
 
+.detail-identity-card {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-identity-heading {
+  align-items: flex-start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.detail-identity-title {
+  color: var(--text-primary);
+  display: -webkit-box;
+  font-size: 22px !important;
+  font-weight: 700;
+  line-height: 30px !important;
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.detail-identity-meta {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-sm) !important;
+  margin: 0;
+}
+
+.detail-identity-card .linked-record-scope,
+.detail-identity-card .linked-diary-type {
+  align-self: start;
+  white-space: nowrap;
+}
+
+.linked-diary-list .linked-diary-card {
+  align-content: start;
+  gap: 8px;
+}
+
+.linked-diary-list .linked-diary-card > .between,
+.linked-diary-list .linked-diary-title-row {
+  align-items: flex-start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: stretch;
+}
+
+.linked-diary-list .linked-diary-card > .between > :is(strong, h3),
+.linked-diary-list .linked-diary-title-row > :is(strong, h3) {
+  color: var(--text-primary);
+  display: -webkit-box !important;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  margin: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.linked-diary-list .linked-diary-right-tools {
+  align-items: flex-start;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.linked-diary-list .linked-diary-type {
+  align-items: center;
+  align-self: start;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 26px;
+  white-space: nowrap;
+}
+
+.linked-diary-list .linked-diary-card > p:not(.diary-date-meta) {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.linked-diary-list .linked-diary-card .diary-date-meta {
+  margin: 0;
+}
+
+#diary .diary-card {
+  align-content: start;
+  display: grid;
+  gap: 8px;
+}
+
+#diary .diary-card > .between {
+  align-items: flex-start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: stretch;
+}
+
+#diary .diary-card > .between > h3 {
+  color: var(--text-primary);
+  display: -webkit-box !important;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  margin: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#diary .diary-card > .between .linked-diary-type {
+  align-items: center;
+  align-self: start;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 26px;
+  white-space: nowrap;
+}
+
+#diary .diary-card .diary-date-meta {
+  margin: 0;
+}
+
+#diary .diary-card > p:not(.diary-date-meta) {
+  margin: 0;
+}
+
 .emotion-badge-row .chip-btn {
   align-items: center;
   display: inline-flex;
@@ -2824,6 +3045,14 @@ h3 {
   font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: var(--line-height-xs);
+}
+
+.anniversary-name-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  min-width: 32px;
+  text-align: right;
 }
 
 .memory-title-input {
@@ -4216,7 +4445,8 @@ h3 {
 .another-question-card h3 {
   font-size: var(--font-size-lg);
   line-height: var(--line-height-lg);
-  margin: 0;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
   overflow: visible;
   text-overflow: clip;
   white-space: normal;
@@ -4232,6 +4462,14 @@ h3 {
 .memory-detail-page .linked-diary-card,
 .memory-edit-page .linked-diary-card {
   border: 1px solid var(--border-default);
+  box-shadow: none;
+}
+
+.memory-detail-page .linked-diary-section,
+.diary-detail-page .linked-record-card,
+.diary-write-page .linked-record-card,
+.memory-detail-page .memory-photo-gallery,
+.memory-edit-page [data-photo-manage-card] {
   box-shadow: none;
 }
 
@@ -4408,7 +4646,7 @@ button,
   .question-history-card h3,
   .another-question-card h3
 ) {
-  font-size: 17px !important;
+  font-size: 18px !important;
   line-height: 25px !important;
 }
 
@@ -4785,6 +5023,18 @@ button,
   gap: var(--gap-list) !important;
 }
 
+@media (max-width: 390px) {
+  #diary .question-history-search-grid,
+  #questions .question-history-search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #diary .question-card .home-question-actions,
+  #questions .question-card .home-question-actions {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
 .modal.page-modal .modal-sheet.notification-page .section-stack > :is(.primary-btn.full, .ghost-btn.full, .diary-load-more) {
   margin-top: -4px !important;
 }
@@ -4803,4 +5053,9 @@ button,
 
 .modal.page-modal .modal-sheet.notification-page :is(.record-picker-actions, .ai-action-grid, .modal-actions) > :is(.primary-btn, .ghost-btn) {
   min-width: 0;
+}
+
+/* App standard: keep every h3 title at 18px. */
+h3 {
+  font-size: 18px !important;
 }

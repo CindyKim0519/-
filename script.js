@@ -1313,12 +1313,13 @@ function openLinkedDiaryDetailLatest(index, backAction = restorePreviousModal) {
 }
 
 function limitMemoryEditTitle(value) {
-  return Array.from(value || "").slice(0, 24).join("");
+  return Array.from(value || "").slice(0, 10).join("");
 }
 
 function syncMemoryTitleLimit(input, count) {
   input.value = limitMemoryEditTitle(input.value);
-  count.textContent = `${Array.from(input.value).length}/24`;
+  input.setAttribute("maxlength", "10");
+  count.textContent = `${Array.from(input.value).length}/10`;
 }
 
 function openMemoryEditPageLatest(index) {
@@ -1958,7 +1959,7 @@ function renderMy() {
               <p class="meta">${current.date}부터</p>
             </div>
           </div>
-          <button class="chip-btn my-info-link" data-action="account">우리 정보<span aria-hidden="true">›</span></button>
+          <button class="chip-btn my-info-link" data-action="account">우리 정보<ion-icon class="duari-ion-icon" name="chevron-forward-outline" aria-hidden="true"></ion-icon></button>
         </div>
       </section>
       <div class="list">${[
@@ -2521,9 +2522,41 @@ function openAnniversariesModal() {
   openAnniversarySettingsPage();
 }
 
+function duariAnniversaryNameValue(value) {
+  const trimmed = String(value || "").trim().slice(0, 7);
+  return trimmed || "새 기념일";
+}
+
+function duariBindAnniversaryNameCounter(root = document) {
+  const input = qs("[data-anniversary-name]", root);
+  if (!input) return;
+  input.setAttribute("maxlength", "7");
+  let row = input.closest(".form-field")?.querySelector(".field-label-row");
+  const label = input.closest(".form-field")?.querySelector("label");
+  if (!row && label) {
+    row = document.createElement("div");
+    row.className = "field-label-row";
+    label.parentNode.insertBefore(row, label);
+    row.appendChild(label);
+  }
+  let counter = qs("[data-anniversary-name-count]", row || input.closest(".form-field"));
+  if (!counter && row) {
+    counter = document.createElement("span");
+    counter.className = "input-count anniversary-name-count";
+    counter.dataset.anniversaryNameCount = "true";
+    row.appendChild(counter);
+  }
+  const update = () => {
+    if (input.value.length > 7) input.value = input.value.slice(0, 7);
+    if (counter) counter.textContent = `${input.value.length}/7`;
+  };
+  input.addEventListener("input", update);
+  update();
+}
+
 function addCustomAnniversary(element) {
   const sheet = element.closest(".modal-sheet");
-  const name = qs("[data-anniversary-name]", sheet)?.value.trim() || "새 기념일";
+  const name = duariAnniversaryNameValue(qs("[data-anniversary-name]", sheet)?.value);
   const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
   const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
   const newAnniversary = { name, date: date.replaceAll("-", "."), repeat, alert: true };
@@ -2535,7 +2568,7 @@ function addCustomAnniversary(element) {
 
 function saveEditedAnniversary(element, index) {
   const sheet = element.closest(".modal-sheet");
-  const name = qs("[data-anniversary-name]", sheet)?.value.trim() || "새 기념일";
+  const name = duariAnniversaryNameValue(qs("[data-anniversary-name]", sheet)?.value);
   const date = qs("[data-anniversary-date]", sheet)?.value || "2026-05-20";
   const repeat = qs("[data-anniversary-repeat]", sheet)?.classList.contains("active") ?? true;
   state.anniversaries[index] = { ...state.anniversaries[index], name, date: date.replaceAll("-", "."), repeat };
@@ -2587,8 +2620,11 @@ function openAddAnniversaryPage(editIndex = null) {
         <section class="card anniversary-form-card">
           <h3>기념일 정보</h3>
           <div class="form-field">
-            <label>이름</label>
-            <input data-anniversary-name placeholder="예: 처음 여행 간 날" value="${editing?.name || ""}" />
+            <div class="field-label-row">
+              <label>이름</label>
+              <span class="input-count" data-anniversary-name-count>${String(editing?.name || "").slice(0, 7).length}/7</span>
+            </div>
+            <input data-anniversary-name maxlength="7" placeholder="예: 첫 여행" value="${duariEscapeHtml(String(editing?.name || "").slice(0, 7))}" />
           </div>
           <div class="form-field">
             <label>날짜</label>
@@ -2611,6 +2647,7 @@ function openAddAnniversaryPage(editIndex = null) {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  duariBindAnniversaryNameCounter(sheet);
   qs("[data-anniversary-add-back]", sheet)?.addEventListener("click", openAnniversarySettingsPage);
   qs("[data-save-anniversary]", sheet)?.addEventListener("click", (event) => {
     if (isEdit) saveEditedAnniversary(event.currentTarget, editIndex);
@@ -8759,6 +8796,7 @@ function diaryEntriesForCurrentView() {
 function renderDiary() {
   normalizeDiaryView();
   const diary = qs("#diary");
+  duariEnsureDiaryIds();
   const entries = diaryEntriesForCurrentView();
   diary.innerHTML = `
     <div class="section-stack">
@@ -9650,7 +9688,7 @@ function renderDiary() {
       <button class="primary-btn full" data-action="diary-scope-first">일기 쓰기</button>
       <div class="list">
         ${entries.map((entry, index) => `
-          <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
+          <article class="diary-card" data-diary-entry-index="${index}" data-diary-source-index="${state.diaries.indexOf(entry)}" data-diary-id="${duariEscapeHtml(entry._duariId || "")}" role="button" tabindex="0">
             <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
             <p>${entry.body}</p>
             <div class="tag-row" style="margin-top:10px">
@@ -9669,7 +9707,8 @@ function renderDiary() {
   });
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
     const openEntry = () => {
-      const entry = entries[Number(card.dataset.diaryEntryIndex)] || entries[0];
+      const entry = duariDiaryEntryFromCard(card, state.diaries || [], entries);
+      if (!entry) return;
       renderDiaryDetailReadOnly(entry, () => renderDiary());
     };
     card.addEventListener("click", openEntry);
@@ -11156,8 +11195,8 @@ function openMemoryEditBackConfirm(resolvedBack, memoryIndex = 0, originalMemory
         <h3>저장하지 않고 나갈까요?</h3>
         <p>저장하지 않고 나가면 방금 바꾼 내용이 기록에 반영되지 않아요.</p>
         <div class="inline-action-pair">
-          <button class="primary-btn" type="button" data-memory-edit-leave>나가기</button>
           <button class="ghost-btn" type="button" data-memory-edit-stay>취소</button>
+          <button class="primary-btn" type="button" data-memory-edit-leave>나가기</button>
         </div>
       </section>
     </div>
@@ -11194,7 +11233,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(memory.scope)}
-        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${editTitle.length}/24</span></div><input class="memory-title-input" value="${editTitle}" maxlength="24" /></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${editTitle.length}/10</span></div><input class="memory-title-input" value="${editTitle}" maxlength="10" /></div>
         <div class="form-field"><label>날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
         <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
         <div class="form-field"><label>유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
@@ -11269,7 +11308,7 @@ function openMemoryCreatePage(backAction = null) {
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(draft.scope || (state.connected ? "우리 둘이 보기" : "나만 보기"))}
-        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${Array.from(draft.title || "").length}/24</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(draft.title || "")}" maxlength="24" /></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${Array.from(limitMemoryEditTitle(draft.title || "")).length}/10</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(limitMemoryEditTitle(draft.title || ""))}" maxlength="10" /></div>
         <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
         <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
@@ -11797,7 +11836,7 @@ function refreshCurrentScreenAfterFinalMemoryPatch() {
   else if (activeTab === "home") renderHome();
 }
 
-window.setTimeout(refreshCurrentScreenAfterFinalMemoryPatch, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Absolute final v3: clean Korean home/album render and force current screen refresh.
 function renderHome() {
@@ -11876,7 +11915,7 @@ function forceRenderActiveHomeOrAlbum() {
   if (activeTab === "home") renderHome();
 }
 
-window.setTimeout(forceRenderActiveHomeOrAlbum, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Absolute final v4: direct memory cards and a clean record-detail page.
 function memoryCards(memories, homeCompact = false) {
@@ -11991,12 +12030,7 @@ function renderAlbum() {
 }
 
 window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "album") renderAlbum();
-  else renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Final restore: keep the existing detail/edit/diary flows and only repair record navigation/rendering.
 function duariRecordScopeLabel(memory) {
@@ -12132,12 +12166,7 @@ function openMemoryCardFromElementFinal(card) {
 }
 
 window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "album") renderAlbum();
-  else if (activeTab === "home") renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 function renderHome() {
   const home = qs("#home");
@@ -12246,11 +12275,7 @@ function renderHome() {
   bindActions(home);
 }
 
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "home") renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Final interaction guard: preserve existing page flows while preventing older handlers from stealing clicks.
 if (!window.__duariFinalRecordFlowGuard) {
@@ -12429,12 +12454,7 @@ if (!window.__duariFinalAlbumAndRecordRestore) {
 }
 
 window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "album") renderAlbum();
-  if (activeTab === "home") renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Restore the original album tab content order and panels.
 function renderAlbum() {
@@ -12500,10 +12520,7 @@ function renderAlbum() {
   bindActions(album);
 }
 
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  if ((qs(".screen.active")?.id || state.tab) === "album") renderAlbum();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Duari final diary-add AI flow.
 // Keeps the newest requested flow isolated from older generic data-action handlers.
@@ -12557,7 +12574,7 @@ function duariCurrentDiaryDraft(fallback = {}) {
 
   return {
     heading: duariNormalizeDiaryHeading(qs(".notification-header h3", page)?.textContent || fallback.heading),
-    title: qs("#diaryTitle", page)?.value || fallback.title || "",
+    title: String(qs("#diaryTitle", page)?.value || fallback.title || "").slice(0, 19),
     body: qs("#diaryBody", page)?.value || fallback.body || "",
     date: selectedDate ? selectedDate.replaceAll("-", ".") : (fallback.date || fallback.createdAt || originalIdentity.date || duariTodayDateText()),
     scope: activeScope?.includes("상대") ? "공유" : (fallback.scope || "개인"),
@@ -12619,8 +12636,9 @@ function duariBindDiaryEditor(args = {}) {
   const titleCount = qs("[data-diary-title-count]", sheet);
   const syncTitle = () => {
     if (!titleInput || !titleCount) return;
-    if (titleInput.value.length > 24) titleInput.value = titleInput.value.slice(0, 24);
-    titleCount.textContent = `${titleInput.value.length}/24`;
+    if (titleInput.value.length > 19) titleInput.value = titleInput.value.slice(0, 19);
+    titleInput.setAttribute("maxlength", "19");
+    titleCount.textContent = `${titleInput.value.length}/19`;
   };
   titleInput?.addEventListener("input", syncTitle);
   syncTitle();
@@ -12632,7 +12650,17 @@ function duariBindDiaryEditor(args = {}) {
     });
   });
 
-  qs("[data-duari-diary-back]", sheet)?.addEventListener("click", () => runFlowBack(args.backAction || diaryEditorFlowBackAction));
+  qs("[data-duari-diary-back]", sheet)?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const isEditPage = !!qs("[data-delete-diary-edit]", sheet);
+    if (isEditPage) {
+      openDiaryEditLeaveConfirmOverlay(args);
+      return;
+    }
+    runFlowBack(args.backAction || diaryEditorFlowBackAction);
+  }, { capture: true });
   qs("[data-duari-record-picker]", sheet)?.addEventListener("click", () => {
     openDiaryRecordPickerPage(duariCurrentDiaryDraft(args));
   });
@@ -12819,6 +12847,30 @@ function openDiaryEditDeleteConfirmOverlay(args = {}) {
   });
 }
 
+function openDiaryEditLeaveConfirmOverlay(args = {}) {
+  const page = qs(".diary-write-page");
+  if (!page || qs(".ai-confirm-overlay", page)) return;
+  page.insertAdjacentHTML("beforeend", `
+    <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+      <div class="ai-confirm-sheet">
+        <h3>저장하지 않고 나갈까요?</h3>
+        <p>수정한 내용은 저장되지 않아요. 마음 보기 화면으로 돌아갈게요.</p>
+        <div class="ai-action-grid">
+          <button class="ghost-btn" type="button" data-diary-edit-leave-cancel>취소</button>
+          <button class="primary-btn" type="button" data-diary-edit-leave-confirm>나가기</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("[data-diary-edit-leave-cancel]", page)?.addEventListener("click", () => {
+    qs(".ai-confirm-overlay", page)?.remove();
+  });
+  qs("[data-diary-edit-leave-confirm]", page)?.addEventListener("click", () => {
+    qs(".ai-confirm-overlay", page)?.remove();
+    runFlowBack(args.backAction || diaryEditorFlowBackAction);
+  });
+}
+
 function duariDiaryViewFromScope(scope = "개인") {
   const normalized = normalizeDiaryScopeValue?.(scope) || scope;
   if (normalized === "공유") return "mineShared";
@@ -12876,7 +12928,7 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
   const linkedMemory = !forceNoLinkedRecord && typeof args.linkedMemoryIndex === "number" ? state.memories[args.linkedMemoryIndex] : null;
   const linkedTitle = forceNoLinkedRecord ? "관련 기록 없음" : (linkedMemory?.title || diary.linked || "관련 기록 없음");
   const linkedMemoryIndex = forceNoLinkedRecord ? null : args.linkedMemoryIndex;
-  const title = String(diary.title || "").slice(0, 24);
+  const title = String(diary.title || "").slice(0, 19);
   const body = diary.body || "";
   const scope = normalizeDiaryScopeValue?.(diary.scope || diary.originalScope || "개인") || "개인";
   const feelings = diary.feelings || [];
@@ -12900,9 +12952,9 @@ renderDiaryEditor = function renderDiaryEditor(args = {}) {
         <div class="form-field">
           <div class="field-label-row">
             <label>제목</label>
-            <span class="input-count" data-diary-title-count>${title.length}/24</span>
+            <span class="input-count" data-diary-title-count>${title.length}/19</span>
           </div>
-          <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="24" />
+          <input id="diaryTitle" value="${duariEscapeHtml(title)}" maxlength="19" />
         </div>
         <div class="form-field">
           <label>작성일</label>
@@ -13039,6 +13091,12 @@ function openAiResultPage(draft = {}) {
 function openDiaryModal(linkedMemoryIndex = null, options = {}) {
   const forceNoLinkedRecord = options.forceNoLinkedRecord === true;
   const linkedMemory = !forceNoLinkedRecord && typeof linkedMemoryIndex === "number" ? state.memories[linkedMemoryIndex] : null;
+  const defaultBackAction = () => {
+    state.journalView = "diary";
+    state.diaryView = state.diaryView || "all";
+    closeModal();
+    setTab("diary");
+  };
   renderDiaryEditor({
     heading: "일기 추가",
     diary: linkedMemory ? { linked: linkedMemory.title, scope: "개인" } : { scope: "개인", linked: "관련 기록 없음", forceNoLinkedRecord },
@@ -13048,7 +13106,7 @@ function openDiaryModal(linkedMemoryIndex = null, options = {}) {
       ? options.backAction
       : (typeof linkedMemoryIndex === "number"
       ? (() => openMemoryEditPageLatest(linkedMemoryIndex, () => openMemoryDetailLatestV3(linkedMemoryIndex)))
-      : diaryEditorFlowBackAction)
+      : (diaryEditorFlowBackAction || defaultBackAction))
   });
 }
 
@@ -13064,6 +13122,15 @@ if (!window.__duariDiaryAddAiFlowGuard) {
       ? state.activeMemoryIndex
       : null;
     openDiaryModal(linkedIndex);
+  }, true);
+}
+
+if (!window.__duariDiaryNavOpensQuestions) {
+  window.__duariDiaryNavOpensQuestions = true;
+  window.addEventListener("click", (event) => {
+    const navButton = event.target.closest?.(".nav-item[data-tab='diary']");
+    if (!navButton) return;
+    state.journalView = "question";
   }, true);
 }
 
@@ -13353,7 +13420,7 @@ function duariRestoreLoggedInSession() {
   setTab("home");
 }
 
-window.setTimeout(duariRestoreLoggedInSession, 0);
+duariRestoreLoggedInSession();
 
 function duariDiaryBelongsToMemory(diary = {}, memoryTitle = "") {
   if (!memoryTitle) return false;
@@ -14572,10 +14639,7 @@ renderHome = function renderHome() {
   bindActions(home);
 };
 
-window.setTimeout(() => {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  if ((qs(".screen.active")?.id || state.tab) === "home") renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Final diary date display across every diary card/detail surface.
 function duariTodayDiaryDate() {
@@ -14742,9 +14806,9 @@ duariLinkedDiaryCardHtml = function duariLinkedDiaryCardHtml(diary, index, optio
           ` : ""}
         </span>
       </div>
+      ${duariDiaryDateMeta(diary || {})}
       <p>${duariEscapeHtml(diary?.body || "")}</p>
       ${linkedDiaryEmotionRow(diary || {})}
-      ${duariDiaryDateMeta(diary || {})}
     </article>
   `;
 };
@@ -14827,9 +14891,9 @@ function duariMemoryEditLinkedDiaryCardHtml(diary, index) {
           </span>
         </span>
       </div>
+      ${duariDiaryDateMeta(diary || {})}
       <p>${duariEscapeHtml(diary?.body || "")}</p>
       ${linkedDiaryEmotionRow(diary || {})}
-      ${duariDiaryDateMeta(diary || {})}
     </article>
   `;
 }
@@ -15162,6 +15226,33 @@ bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backActio
 };
 
 const duariRenderDiaryWithDateBase = renderDiary;
+function duariEnsureDiaryIds() {
+  if (!Array.isArray(state.diaries)) return;
+  let changed = false;
+  state.diaries.forEach((entry, index) => {
+    if (entry && !entry._duariId) {
+      entry._duariId = `diary-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
+      changed = true;
+    }
+  });
+  if (changed && typeof duariSavePersistentContent === "function") duariSavePersistentContent();
+}
+
+function duariDiaryEntryFromCard(card, entries = state.diaries || [], filteredEntries = entries) {
+  if (!card) return null;
+  const diaryId = card.dataset.diaryId || "";
+  if (diaryId) {
+    const byId = (state.diaries || []).find((entry) => entry?._duariId === diaryId)
+      || entries.find((entry) => entry?._duariId === diaryId)
+      || filteredEntries.find((entry) => entry?._duariId === diaryId);
+    if (byId) return byId;
+  }
+  const sourceIndex = Number(card.dataset.diarySourceIndex);
+  if (Number.isFinite(sourceIndex) && sourceIndex >= 0 && entries[sourceIndex]) return entries[sourceIndex];
+  const filteredIndex = Number(card.dataset.diaryEntryIndex);
+  return filteredEntries[filteredIndex] || filteredEntries[0] || entries[0] || null;
+}
+
 function duariDiaryVisibleCount() {
   state.diaryVisibleCounts = state.diaryVisibleCounts || {};
   const view = "all";
@@ -15347,6 +15438,7 @@ renderDiary = function renderDiary() {
     return;
   }
 
+  duariEnsureDiaryIds();
   const entries = state.diaries || [];
   const diaryFilter = duariDiaryFilterForCurrentView();
   const filteredEntries = duariFilterDiaryEntries(entries, diaryFilter);
@@ -15376,13 +15468,13 @@ renderDiary = function renderDiary() {
       </div>
       <div class="list">
         ${visibleEntries.length ? visibleEntries.map((entry, index) => `
-          <article class="diary-card" data-diary-entry-index="${index}" role="button" tabindex="0">
+          <article class="diary-card" data-diary-entry-index="${index}" data-diary-source-index="${entries.indexOf(entry)}" data-diary-id="${duariEscapeHtml(entry._duariId || "")}" role="button" tabindex="0">
             <div class="between"><h3>${entry.title}</h3><span class="linked-diary-type">${diaryTypeLabel(entry)}</span></div>
+            ${duariDiaryDateMeta(entry)}
             <p>${entry.body}</p>
             <div class="tag-row" style="margin-top:10px">
               ${(entry.feelings || []).slice(0, 2).map((feeling) => `<span class="chip-btn">${feeling}</span>`).join("")}
             </div>
-            ${duariDiaryDateMeta(entry)}
           </article>
         `).join("") : `<p class="linked-record-empty">${duariEmptyDiaryMessage()}</p>`}
       </div>
@@ -15426,14 +15518,18 @@ renderDiary = function renderDiary() {
     });
   });
   qsa("[data-diary-entry-index]", diary).forEach((card) => {
-    const openEntry = () => {
-      const entry = filteredEntries[Number(card.dataset.diaryEntryIndex)] || filteredEntries[0] || entries[0];
+    const openEntry = (event = null) => {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      event?.stopImmediatePropagation?.();
+      const entry = duariDiaryEntryFromCard(card, entries, filteredEntries);
+      if (!entry) return;
       renderDiaryDetailReadOnly(entry, () => {
         closeModal();
         setTab("diary");
       });
     };
-    card.addEventListener("click", openEntry);
+    card.addEventListener("click", openEntry, { capture: true });
     card.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -15468,11 +15564,7 @@ renderHome = function renderHome() {
   });
 };
 
-window.setTimeout(() => {
-  const active = qs(".screen.active")?.id || state.tab;
-  if (active === "diary") renderDiary();
-  if (active === "home") renderHome();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Final question history send/AI hooks. These run after older duplicated question flows.
 function openQuestionSendConfirmOverlay() {
@@ -15512,9 +15604,7 @@ openQuestionAiResultPage = function openQuestionAiResultPage(draft = {}) {
   }, { capture: true });
 };
 
-window.setTimeout(() => {
-  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Final question tab layout: keep the tab focused on today's question.
 function renderQuestions() {
@@ -15535,9 +15625,7 @@ function renderQuestions() {
   bindActions(questions);
 }
 
-window.setTimeout(() => {
-  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 function duariQuestionHistorySeed() {
   if (!Array.isArray(state.questionHistory)) state.questionHistory = [];
@@ -15567,12 +15655,16 @@ function duariQuestionHistoryCard(item, index) {
         <h3>${duariEscapeHtml(item.question)}</h3>
         <span class="linked-diary-type">${duariEscapeHtml(item.status)}</span>
       </div>
-      <p>${duariEscapeHtml(item.sent)}</p>
       <div class="question-history-meta">
         <span>${duariEscapeHtml(item.date)}</span>
       </div>
+      <p>${duariEscapeHtml(item.sent)}</p>
     </article>
   `;
+}
+
+function duariQuestionDateMetaHtml(date = duariTodayDiaryDate()) {
+  return `<p class="meta question-card-date">${duariEscapeHtml(date)}</p>`;
 }
 
 function bindQuestionHistoryCards(root, backAction) {
@@ -15798,9 +15890,7 @@ openQuestionAiResultPage = function openQuestionAiResultPage(draft = {}) {
   }, { capture: true });
 };
 
-window.setTimeout(() => {
-  if ((qs(".screen.active")?.id || state.tab) === "questions") renderQuestions();
-}, 0);
+// Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {}) {
   const normalizedQuery = String(query || "").trim().toLowerCase();
@@ -16464,6 +16554,21 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     `).join("");
   };
 
+  linkedDiaryCardsLatest = function linkedDiaryCardsLatest(memoryIndex = state.activeMemoryIndex) {
+    const safeIndex = Number.isFinite(Number(memoryIndex)) ? Number(memoryIndex) : 0;
+    return linkedDiariesForMemory(safeIndex).map((diary, index) => `
+      <article class="linked-diary-card" role="button" tabindex="0" data-linked-diary-index="${index}" data-linked-diary-memory-index="${safeIndex}">
+        <div class="between">
+          <strong>${duariEscapeHtml(diary.title || "제목 없는 마음")}</strong>
+          <span class="linked-diary-type">${duariEscapeHtml(diary.type || diaryScopeLabel(diary.scope))}</span>
+        </div>
+        ${typeof duariDiaryDateMeta === "function" ? duariDiaryDateMeta(diary) : ""}
+        <p>${duariEscapeHtml(diary.body || "작성한 내용이 없어요.")}</p>
+        ${linkedDiaryEmotionRow(diary)}
+      </article>
+    `).join("");
+  };
+
   bindLinkedDiaryCardsLatest = function bindLinkedDiaryCardsLatest(root, backAction = null) {
     if (typeof duariBindLinkedDiaryDropdowns === "function") duariBindLinkedDiaryDropdowns(root);
     qsa("[data-linked-diary-index]", root).forEach((card) => {
@@ -16522,8 +16627,9 @@ openMemoryCreatePage = function openMemoryCreatePage(backAction = null, options 
     const filteredEntries = typeof duariFilterDiaryEntries === "function"
       ? duariFilterDiaryEntries(entries, filter)
       : entries;
-    const index = Number(card.dataset.diaryEntryIndex || 0);
-    const entry = filteredEntries[index] || entries[index] || filteredEntries[0] || entries[0];
+    const entry = typeof duariDiaryEntryFromCard === "function"
+      ? duariDiaryEntryFromCard(card, entries, filteredEntries)
+      : null;
     if (!entry || typeof renderDiaryDetailReadOnly !== "function") return;
     renderDiaryDetailReadOnly(entry, () => {
       if (typeof duariDiaryViewFromScope === "function") state.diaryView = duariDiaryViewFromScope(entry.scope || entry.type);
@@ -16926,9 +17032,9 @@ ${photoSection}
     "새 기록 추가": "기록 남기기",
     "마음 남기기": "마음 남기기",
     "질문 더 보기": "다른 질문",
-    "답변 남기기": "마음 남기기",
-    "이 질문에 답하기": "마음 남기기",
-    "답변 추가": "마음 남기기",
+    "답변 남기기": "답변 남기기",
+    "이 질문에 답하기": "답변 남기기",
+    "답변 추가": "답변 남기기",
     "일기 연결 추가": "마음 남기기",
     "연결된 일기 추가": "마음 남기기",
     "마음 일기 추가": "마음 남기기",
@@ -17082,7 +17188,7 @@ ${photoSection}
   });
 
   window.duariPolishCoupleDiaryCopy = polishCoupleDiaryCopy;
-  window.setTimeout(() => polishCoupleDiaryCopy(document), 0);
+  polishCoupleDiaryCopy(document);
 })();
 
 (function installHeartActionCopyPatch() {
@@ -17121,7 +17227,7 @@ ${photoSection}
     };
   });
 
-  window.setTimeout(() => patchHeartActionCopy(document), 0);
+  patchHeartActionCopy(document);
 })();
 
 (function installDuariIonicons() {
@@ -17216,7 +17322,7 @@ ${photoSection}
   const observer = new MutationObserver(() => patchIonicons(document));
   observer.observe(document.body, { childList: true, subtree: true });
   window.duariPatchIonicons = patchIonicons;
-  window.setTimeout(() => patchIonicons(document), 0);
+  patchIonicons(document);
 })();
 
 (function installDuariDiaryFeelingOptions() {
@@ -17390,5 +17496,160 @@ ${photoSection}
 
   if (!localStorage.getItem(storageKey)) {
     setQuestionIndex(nextUnansweredIndex(0));
+  }
+})();
+
+window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
+(function installQuestionAnswerButtonCopyPatch() {
+  if (window.__duariQuestionAnswerButtonCopyPatchInstalled) return;
+  window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
+
+  function patchQuestionAnswerButtonCopy(root = document) {
+    qsa(".question-card [data-action='answer-question'], .question-action-row [data-action='answer-question']", root).forEach((button) => {
+      button.textContent = "답변 남기기";
+    });
+    qsa("[data-question-option]", root).forEach((button) => {
+      button.textContent = "답변 남기기";
+    });
+  }
+
+  const previousOpenModal = openModal;
+  openModal = function openModalWithQuestionAnswerButtonCopy(html) {
+    previousOpenModal(html);
+    patchQuestionAnswerButtonCopy(qs("#modal") || document);
+  };
+
+  ["render", "renderHome", "renderDiary", "renderQuestions"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function questionAnswerButtonCopyWrapper(...args) {
+      const result = original.apply(this, args);
+      patchQuestionAnswerButtonCopy(document);
+      return result;
+    };
+  });
+
+  const observer = new MutationObserver(() => patchQuestionAnswerButtonCopy(document));
+  observer.observe(document.body, { childList: true, subtree: true });
+  patchQuestionAnswerButtonCopy(document);
+  patchQuestionAnswerButtonCopy(document);
+  patchQuestionAnswerButtonCopy(document);
+})();
+
+(function repaintCurrentScreenWithFinalCopy() {
+  if (qs("#app")?.classList.contains("is-hidden")) return;
+  const activeTab = qs(".screen.active")?.id || state.tab || "home";
+  if (activeTab === "home" && typeof renderHome === "function") renderHome();
+  else if (activeTab === "diary" && typeof renderDiary === "function") renderDiary();
+  else if (activeTab === "album" && typeof renderAlbum === "function") renderAlbum();
+  else if (activeTab === "my" && typeof renderMy === "function") renderMy();
+})();
+
+(function renderCurrentScreenBeforeFirstPaint() {
+  if (qs("#app")?.classList.contains("is-hidden")) return;
+  const activeTab = qs(".screen.active")?.id || state.tab || "home";
+  if (activeTab === "home" && typeof renderHome === "function") renderHome();
+  else if (activeTab === "diary" && typeof renderDiary === "function") renderDiary();
+  else if (activeTab === "album" && typeof renderAlbum === "function") renderAlbum();
+  else if (activeTab === "my" && typeof renderMy === "function") renderMy();
+  if (typeof window.duariPolishCoupleDiaryCopy === "function") window.duariPolishCoupleDiaryCopy(document);
+})();
+
+(function installSafeQuestionAnswerButtonCopyPatch() {
+  if (window.__duariSafeQuestionAnswerButtonCopyPatchInstalled) return;
+  window.__duariSafeQuestionAnswerButtonCopyPatchInstalled = true;
+
+  const answerLabel = "\uB2F5\uBCC0 \uB0A8\uAE30\uAE30";
+
+  function patchQuestionAnswerButtonCopy(root = document) {
+    if (typeof qsa !== "function") return;
+    qsa(".question-card [data-action='answer-question'], .question-action-row [data-action='answer-question'], [data-question-option]", root).forEach((button) => {
+      if (button.textContent !== answerLabel) button.textContent = answerLabel;
+    });
+  }
+
+  if (typeof openModal === "function") {
+    const previousOpenModal = openModal;
+    openModal = function openModalWithSafeQuestionAnswerButtonCopy(html) {
+      previousOpenModal(html);
+      patchQuestionAnswerButtonCopy(typeof qs === "function" ? (qs("#modal") || document) : document);
+    };
+  }
+
+  ["render", "renderHome", "renderDiary", "renderQuestions"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function safeQuestionAnswerButtonCopyWrapper(...args) {
+      const result = original.apply(this, args);
+      patchQuestionAnswerButtonCopy(document);
+      return result;
+    };
+  });
+
+  patchQuestionAnswerButtonCopy(document);
+})();
+
+(function installDetailIdentityHeaderPolish() {
+  if (window.__duariDetailIdentityHeaderPolishInstalled) return;
+  window.__duariDetailIdentityHeaderPolishInstalled = true;
+
+  function polishMemoryDetailIdentity(memory = {}) {
+    const page = qs(".memory-detail-page:not(.memory-edit-page)");
+    const summary = qs(".section-stack > .card:not(.linked-diary-section)", page);
+    if (!page || !summary) return;
+    summary.classList.add("detail-identity-card", "memory-identity-card");
+    const row = qs(".between", summary);
+    row?.classList.add("detail-identity-heading");
+    const title = qs(".memory-limited-title", summary) || qs("h3", summary);
+    if (title) {
+      title.classList.add("detail-identity-title");
+      title.textContent = memory.title || title.textContent;
+      title.setAttribute("title", memory.title || title.textContent);
+    }
+    const meta = qs("p.meta", summary);
+    if (meta) {
+      meta.classList.add("detail-identity-meta");
+      const pieces = [memory.date, memory.place, memory.type].filter(Boolean);
+      if (pieces.length) meta.textContent = pieces.join(" · ");
+    }
+  }
+
+  function polishDiaryDetailIdentity(diary = {}) {
+    const summary = qs(".diary-detail-page .diary-detail-summary");
+    if (!summary) return;
+    summary.classList.add("detail-identity-card", "diary-identity-card");
+    const row = qs(".between", summary);
+    row?.classList.add("detail-identity-heading");
+    const title = qs("h3", summary);
+    if (title) {
+      title.classList.add("detail-identity-title");
+      title.textContent = diary.title || title.textContent;
+      title.setAttribute("title", diary.title || title.textContent);
+    }
+    const dateMeta = qs(".diary-date-meta", summary);
+    if (dateMeta && row && dateMeta.previousElementSibling !== row) {
+      dateMeta.classList.add("detail-identity-meta");
+      row.insertAdjacentElement("afterend", dateMeta);
+    }
+  }
+
+  if (typeof openMemoryDetailLatestV3 === "function") {
+    const baseOpenMemoryDetailLatestV3 = openMemoryDetailLatestV3;
+    openMemoryDetailLatestV3 = function openMemoryDetailLatestV3WithIdentity(index, backAction = null) {
+      const result = baseOpenMemoryDetailLatestV3(index, backAction);
+      const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
+      polishMemoryDetailIdentity(state.memories?.[safeIndex] || {});
+      return result;
+    };
+    window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
+  }
+
+  if (typeof renderDiaryDetailReadOnly === "function") {
+    const baseRenderDiaryDetailReadOnly = renderDiaryDetailReadOnly;
+    renderDiaryDetailReadOnly = function renderDiaryDetailReadOnlyWithIdentity(diary, backAction = null) {
+      const result = baseRenderDiaryDetailReadOnly(diary, backAction);
+      polishDiaryDetailIdentity(diary || {});
+      return result;
+    };
   }
 })();
