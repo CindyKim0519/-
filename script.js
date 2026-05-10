@@ -206,7 +206,7 @@ function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.questionHistory);
 }
 
-const titles = { home: "오늘의 우리", album: "우리 기록", diary: "우리 대화", questions: "우리 대화", my: "설정" };
+const titles = { home: "오늘의 우리", album: "우리 기록", diary: "우리 대화", questions: "우리 대화", my: "마이" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -18956,8 +18956,11 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
           <p>\uC0C1\uB300\uAC00 \uCD08\uB300 \uCF54\uB4DC\uB97C \uC785\uB825\uD588\uC744 \uB54C \uD655\uC778\uD560 \uC815\uBCF4\uC785\uB2C8\uB2E4.</p>
         </section>
         <div class="form-field">
-          <label>\uB0B4 \uB2C9\uB124\uC784</label>
-          <input data-relation-add-my-name value="${data.myName}" placeholder="\uB0B4 \uB2C9\uB124\uC784" />
+          <div class="field-label-row">
+            <label>\uB0B4 \uB2C9\uB124\uC784</label>
+            <span class="input-count" data-relation-add-name-count>${String(data.myName || "").slice(0, 6).length}/6</span>
+          </div>
+          <input data-relation-add-my-name value="${String(data.myName || "").slice(0, 6)}" maxlength="6" placeholder="\uB0B4 \uB2C9\uB124\uC784" />
         </div>
         <div class="form-field">
           <label>\uC0DD\uB144\uC6D4\uC77C</label>
@@ -19046,6 +19049,12 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     };
 
     qs("[data-relation-add-back]", sheet)?.addEventListener("click", backTarget);
+    const nameInput = qs("[data-relation-add-my-name]", sheet);
+    const nameCount = qs("[data-relation-add-name-count]", sheet);
+    nameInput?.addEventListener("input", () => {
+      if (nameInput.value.length > 6) nameInput.value = nameInput.value.slice(0, 6);
+      if (nameCount) nameCount.textContent = `${nameInput.value.length}/6`;
+    });
     qs("[data-relation-link-copy]", sheet)?.addEventListener("click", duariShareInviteLink);
     qs("[data-relation-new-code]", sheet)?.addEventListener("click", () => {
       const nextInvite = duariRenewInviteCode();
@@ -19088,4 +19097,194 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   };
 
   window.openRelationAddPage = openRelationAddPage;
+})();
+
+(function installFocusedNotificationFlow() {
+  const filters = [
+    { value: "all", label: "\uC804\uCCB4" },
+    { value: "anniversary", label: "\uAE30\uB150\uC77C" },
+    { value: "memory", label: "\uCD94\uC5B5" },
+    { value: "conversation", label: "\uB300\uD654" },
+    { value: "system", label: "\uC5F0\uACB0" }
+  ];
+  const labels = {
+    anniversary: "\uAE30\uB150\uC77C",
+    memory: "\uCD94\uC5B5",
+    conversation: "\uB300\uD654",
+    system: "\uC5F0\uACB0"
+  };
+  const coreItems = [
+    {
+      type: "memory",
+      title: "\uC0C1\uB300\uBC29\uC774 \uC0C8 \uCD94\uC5B5\uC744 \uCD94\uAC00\uD588\uC5B4\uC694",
+      body: "\uD568\uAED8 \uBCFC \uC0C8 \uCD94\uC5B5\uC774 \uB3C4\uCC29\uD588\uC5B4\uC694."
+    },
+    {
+      type: "conversation",
+      title: "\uC0C1\uB300\uBC29\uC774 \uC0C8 \uB300\uD654\uB97C \uCD94\uAC00\uD588\uC5B4\uC694",
+      body: "\uC11C\uB85C \uB098\uB208 \uC0C8 \uB300\uD654\uAC00 \uB3C4\uCC29\uD588\uC5B4\uC694."
+    },
+    {
+      type: "system",
+      title: "\uCEE4\uD50C \uC5F0\uACB0 \uC644\uB8CC",
+      body: "\uB458\uB9CC\uC758 \uACF5\uAC04\uC774 \uC5F0\uACB0\uB410\uC5B4\uC694."
+    }
+  ];
+
+  function notificationAuthorIsMine(author = "") {
+    const value = String(author || "").trim();
+    if (!value) return false;
+    const myName = typeof relationMyName === "function" ? relationMyName() : "";
+    return value === "\uB098" || (!!myName && value === myName);
+  }
+
+  function partnerMemoryNotificationIndex() {
+    return (state.memories || []).findIndex((memory) => {
+      const author = String(memory?.author || "").trim();
+      return !!author && !notificationAuthorIsMine(author);
+    });
+  }
+
+  function partnerConversationNotificationIndex() {
+    const history = typeof duariQuestionHistorySeed === "function" ? duariQuestionHistorySeed() : state.questionHistory;
+    if (!Array.isArray(history)) return -1;
+    const byAuthor = history.findIndex((item) => {
+      const author = String(item?.author || "").trim();
+      return !!author && !notificationAuthorIsMine(author);
+    });
+    if (byAuthor >= 0) return byAuthor;
+    return history.findIndex((item) => ["partner", "received", "\uC0C1\uB300"].includes(String(item?.direction || item?.from || "").trim()));
+  }
+
+  duariAnniversaryNotificationItems = function duariFocusedAnniversaryNotificationItems() {
+    return duariTriggeredAnniversaries().map((item) => {
+      const name = item.name || "\uAE30\uB150\uC77C";
+      if (item.diff === 0) {
+        return {
+          type: "anniversary",
+          title: `\uC624\uB298\uC740 ${name}\uC774\uC5D0\uC694`,
+          body: "\uC624\uB298\uC758 \uAE30\uB150\uC77C\uC744 \uD568\uAED8 \uAE30\uC5B5\uD574\uC694."
+        };
+      }
+      return {
+        type: "anniversary",
+        title: `${name} ${duariAnniversaryDdayLabel(item.diff)}`,
+        body: `${item.diff}\uC77C \uB4A4 \uAE30\uB150\uC77C\uC774\uC5D0\uC694.`
+      };
+    });
+  };
+
+  renderNotificationItemsFinal = function renderFocusedNotificationItems(filter = "all") {
+    const list = qs("[data-notification-list]");
+    if (!list) return;
+    state.notificationVisibleCounts = state.notificationVisibleCounts || {};
+    if (!state.notificationVisibleCounts[filter]) state.notificationVisibleCounts[filter] = 10;
+    const items = [...duariAnniversaryNotificationItems(), ...coreItems];
+    const filtered = filter === "all" ? items : items.filter((item) => item.type === filter);
+    const visibleCount = state.notificationVisibleCounts[filter];
+    const visibleItems = filtered.slice(0, visibleCount);
+    const hasMore = filtered.length > visibleItems.length;
+    const actionButton = (item) => {
+      if (!["memory", "conversation"].includes(item.type)) return "";
+      return `
+        <button class="notification-jump-btn" type="button" data-notification-jump="${item.type}" aria-label="\uC0C1\uC138 \uBCF4\uAE30">
+          <ion-icon class="duari-ion-icon" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+        </button>
+      `;
+    };
+    list.innerHTML = `
+      ${visibleItems.map((item) => `
+        <section class="card notification-item">
+          <div class="notification-title-row">
+            <strong class="notification-title-text">
+              <span>${item.title}</span>
+              ${actionButton(item)}
+            </strong>
+            <span class="notification-title-actions">
+              <span class="notification-type-label">${labels[item.type] || item.type}</span>
+            </span>
+          </div>
+          <p>${item.body}</p>
+        </section>
+      `).join("") || `
+        <section class="card notification-item">
+          <strong>\uC544\uC9C1 \uC54C\uB9BC\uC774 \uC5C6\uC5B4\uC694</strong>
+          <p>\uD574\uB2F9 \uC720\uD615\uC758 \uC54C\uB9BC\uC774 \uC0DD\uAE30\uBA74 \uC5EC\uAE30\uC5D0 \uBCF4\uC5EC\uC904\uAC8C\uC694.</p>
+        </section>
+      `}
+      ${hasMore ? `<button class="ghost-btn full diary-load-more" type="button" data-notification-load-more>\uB354\uBCF4\uAE30</button>` : ""}
+    `;
+    qs("[data-notification-load-more]", list)?.addEventListener("click", () => {
+      state.notificationVisibleCounts[filter] = visibleCount + 10;
+      renderNotificationItemsFinal(filter);
+    });
+    qsa("[data-notification-jump]", list).forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const target = button.dataset.notificationJump;
+        const backToNotifications = () => openNotificationPageV4();
+        if (target === "memory" && typeof openMemoryDetailLatestV3 === "function") {
+          const memoryIndex = partnerMemoryNotificationIndex();
+          if (memoryIndex < 0) {
+            showToast("\uC0C1\uB300\uBC29\uC774 \uCD94\uAC00\uD55C \uCD94\uC5B5\uC774 \uC544\uC9C1 \uC5C6\uC5B4\uC694.");
+            return;
+          }
+          openMemoryDetailLatestV3(memoryIndex, backToNotifications);
+        } else if (target === "conversation" && typeof openQuestionHistoryDetail === "function") {
+          const conversationIndex = partnerConversationNotificationIndex();
+          if (conversationIndex < 0) {
+            showToast("\uC0C1\uB300\uBC29\uC774 \uCD94\uAC00\uD55C \uB300\uD654\uAC00 \uC544\uC9C1 \uC5C6\uC5B4\uC694.");
+            return;
+          }
+          openQuestionHistoryDetail(conversationIndex, backToNotifications);
+        }
+      });
+    });
+    bindActions(list);
+  };
+
+  openNotificationPageV4 = function openFocusedNotificationPage() {
+    openModal(`
+      <div class="modal-sheet notification-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" data-close aria-label="\uB4A4\uB85C\uAC00\uAE30">\u2190</button>
+          <h3>\uC54C\uB9BC</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <label class="notification-filter-field" aria-label="\uC54C\uB9BC \uD544\uD130">
+          <select class="notification-filter-select" data-notification-filter>
+            ${filters.map((option) => `<option value="${option.value}">${option.label}</option>`).join("")}
+          </select>
+        </label>
+        <div class="list" data-notification-list></div>
+      </div>
+    `);
+    qs("#modal")?.classList.add("page-modal");
+    renderNotificationItemsFinal("all");
+    qs("[data-notification-filter]")?.addEventListener("change", (event) => {
+      state.notificationVisibleCounts = state.notificationVisibleCounts || {};
+      state.notificationVisibleCounts[event.target.value] = 10;
+      renderNotificationItemsFinal(event.target.value);
+    });
+  };
+})();
+
+(function installQuestionReadStatusOnOpen() {
+  if (window.__duariQuestionReadStatusOnOpenInstalled) return;
+  window.__duariQuestionReadStatusOnOpenInstalled = true;
+  if (typeof openQuestionHistoryDetail !== "function") return;
+
+  const baseOpenQuestionHistoryDetail = openQuestionHistoryDetail;
+  openQuestionHistoryDetail = function openQuestionHistoryDetailWithReadStatus(index = 0, backAction = null) {
+    const history = typeof duariQuestionHistorySeed === "function" ? duariQuestionHistorySeed() : state.questionHistory;
+    const item = Array.isArray(history) ? history[index] : null;
+    if (item && item.status === "\uC804\uB2EC\uB428") {
+      item.status = "\uC77D\uC74C";
+      if (typeof duariSavePersistentContent === "function") duariSavePersistentContent();
+    }
+    return baseOpenQuestionHistoryDetail(index, backAction);
+  };
+
+  window.openQuestionHistoryDetail = openQuestionHistoryDetail;
 })();
