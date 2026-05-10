@@ -1,7 +1,7 @@
 const onboardingSlides = [
   { art: "diary", title: "우리의 하루가 흩어지지 않게 모아요.", body: "사진 한 장, 짧은 문장 하나도 둘만의 기록이 될 수 있어요. 데이트와 여행은 물론 평범한 일상까지 차곡차곡 남겨요." },
   { art: "lock", title: "나만 보는 마음과 함께 보는 마음을 나눠요.", body: "혼자 정리하고 싶은 이야기는 조용히 보관하고, 함께 기억하고 싶은 일기는 상대와 나눌 수 있어요." },
-  { art: "message", title: "말하기 어려운 마음도 부드럽게 전해요.", body: "질문과 일기에서 꺼낸 마음을 한 번 더 다듬어, 상대가 편하게 읽을 수 있는 문장으로 준비해요." },
+  { art: "message", title: "말하기 어려운 마음도 부드럽게 전해요.", body: "대화과 일기에서 꺼낸 마음을 한 번 더 다듬어, 상대가 편하게 읽을 수 있는 문장으로 준비해요." },
 ];
 
 const state = {
@@ -206,7 +206,7 @@ function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.questionHistory);
 }
 
-const titles = { home: "오늘의 우리", album: "우리 기록", diary: "마음", questions: "질문", my: "설정" };
+const titles = { home: "오늘의 우리", album: "우리 기록", diary: "마음", questions: "대화", my: "설정" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -1427,7 +1427,8 @@ function openPhotoOrderManagerPageLatest(backAction = restorePreviousModal) {
     memory.photoCount = orderedPhotos.length;
     memory.representativePhoto = representativePhoto || orderedPhotos[0] || null;
     memory.representativePhotoIndex = representativePhotoIndex;
-    duariSavePersistentContent();
+    if (typeof renderHome === "function") renderHome();
+    if (typeof renderAlbum === "function") renderAlbum();
   };
   qsa("[data-photo-order-back]", sheet).forEach((button) => button.addEventListener("click", () => {
     savePhotoOrder();
@@ -1777,7 +1778,7 @@ function renderHome() {
   const questionActions = `
     <div class="home-question-actions">
       <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
-      <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+      <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
     </div>
   `;
 
@@ -1788,7 +1789,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
       </div>
     `;
     bindActions(home);
@@ -1801,7 +1802,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
     </div>
   `;
   bindActions(home);
@@ -1851,7 +1852,7 @@ function renderHome() {
         <div class="between"><div><p class="eyebrow">내 공간</p><h3>하린</h3></div><button class="chip-btn" data-action="connect">상대 초대</button></div>
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <div class="quick-grid"><button class="primary-btn" data-action="new-memory">나만 보기 기록</button><button class="ghost-btn" data-action="diary-scope-first">개인 일기</button></div>
-        <section class="card"><h3>전할 말 초안</h3><p>연결 전에도 질문 답변, 개인 일기, 기록에서 전할 말을 정리해 둘 수 있어요.</p><button class="ghost-btn full" data-action="draft-list">저장된 초안 보기</button></section>
+        <section class="card"><h3>전할 말 초안</h3><p>연결 전에도 대화 답변, 개인 일기, 기록에서 전할 말을 정리해 둘 수 있어요.</p><button class="ghost-btn full" data-action="draft-list">저장된 초안 보기</button></section>
       </div>
     `;
     bindActions(home);
@@ -1864,7 +1865,7 @@ function renderHome() {
       <div class="quick-grid"><button class="primary-btn" data-action="new-memory">우리 기록 남기기</button><button class="ghost-btn" data-action="diary-scope-first">일기 쓰기</button></div>
       <section><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${state.diaries.find((diary) => diary.scope === "공유")?.body || "아직 공유 일기가 없어요."}</p></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -1932,7 +1933,7 @@ function renderDiary() {
 function renderQuestions() {
   qs("#questions").innerHTML = `
     <div class="section-stack">
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3><p>개인 질문 70%, 관계 질문 30% 비율로 부담 없이 이어집니다.</p><div class="row" style="margin-top:12px"><button class="primary-btn" data-action="answer-question">답변 작성</button><button class="ghost-btn" data-action="new-question">직접 질문</button></div><button class="ghost-btn full" data-action="another-question">다른 질문 보기</button></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3><p>개인 대화 70%, 관계 대화 30% 비율로 부담 없이 이어집니다.</p><div class="row" style="margin-top:12px"><button class="primary-btn" data-action="answer-question">답변 작성</button><button class="ghost-btn" data-action="new-question">직접 대화</button></div><button class="ghost-btn full" data-action="another-question">다른 대화 보기</button></section>
       <section class="card"><h3>답변 보내기</h3><div class="list"><button class="ghost-btn" data-action="private-answer">비공개 저장</button><button class="ghost-btn" data-action="send-to-partner">상대에게 보내기</button><button class="ghost-btn" data-action="ai-message">AI로 다듬어서 보내기</button><button class="ghost-btn" data-action="send-original">원문으로 보내기</button></div></section>
       <section class="card"><h3>메시지함</h3><p>받은 메시지는 최종 메시지만, 보낸 메시지는 원문과 실제 보낸 메시지를 함께 보여줍니다.</p><button class="primary-btn full" data-action="message-detail">메시지 상세 보기</button></section>
     </div>
@@ -2277,7 +2278,7 @@ function renderHome() {
   const questionActions = `
     <div class="home-question-actions">
       <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
-      <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+      <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
     </div>
   `;
 
@@ -2288,7 +2289,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
       </div>
     `;
     bindActions(home);
@@ -2301,7 +2302,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
     </div>
   `;
   bindActions(home);
@@ -2312,8 +2313,8 @@ function renderHome() {
   const questionActions = `
     <div class="home-question-actions">
       <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
-      <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
-      <button class="ghost-btn" data-action="new-question">직접 질문 작성하기</button>
+      <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
+      <button class="ghost-btn" data-action="new-question">직접 대화 작성하기</button>
     </div>
   `;
 
@@ -2324,7 +2325,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
       </div>
     `;
     bindActions(home);
@@ -2337,7 +2338,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
     </div>
   `;
   bindActions(home);
@@ -2347,14 +2348,14 @@ function renderQuestions() {
   qs("#questions").innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘의 대화</p>
         <h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3>
-        <p>개인 질문 70%, 관계 질문 30% 비율로 부담 없이 이어집니다.</p>
+        <p>개인 대화 70%, 관계 대화 30% 비율로 부담 없이 이어집니다.</p>
         <div class="row" style="margin-top:12px">
           <button class="primary-btn" data-action="answer-question">답변 작성</button>
-          <button class="ghost-btn" data-action="new-question">직접 질문</button>
+          <button class="ghost-btn" data-action="new-question">직접 대화</button>
         </div>
-        <button class="ghost-btn full" data-action="another-question">다른 질문 보기</button>
+        <button class="ghost-btn full" data-action="another-question">다른 대화 보기</button>
       </section>
       <section class="card"><h3>답변 보내기</h3><div class="list"><button class="ghost-btn" data-action="private-answer">비공개 저장</button><button class="ghost-btn" data-action="send-to-partner">상대에게 보내기</button><button class="ghost-btn" data-action="ai-message">AI로 다듬어서 보내기</button><button class="ghost-btn" data-action="send-original">원문으로 보내기</button></div></section>
       <section class="card"><h3>메시지함</h3><p>받은 메시지는 최종 메시지만, 보낸 메시지는 원문과 실제 보낸 메시지를 함께 보여줍니다.</p><button class="primary-btn full" data-action="message-detail">메시지 상세 보기</button></section>
@@ -2374,10 +2375,10 @@ function openStartAlonePage() {
       <div class="section-stack">
         <section class="hero-card">
           <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
-          <p>나만 보기 기록과 개인 일기, 비공개 질문 답변, 전할 말 초안을 먼저 쌓아둘 수 있어요.</p>
+          <p>나만 보기 기록과 개인 일기, 비공개 대화 답변, 전할 말 초안을 먼저 쌓아둘 수 있어요.</p>
         </section>
         <div class="solo-feature-grid">
-          ${["나만 보기 기록", "개인 일기", "질문 답변 비공개 저장", "전할 말 초안 작성"].map((item) => `<section class="card"><strong>${item}</strong></section>`).join("")}
+          ${["나만 보기 기록", "개인 일기", "대화 답변 비공개 저장", "전할 말 초안 작성"].map((item) => `<section class="card"><strong>${item}</strong></section>`).join("")}
         </div>
         <section class="card">
           <h3>연결 전 제한</h3>
@@ -2412,7 +2413,7 @@ function renderHome() {
   const questionActions = `
     <div class="home-question-actions">
       <button class="primary-btn" data-action="answer-question">답변 쓰기</button>
-      <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+      <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
     </div>
   `;
 
@@ -2423,7 +2424,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
       </div>
     `;
     bindActions(home);
@@ -2436,7 +2437,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3>${questionActions}</section>
     </div>
   `;
   bindActions(home);
@@ -2446,12 +2447,12 @@ function renderQuestions() {
   qs("#questions").innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘의 대화</p>
         <h3>내가 요즘 자주 떠올리는 우리의 순간은?</h3>
-        <p>개인 질문 70%, 관계 질문 30% 비율로 부담 없이 이어집니다.</p>
+        <p>개인 대화 70%, 관계 대화 30% 비율로 부담 없이 이어집니다.</p>
         <div class="row" style="margin-top:12px">
           <button class="primary-btn" data-action="answer-question">답변 작성</button>
-          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+          <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
         </div>
       </section>
       <section class="card"><h3>답변 보내기</h3><div class="list"><button class="ghost-btn" data-action="private-answer">비공개 저장</button><button class="ghost-btn" data-action="send-to-partner">상대에게 보내기</button><button class="ghost-btn" data-action="ai-message">AI로 다듬어서 보내기</button><button class="ghost-btn" data-action="send-original">원문으로 보내기</button></div></section>
@@ -2491,7 +2492,7 @@ function openConnectModal() {
 }
 
 function openDirectQuestionModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>직접 질문 만들기</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>질문</label><textarea placeholder="함께 이야기하고 싶은 질문"></textarea></div><p class="tiny-note">직접 만든 질문은 저장 후 수정할 수 없습니다.</p><button class="primary-btn full" data-close>저장</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>직접 대화 만들기</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><div class="form-field"><label>대화</label><textarea placeholder="함께 이야기하고 싶은 대화"></textarea></div><p class="tiny-note">직접 만든 대화은 저장 후 수정할 수 없습니다.</p><button class="primary-btn full" data-close>저장</button></div></div>`);
 }
 
 function openMessageDetail() {
@@ -2938,8 +2939,8 @@ function getSupportFaqItems() {
     ["일기", "개인 일기는 상대에게 보이나요?", "아니요. 개인 일기는 존재 자체도 상대에게 노출되지 않아요."],
     ["일기", "개인 일기를 공유하면 원본도 바뀌나요?", "아니요. 공유 복사본을 만들고, 원본 개인 일기는 계속 나만 보기로 남습니다."],
     ["일기", "공유 일기에 사진을 첨부할 수 있나요?", "아니요. 일기는 글과 감정, 관련 기록 연결 중심으로 작성합니다."],
-    ["질문", "질문 답변을 비공개로 저장할 수 있나요?", "네, 상대에게 보내지 않고 내 답변으로 저장해둘 수 있어요."],
-    ["질문", "직접 만든 질문은 수정할 수 있나요?", "직접 만든 질문은 수정하지 않고, 필요하면 새 질문을 만드는 흐름으로 사용합니다."],
+    ["대화", "대화 답변을 비공개로 저장할 수 있나요?", "네, 상대에게 보내지 않고 내 답변으로 저장해둘 수 있어요."],
+    ["대화", "직접 만든 대화은 수정할 수 있나요?", "직접 만든 대화은 수정하지 않고, 필요하면 새 대화을 만드는 흐름으로 사용합니다."],
     ["AI", "AI 정리에 실패하면 어떻게 하나요?", "다시 시도하거나 원문으로 보낼 수 있어요."],
     ["AI", "AI가 내 비공개 일기도 참고하나요?", "아니요. 기록 상세에서는 기록 정보와 내가 입력한 원문만 참고하고 비공개 일기는 참고하지 않아요."],
     ["계정", "PIN은 어디에 사용되나요?", "이전 커플 보관함 접근, 관계 연결 해제, 이전 관계 전체 삭제, 회원 탈퇴 같은 중요한 동작에 사용됩니다."],
@@ -2991,7 +2992,7 @@ function bindSupportFaqFilters(sheet, faqItems, faqTypes) {
 
 function openSupportModal() {
   const faqItems = getSupportFaqItems();
-  const faqTypes = ["시작", "기록", "사진", "저장", "일기", "질문", "AI", "계정"];
+  const faqTypes = ["시작", "기록", "사진", "저장", "일기", "대화", "AI", "계정"];
   openModal(`
     <div class="modal-sheet notification-page faq-page">
       <header class="notification-header">
@@ -3010,7 +3011,7 @@ function openSupportModal() {
           </div>
         </section>
         <section class="card">
-          <div class="between"><h3>자주 묻는 질문</h3><span class="meta" data-faq-count>${faqItems.length}개</span></div>
+          <div class="between"><h3>자주 묻는 대화</h3><span class="meta" data-faq-count>${faqItems.length}개</span></div>
           <div data-faq-list>${renderSupportFaqGroups(faqItems, faqTypes)}</div>
         </section>
       </div>
@@ -3063,7 +3064,7 @@ function openSupportContactPage(initialTab = "form") {
               <option>기록</option>
               <option>사진</option>
               <option>일기</option>
-              <option>질문</option>
+              <option>대화</option>
               <option>메시지</option>
               <option>계정</option>
               <option>PIN</option>
@@ -3182,7 +3183,7 @@ function openSupportInquiryEditPage(inquiry) {
           <div class="form-field">
             <label>문의 유형</label>
             <select>
-              ${["기록", "사진", "일기", "질문", "메시지", "계정", "PIN", "기타"].map((type) => `<option ${type === inquiry.type ? "selected" : ""}>${type}</option>`).join("")}
+              ${["기록", "사진", "일기", "대화", "메시지", "계정", "PIN", "기타"].map((type) => `<option ${type === inquiry.type ? "selected" : ""}>${type}</option>`).join("")}
             </select>
           </div>
           <div class="form-field">
@@ -3314,7 +3315,7 @@ function openPrivacyPolicyModal() {
       </header>
       <div class="policy-content">
         <h4>수집하는 정보</h4>
-        <p>계정 이메일, 닉네임, 프로필 사진, 관계 기록, 일기, 질문 답변, 알림 설정처럼 서비스 이용에 필요한 정보를 다룹니다.</p>
+        <p>계정 이메일, 닉네임, 프로필 사진, 관계 기록, 일기, 대화 답변, 알림 설정처럼 서비스 이용에 필요한 정보를 다룹니다.</p>
         <h4>개인 기록 보호</h4>
         <p>개인 일기, 개인 초안, 나만 보기 기록은 상대에게 존재 자체가 노출되지 않도록 분리합니다.</p>
         <h4>공유 공간 데이터</h4>
@@ -3329,7 +3330,7 @@ function openPrivacyPolicyModal() {
 }
 
 function openArchiveModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>이전 커플 보관함</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><p>조회 전용이며 현재 관계와 완전히 분리됩니다. 검색, 외부 공유, 데이터 내보내기는 제공하지 않아요.</p>${["우리 기록", "사진", "공유 일기", "질문/메시지", "정제 메시지", "반응", "기념일"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">조회 전용</span></div></section>`).join("")}<button class="ghost-btn">사진 다운로드</button><button class="primary-btn" data-action="danger-delete-archive">이전 관계 전체 삭제</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>이전 커플 보관함</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><p>조회 전용이며 현재 관계와 완전히 분리됩니다. 검색, 외부 공유, 데이터 내보내기는 제공하지 않아요.</p>${["우리 기록", "사진", "공유 일기", "대화/메시지", "정제 메시지", "반응", "기념일"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">조회 전용</span></div></section>`).join("")}<button class="ghost-btn">사진 다운로드</button><button class="primary-btn" data-action="danger-delete-archive">이전 관계 전체 삭제</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -3355,7 +3356,7 @@ function openWithdrawalModal() {
           </section>
           <section class="card">
             <h3>탈퇴 후 데이터</h3>
-            <p>공유 기록이나 일기, 전달한 질문은 상대방 화면에 보존되고 나머지는 영구적으로 삭제됩니다.</p>
+            <p>공유 기록이나 일기, 전달한 대화은 상대방 화면에 보존되고 나머지는 영구적으로 삭제됩니다.</p>
           </section>
           <button class="primary-btn full" type="button" data-withdraw-final>최종 탈퇴</button>
         </div>
@@ -3400,7 +3401,7 @@ function openSharedDiaryConfirmModal() {
 }
 
 function openDraftListModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["질문 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p></section>`).join("")}<button class="primary-btn">선택한 초안 보내기</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["대화 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p></section>`).join("")}<button class="primary-btn">선택한 초안 보내기</button></div></div>`);
 }
 
 function openShareCardModal() {
@@ -3409,7 +3410,7 @@ function openShareCardModal() {
 }
 
 function openErrorPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>오류/복구 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["작성 내용은 유지합니다.", "기록 저장 실패 시 임시 저장을 제공합니다.", "사진 일부 실패 시 실패한 사진만 제외하고 저장할 수 있습니다.", "AI 실패 시 다시 시도하거나 원문으로 보낼 수 있습니다.", "전송 실패 메시지는 사용자가 초안 저장을 선택합니다.", "목록 로딩 실패 시 가능하면 캐시를 먼저 표시합니다."].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}<button class="ghost-btn" data-action="photo-upload-policy">사진 업로드 정책</button><button class="ghost-btn" data-action="album-search-policy">앨범 검색 정책</button><button class="ghost-btn" data-action="reaction-policy">반응 정책</button><button class="ghost-btn" data-action="download-share-policy">다운로드/공유 정책</button><button class="ghost-btn" data-action="notification-exclusions">알림 제외 항목</button><button class="ghost-btn" data-action="anniversary-policy">기념일 자동 규칙</button><button class="ghost-btn" data-action="question-ratio">질문 구성 비율</button><button class="ghost-btn" data-action="ai-reference-policy">AI 참고 정보</button><button class="ghost-btn" data-action="hide-delete-policy">삭제/숨김 정책</button><button class="ghost-btn" data-action="message-read-policy">읽음/메시지 정책</button><button class="ghost-btn" data-action="solo-limit-policy">혼자 사용 제한</button><button class="ghost-btn" data-action="multi-relation-policy">복수 관계 고급 정책</button><button class="ghost-btn" data-action="withdrawal-display-policy">탈퇴 후 표시 정책</button><button class="ghost-btn" data-action="privacy-scope-policy">개인/공유 분리 정책</button><button class="ghost-btn" data-action="permission-timing-policy">권한 요청 타이밍</button><button class="ghost-btn" data-action="pin-usage-policy">PIN 사용 범위</button><button class="ghost-btn" data-action="share-consent-lifecycle">공유 동의 흐름</button><button class="ghost-btn" data-action="archive-content-policy">보관함 포함 데이터</button><button class="ghost-btn" data-action="notification-types-policy">전체 알림 종류</button><button class="ghost-btn" data-action="account-profile-policy">계정 프로필 정책</button><button class="ghost-btn" data-action="author-permission-policy">작성자 권한 정책</button><button class="ghost-btn" data-action="emotion-policy">감정 표시 정책</button><button class="ghost-btn" data-action="calendar-display-policy">캘린더 표시 정책</button><button class="ghost-btn" data-action="record-delete-policy">기록 수정/삭제 정책</button><button class="ghost-btn" data-action="diary-reaction-policy">일기 반응 정책</button><button class="ghost-btn" data-action="invite-code-policy">초대 코드 정책</button><button class="ghost-btn" data-action="private-diary-share-flow">개인 일기 공유 흐름</button><button class="ghost-btn" data-action="draft-source-policy">초안 출처 저장 정책</button><button class="ghost-btn" data-action="notification-filter-policy">알림 필터 정책</button><button class="ghost-btn" data-action="custom-anniversary-policy">직접 기념일 항목</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>오류/복구 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["작성 내용은 유지합니다.", "기록 저장 실패 시 임시 저장을 제공합니다.", "사진 일부 실패 시 실패한 사진만 제외하고 저장할 수 있습니다.", "AI 실패 시 다시 시도하거나 원문으로 보낼 수 있습니다.", "전송 실패 메시지는 사용자가 초안 저장을 선택합니다.", "목록 로딩 실패 시 가능하면 캐시를 먼저 표시합니다."].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}<button class="ghost-btn" data-action="photo-upload-policy">사진 업로드 정책</button><button class="ghost-btn" data-action="album-search-policy">앨범 검색 정책</button><button class="ghost-btn" data-action="reaction-policy">반응 정책</button><button class="ghost-btn" data-action="download-share-policy">다운로드/공유 정책</button><button class="ghost-btn" data-action="notification-exclusions">알림 제외 항목</button><button class="ghost-btn" data-action="anniversary-policy">기념일 자동 규칙</button><button class="ghost-btn" data-action="question-ratio">대화 구성 비율</button><button class="ghost-btn" data-action="ai-reference-policy">AI 참고 정보</button><button class="ghost-btn" data-action="hide-delete-policy">삭제/숨김 정책</button><button class="ghost-btn" data-action="message-read-policy">읽음/메시지 정책</button><button class="ghost-btn" data-action="solo-limit-policy">혼자 사용 제한</button><button class="ghost-btn" data-action="multi-relation-policy">복수 관계 고급 정책</button><button class="ghost-btn" data-action="withdrawal-display-policy">탈퇴 후 표시 정책</button><button class="ghost-btn" data-action="privacy-scope-policy">개인/공유 분리 정책</button><button class="ghost-btn" data-action="permission-timing-policy">권한 요청 타이밍</button><button class="ghost-btn" data-action="pin-usage-policy">PIN 사용 범위</button><button class="ghost-btn" data-action="share-consent-lifecycle">공유 동의 흐름</button><button class="ghost-btn" data-action="archive-content-policy">보관함 포함 데이터</button><button class="ghost-btn" data-action="notification-types-policy">전체 알림 종류</button><button class="ghost-btn" data-action="account-profile-policy">계정 프로필 정책</button><button class="ghost-btn" data-action="author-permission-policy">작성자 권한 정책</button><button class="ghost-btn" data-action="emotion-policy">감정 표시 정책</button><button class="ghost-btn" data-action="calendar-display-policy">캘린더 표시 정책</button><button class="ghost-btn" data-action="record-delete-policy">기록 수정/삭제 정책</button><button class="ghost-btn" data-action="diary-reaction-policy">일기 반응 정책</button><button class="ghost-btn" data-action="invite-code-policy">초대 코드 정책</button><button class="ghost-btn" data-action="private-diary-share-flow">개인 일기 공유 흐름</button><button class="ghost-btn" data-action="draft-source-policy">초안 출처 저장 정책</button><button class="ghost-btn" data-action="notification-filter-policy">알림 필터 정책</button><button class="ghost-btn" data-action="custom-anniversary-policy">직접 기념일 항목</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -3438,7 +3439,7 @@ function openAnniversaryPolicyModal() {
 }
 
 function openQuestionRatioModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>질문 구성 비율</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>큰 비율</h3><p>개인 질문 70%, 관계 질문 30%</p></section>${["감정 25%", "취향 15%", "일상 15%", "가치관 15%", "애정 표현 10%", "추억 회상 8%", "서운함/갈등 7%", "미래/기대 5%"].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}</div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>대화 구성 비율</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>큰 비율</h3><p>개인 대화 70%, 관계 대화 30%</p></section>${["감정 25%", "취향 15%", "일상 15%", "가치관 15%", "애정 표현 10%", "추억 회상 8%", "서운함/갈등 7%", "미래/기대 5%"].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}</div></div>`);
 }
 
 function openAiReferencePolicyModal() {
@@ -3454,7 +3455,7 @@ function openMessageReadPolicyModal() {
 }
 
 function openSoloLimitPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>혼자 사용 제한</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>혼자 가능</h3><p>나만 보기 기록, 개인 일기, 질문 답변 비공개 저장, 전할 말 초안 작성</p></section><section class="card"><h3>연결 전 제한</h3><p>상대에게 보내기, 공유 일기, 상대 반응, 커플 공동 기록</p></section><section class="card"><h3>홈 CTA</h3><p>혼자 계속 쓰기를 누르면 큰 CTA는 숨기고 작은 상대 초대 버튼은 유지합니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>혼자 사용 제한</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>혼자 가능</h3><p>나만 보기 기록, 개인 일기, 대화 답변 비공개 저장, 전할 말 초안 작성</p></section><section class="card"><h3>연결 전 제한</h3><p>상대에게 보내기, 공유 일기, 상대 반응, 커플 공동 기록</p></section><section class="card"><h3>홈 CTA</h3><p>혼자 계속 쓰기를 누르면 큰 CTA는 숨기고 작은 상대 초대 버튼은 유지합니다.</p></section></div></div>`);
 }
 
 function openMultiRelationPolicyModal() {
@@ -3482,7 +3483,7 @@ function openShareConsentLifecycleModal() {
 }
 
 function openArchiveContentPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>보관함 포함 데이터</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>포함</h3><p>우리 기록, 사진, 공유 일기, 질문/메시지, 정제 메시지, 반응, 기념일, 연애 시작일, 연결 기간</p></section><section class="card"><h3>개인 데이터</h3><p>개인 데이터는 개인 표시로 구분합니다.</p></section><section class="card"><h3>제한</h3><p>조회 전용이며 수정, 외부 공유, 검색, 데이터 내보내기는 제공하지 않습니다. 사진 다운로드와 전체 삭제만 가능합니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>보관함 포함 데이터</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>포함</h3><p>우리 기록, 사진, 공유 일기, 대화/메시지, 정제 메시지, 반응, 기념일, 연애 시작일, 연결 기간</p></section><section class="card"><h3>개인 데이터</h3><p>개인 데이터는 개인 표시로 구분합니다.</p></section><section class="card"><h3>제한</h3><p>조회 전용이며 수정, 외부 공유, 검색, 데이터 내보내기는 제공하지 않습니다. 사진 다운로드와 전체 삭제만 가능합니다.</p></section></div></div>`);
 }
 
 function openNotificationTypesPolicyModal() {
@@ -3498,7 +3499,7 @@ function openAuthorPermissionPolicyModal() {
 }
 
 function openEmotionPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>감정 표시 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>선택 규칙</h3><p>기록과 일기에서 감정은 최대 3개까지 선택할 수 있고 선택 사항입니다.</p></section><section class="card"><h3>일기 표시</h3><p>목록에서는 감정 아이콘만 표시하고, 상세/작성 화면에서는 아이콘과 텍스트를 함께 표시합니다.</p></section><section class="card"><h3>디자인</h3><p>감정은 앱 전용 라인 아이콘과 감정군별 은은한 색상으로 구분합니다.</p></section><section class="card"><h3>질문 답변</h3><p>질문 답변 작성 시에는 감정 선택을 사용하지 않습니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>감정 표시 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>선택 규칙</h3><p>기록과 일기에서 감정은 최대 3개까지 선택할 수 있고 선택 사항입니다.</p></section><section class="card"><h3>일기 표시</h3><p>목록에서는 감정 아이콘만 표시하고, 상세/작성 화면에서는 아이콘과 텍스트를 함께 표시합니다.</p></section><section class="card"><h3>디자인</h3><p>감정은 앱 전용 라인 아이콘과 감정군별 은은한 색상으로 구분합니다.</p></section><section class="card"><h3>대화 답변</h3><p>대화 답변 작성 시에는 감정 선택을 사용하지 않습니다.</p></section></div></div>`);
 }
 
 function openCalendarDisplayPolicyModal() {
@@ -3522,11 +3523,11 @@ function openPrivateDiaryShareFlowModal() {
 }
 
 function openDraftSourcePolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>초안 출처 저장 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>저장</h3><p>AI 결과는 초안으로 저장할 수 있고 여러 개 저장할 수 있습니다.</p></section><section class="card"><h3>출처</h3><p>초안은 질문 답변, 개인 일기, 공유 일기, 기록 상세 등 출처 상세 하단에 저장됩니다.</p></section><section class="card"><h3>전송</h3><p>전송 시 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p></section><section class="card"><h3>공유</h3><p>초안 자체의 외부 공유는 제공하지 않습니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>초안 출처 저장 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><section class="card"><h3>저장</h3><p>AI 결과는 초안으로 저장할 수 있고 여러 개 저장할 수 있습니다.</p></section><section class="card"><h3>출처</h3><p>초안은 대화 답변, 개인 일기, 공유 일기, 기록 상세 등 출처 상세 하단에 저장됩니다.</p></section><section class="card"><h3>전송</h3><p>전송 시 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p></section><section class="card"><h3>공유</h3><p>초안 자체의 외부 공유는 제공하지 않습니다.</p></section></div></div>`);
 }
 
 function openNotificationFilterPolicyModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>알림 필터 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}<section class="card"><h3>묶음</h3><p>질문 알림은 여러 개 가능하며 알림 묶음은 제공하지 않습니다.</p></section></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>알림 필터 정책</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item) => `<section class="card"><p>${item}</p></section>`).join("")}<section class="card"><h3>묶음</h3><p>대화 알림은 여러 개 가능하며 알림 묶음은 제공하지 않습니다.</p></section></div></div>`);
 }
 
 function openCustomAnniversaryPolicyModal() {
@@ -3534,7 +3535,7 @@ function openCustomAnniversaryPolicyModal() {
 }
 
 function openAnotherQuestionModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>다른 질문 보기</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["요즘 가장 자주 떠오르는 감정은 뭐야?", "우리의 작은 습관 중 좋아하는 건?", "최근에 고마웠던 순간은?", "앞으로 함께 기대하는 일은?"].map((item) => `<section class="card"><p>${item}</p><button class="ghost-btn full" data-action="answer-question">이 질문에 답하기</button></section>`).join("")}<p class="tiny-note">질문은 여러 개 받을 수 있고 알림 묶음은 제공하지 않아요.</p></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>다른 대화 보기</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["요즘 가장 자주 떠오르는 감정은 뭐야?", "우리의 작은 습관 중 좋아하는 건?", "최근에 고마웠던 순간은?", "앞으로 함께 기대하는 일은?"].map((item) => `<section class="card"><p>${item}</p><button class="ghost-btn full" data-action="answer-question">이 대화에 답하기</button></section>`).join("")}<p class="tiny-note">대화은 여러 개 받을 수 있고 알림 묶음은 제공하지 않아요.</p></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -3595,7 +3596,7 @@ function openHiddenPhotosModal() {
 }
 
 function openDraftListModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["질문 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p><div class="row"><button class="ghost-btn" data-action="delete-draft-confirm">삭제</button><button class="ghost-btn">편집</button></div></section>`).join("")}<button class="primary-btn">선택한 초안 보내기</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["대화 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p><div class="row"><button class="ghost-btn" data-action="delete-draft-confirm">삭제</button><button class="ghost-btn">편집</button></div></section>`).join("")}<button class="primary-btn">선택한 초안 보내기</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -4230,7 +4231,7 @@ function openPasswordChangePage() {
 }
 
 function openArchiveModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>이전 커플 보관함</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><p>조회 전용이며 현재 관계와 완전히 분리됩니다. 검색, 외부 공유, 데이터 내보내기는 제공하지 않습니다.</p>${["우리 기록", "사진", "공유 일기", "질문/메시지", "정제 메시지", "반응", "기념일"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">조회 전용</span></div></section>`).join("")}<button class="ghost-btn" data-action="download-photo">사진 다운로드</button><button class="primary-btn" data-action="danger-delete-archive">이전 관계 전체 삭제</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>이전 커플 보관함</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack"><p>조회 전용이며 현재 관계와 완전히 분리됩니다. 검색, 외부 공유, 데이터 내보내기는 제공하지 않습니다.</p>${["우리 기록", "사진", "공유 일기", "대화/메시지", "정제 메시지", "반응", "기념일"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">조회 전용</span></div></section>`).join("")}<button class="ghost-btn" data-action="download-photo">사진 다운로드</button><button class="primary-btn" data-action="danger-delete-archive">이전 관계 전체 삭제</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -4275,7 +4276,7 @@ function openShareConsentCompleteModal() {
 }
 
 function openDraftListModal() {
-  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["질문 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p><div class="row"><button class="ghost-btn" data-action="delete-draft-confirm">삭제</button><button class="ghost-btn" data-action="ai-message">편집</button></div></section>`).join("")}<button class="primary-btn" data-action="send-ai-result">선택한 초안 보내기</button></div></div>`);
+  openModal(`<div class="modal-sheet"><div class="between"><h3>저장된 초안</h3><button class="icon-btn" data-close>닫기</button></div><div class="section-stack">${["대화 답변에서 만든 초안", "개인 일기에서 만든 초안", "기록 상세에서 만든 초안"].map((item) => `<section class="card"><div class="between"><strong>${item}</strong><span class="meta">출처 저장</span></div><p>전송하면 초안은 삭제되고 보낸 메시지가 새로 생성됩니다.</p><div class="row"><button class="ghost-btn" data-action="delete-draft-confirm">삭제</button><button class="ghost-btn" data-action="ai-message">편집</button></div></section>`).join("")}<button class="primary-btn" data-action="send-ai-result">선택한 초안 보내기</button></div></div>`);
   bindActions(qs(".modal-sheet"));
 }
 
@@ -4420,7 +4421,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
     bindActions(home);
@@ -4433,7 +4434,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -4448,7 +4449,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button><button class="ghost-btn" data-action="new-question">직접 질문 작성하기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button><button class="ghost-btn" data-action="new-question">직접 대화 작성하기</button></div></section>
       </div>
     `;
     bindActions(home);
@@ -4461,7 +4462,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">새 기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -10417,7 +10418,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
     bindActions(home);
@@ -10430,7 +10431,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -10910,7 +10911,7 @@ function openMemoryDeleteConfirmOverlay(index, backAction = null) {
     <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
       <div class="ai-confirm-sheet">
         <h3>기록을 삭제할까요?</h3>
-        <p>삭제하면 이 기록은 복구할 수 없어요. 연결된 일기는 남고, 이 기록과의 연결만 해제됩니다.</p>
+        <p>삭제하면 이 추억은 복구할 수 없어요.</p>
         <div class="ai-action-grid">
           <button class="ghost-btn" type="button" data-memory-delete-cancel>취소</button>
           <button class="primary-btn" type="button" data-memory-delete-confirm>삭제</button>
@@ -11163,6 +11164,7 @@ function openMemoryEditBackConfirm(resolvedBack, memoryIndex = 0, originalMemory
     if (originalMemory && state.memories?.[memoryIndex]) {
       state.memories[memoryIndex] = duariCloneMemory(originalMemory);
       state.activeMemoryIndex = memoryIndex;
+      if (state.memoryEditSnapshots) delete state.memoryEditSnapshots[memoryIndex];
       duariSavePersistentContent();
       renderHome();
       renderAlbum();
@@ -11680,7 +11682,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
     bindActions(home);
@@ -11693,7 +11695,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -11734,7 +11736,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
     bindActions(home);
@@ -11746,7 +11748,7 @@ function renderHome() {
       <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
       <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
       <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-      <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+      <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
     </div>
   `;
   bindActions(home);
@@ -11850,7 +11852,7 @@ function renderHome() {
         ${state.aloneCtaHidden ? "" : `<section class="hero-card"><h3>함께 쓸 공간을 만들어볼까요?</h3><p>상대와 연결하면 기록과 일기를 함께 남기고, 전할 말을 보낼 수 있어요.</p><div class="row" style="margin-top:14px"><button class="primary-btn" data-action="connect">상대 초대하기</button><button class="ghost-btn" data-action="continue-alone">혼자 계속 쓰기</button></div></section>`}
         <section class="card home-records-card"><h3>최근 우리 기록</h3><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
         <section class="diary-card"><h3>최근 공유 일기</h3><p>연결 전에는 공유 일기를 사용할 수 없어요.</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
   } else {
@@ -11859,7 +11861,7 @@ function renderHome() {
         <section class="hero-card home-hero"><div class="between"><div><p class="relationship-name">봄이 & 하린</p><h3>함께한 지 421일</h3></div><span class="anniversary-pill">D-7 여행 1주년</span></div></section>
         <section class="card home-records-card"><div class="between"><h3>최근 우리 기록</h3><button class="chip-btn" data-tab-go="album">더보기</button></div><div class="list">${memoryCards(state.memories.slice(0, 2), true)}</div><button class="primary-btn full" data-action="new-memory">기록 추가</button></section>
         <section class="diary-card"><div class="between"><h3>최근 공유 일기</h3><span class="reaction-icon" aria-label="고마워 반응">♥</span></div><p>${sharedDiary?.body || "아직 공유 일기가 없어요."}</p><button class="ghost-btn full" data-action="diary-scope-first">일기 쓰기</button></section>
-        <section class="question-card"><p class="eyebrow">오늘의 질문</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 질문 보기</button></div></section>
+        <section class="question-card"><p class="eyebrow">오늘의 대화</p><h3>요즘 나에게 가장 큰 힘이 되는 말은 뭐야?</h3><div class="home-question-actions"><button class="primary-btn" data-action="answer-question">답변 쓰기</button><button class="ghost-btn" data-action="another-question">다른 대화 보기</button></div></section>
       </div>
     `;
   }
@@ -12051,11 +12053,11 @@ function renderHome() {
           <button class="ghost-btn full" data-action="diary-scope-first">일기 추가</button>
         </section>
         <section class="question-card">
-          <p class="eyebrow">오늘의 질문</p>
+          <p class="eyebrow">오늘의 대화</p>
           <h3>요즘 나에게 가장 힘이 되는 말은 뭐야?</h3>
           <div class="home-question-actions">
             <button class="primary-btn" data-action="answer-question">마음 남기기</button>
-            <button class="ghost-btn" data-action="another-question">질문 더 보기</button>
+            <button class="ghost-btn" data-action="another-question">대화 더 보기</button>
           </div>
         </section>
       </div>
@@ -12113,11 +12115,11 @@ function renderHome() {
         <button class="primary-btn full" data-action="diary-scope-first">일기 추가</button>
       </section>
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘의 대화</p>
         <h3>요즘 나에게 가장 힘이 되는 말은 뭐야?</h3>
         <div class="home-question-actions">
           <button class="primary-btn" data-action="answer-question">답변 추가</button>
-          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+          <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
         </div>
       </section>
     </div>
@@ -13090,7 +13092,7 @@ function openQuestionModal() {
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘의 질문</p>
+          <p class="eyebrow">오늘의 대화</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
@@ -13315,12 +13317,20 @@ function removePhotoFromManageState({ createMode = false, memoryIndex = 0, photo
   if (createMode) {
     const draft = state.memoryCreateDraft || {};
     const photos = Array.isArray(draft.photos) ? [...draft.photos] : [];
+    const deletedPhoto = photos[photoIndex] || null;
+    const currentRepresentative = draft.representativePhoto || photos[Number(draft.representativePhotoIndex) || 0] || photos[0] || null;
     if (photos.length > photoIndex) photos.splice(photoIndex, 1);
     const currentCount = duariCurrentPhotoManageCount(draft.photoCount || photos.length);
+    const representativeWasDeleted = duariPhotoSource(currentRepresentative) === duariPhotoSource(deletedPhoto);
+    const nextRepresentative = representativeWasDeleted
+      ? (photos[0] || null)
+      : (photos.find((photo) => duariPhotoSource(photo) === duariPhotoSource(currentRepresentative)) || photos[0] || null);
     state.memoryCreateDraft = {
       ...draft,
       photos,
-      photoCount: Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length)))
+      photoCount: Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length))),
+      representativePhoto: nextRepresentative,
+      representativePhotoIndex: Math.max(0, photos.indexOf(nextRepresentative))
     };
     duariRefreshPhotoManageCard(state.memoryCreateDraft.photoCount, { createMode: true });
     return;
@@ -13334,10 +13344,11 @@ function removePhotoFromManageState({ createMode = false, memoryIndex = 0, photo
   const currentCount = duariPhotoCountForMemory(memoryIndex);
   memory.photos = photos;
   memory.photoCount = Math.max(0, Math.min(30, Math.max(currentCount - 1, photos.length)));
-  if (duariPhotoSource(memory.representativePhoto) === duariPhotoSource(deletedPhoto)) {
-    memory.representativePhoto = photos[0] || null;
-    memory.representativePhotoIndex = 0;
-  }
+  const nextRepresentative = duariPhotoSource(memory.representativePhoto) === duariPhotoSource(deletedPhoto)
+    ? (photos[0] || null)
+    : (photos.find((photo) => duariPhotoSource(photo) === duariPhotoSource(memory.representativePhoto)) || photos[Number(memory.representativePhotoIndex) || 0] || photos[0] || null);
+  memory.representativePhoto = nextRepresentative;
+  memory.representativePhotoIndex = Math.max(0, photos.indexOf(nextRepresentative));
   duariSavePersistentContent();
   duariRefreshPhotoManageCard(memory.photoCount, { memoryIndex });
   renderAlbum();
@@ -13617,7 +13628,7 @@ const signupTerms = [
     type: "필수",
     title: "개인정보처리방침",
     content: [
-      ["수집하는 정보", "계정 이메일, 닉네임, 관계 기록, 일기, 질문 답변, 알림 설정처럼 듀아리를 사용하는 데 필요한 정보를 다룹니다."],
+      ["수집하는 정보", "계정 이메일, 닉네임, 관계 기록, 일기, 대화 답변, 알림 설정처럼 듀아리를 사용하는 데 필요한 정보를 다룹니다."],
       ["개인 기록 보호", "개인 일기, 개인 초안, 나만 보기 기록은 상대에게 보이지 않도록 공유 기록과 분리해서 관리합니다."],
       ["탈퇴와 보존", "탈퇴하면 개인 데이터는 삭제되지만, 이미 함께 남긴 공유 기록과 공유 일기는 상대 화면에 남을 수 있습니다."],
     ],
@@ -14100,14 +14111,14 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
     <div class="modal-sheet notification-page another-question-page">
       <header class="notification-header">
         <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
-        <h3>다른 질문 보기</h3>
+        <h3>다른 대화 보기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         ${questions.map((question) => `
           <article class="question-history-card">
             <h3>${duariEscapeHtml(question)}</h3>
-            <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+            <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 대화에 답하기</button>
           </article>
         `).join("")}
       </div>
@@ -14156,14 +14167,14 @@ openAnotherQuestionModal = function openAnotherQuestionPage() {
       <div class="modal-sheet notification-page another-question-page">
         <header class="notification-header">
           <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
-          <h3>다른 질문 보기</h3>
+          <h3>다른 대화 보기</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
         <div class="section-stack">
           ${questions.map((question) => `
             <article class="question-history-card">
               <h3>${duariEscapeHtml(question)}</h3>
-              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 대화에 답하기</button>
             </article>
           `).join("")}
         </div>
@@ -14375,11 +14386,11 @@ renderHome = function renderHome() {
 
   const questionCard = `
     <section class="question-card">
-      <p class="eyebrow">오늘의 질문</p>
+      <p class="eyebrow">오늘의 대화</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText?.() || "요즘 나에게 가장 큰 힘이 되는 말은 뭐야?")}</h3>
       <div class="home-question-actions">
         <button class="primary-btn" data-action="answer-question">답변 남기기</button>
-        <button class="ghost-btn" data-action="another-question">다른 질문</button>
+        <button class="ghost-btn" data-action="another-question">다른 대화</button>
       </div>
     </section>
   `;
@@ -15126,7 +15137,7 @@ function duariEmptyDiaryMessage() {
 function duariJournalSubTabsHtml(activeView = "diary") {
   return `
     <div class="tabs diary-tabs">
-      <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">질문</button>
+      <button class="chip-btn ${activeView === "question" ? "active" : ""}" type="button" data-journal-view="question">대화</button>
       <button class="chip-btn ${activeView === "diary" ? "active" : ""}" type="button" data-journal-view="diary">마음</button>
     </div>
   `;
@@ -15138,16 +15149,16 @@ function duariQuestionPanelHtml() {
   const visibleCount = 5;
   return `
     <section class="question-card">
-      <p class="eyebrow">오늘의 질문</p>
+      <p class="eyebrow">오늘의 대화</p>
       <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
       <div class="home-question-actions question-action-row">
         <button class="primary-btn" data-action="answer-question">마음 남기기</button>
-        <button class="ghost-btn" data-action="another-question">다른 질문</button>
+        <button class="ghost-btn" data-action="another-question">다른 대화</button>
       </div>
     </section>
     <section class="card question-history-section">
       <div class="between">
-        <h3>나눈 질문</h3>
+        <h3>나눈 대화</h3>
         <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
       </div>
       <div class="chip-row question-history-filters">
@@ -15155,7 +15166,7 @@ function duariQuestionPanelHtml() {
       </div>
       <div class="question-history-search-grid">
         <div class="form-field">
-          <input id="questionHistoryInlineSearch" placeholder="질문 또는 답변 검색" />
+          <input id="questionHistoryInlineSearch" placeholder="대화 또는 답변 검색" />
         </div>
         <div class="form-field">
           <input id="questionHistoryInlineDate" type="month" />
@@ -15423,11 +15434,11 @@ function renderQuestions() {
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘의 대화</p>
         <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
         <div class="home-question-actions question-action-row">
           <button class="primary-btn" data-action="answer-question">답변 추가</button>
-          <button class="ghost-btn" data-action="another-question">다른 질문 보기</button>
+          <button class="ghost-btn" data-action="another-question">다른 대화 보기</button>
         </div>
       </section>
     </div>
@@ -15498,16 +15509,16 @@ function renderQuestions() {
   questions.innerHTML = `
     <div class="section-stack">
       <section class="question-card">
-        <p class="eyebrow">오늘의 질문</p>
+        <p class="eyebrow">오늘의 대화</p>
         <h3>${duariEscapeHtml(duariCurrentQuestionText())}</h3>
         <div class="home-question-actions question-action-row">
           <button class="primary-btn" data-action="answer-question">답변 남기기</button>
-          <button class="ghost-btn" data-action="another-question">다른 질문</button>
+          <button class="ghost-btn" data-action="another-question">다른 대화</button>
         </div>
       </section>
       <section class="card question-history-section">
         <div class="between">
-          <h3>나눈 질문</h3>
+          <h3>나눈 대화</h3>
           <span class="meta question-history-count" data-question-history-count>총 ${filtered.length}개</span>
         </div>
         <div class="chip-row question-history-filters">
@@ -15515,7 +15526,7 @@ function renderQuestions() {
         </div>
         <div class="question-history-search-grid">
           <div class="form-field">
-            <input id="questionHistoryInlineSearch" placeholder="질문이나 답변 검색" />
+            <input id="questionHistoryInlineSearch" placeholder="대화이나 답변 검색" />
           </div>
           <div class="form-field">
             <input id="questionHistoryInlineDate" type="month" />
@@ -15555,7 +15566,7 @@ function duariFilterQuestionHistory(history, filter = "전체", query = "", date
 
 function duariQuestionHistoryListHtml(history, filtered, limit = filtered.length) {
   const visible = filtered.slice(0, limit);
-  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 나눈 질문이 없어요. 오늘의 질문에 답변을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
+  return visible.map((item) => duariQuestionHistoryCard(item, history.indexOf(item))).join("") || `<p class="linked-record-empty">아직 나눈 대화이 없어요. 오늘의 대화에 답변을 남기면 이곳에 차곡차곡 쌓여요.</p>`;
 }
 
 function duariQuestionHistoryLoadMoreHtml(filtered, visibleCount = 5) {
@@ -15571,7 +15582,7 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
     <div class="modal-sheet notification-page question-history-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-history-back aria-label="뒤로가기">←</button>
-        <h3>전달한 질문</h3>
+        <h3>전달한 대화</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
@@ -15580,7 +15591,7 @@ function openQuestionHistoryPage(filter = "전체", query = "", date = "") {
         </div>
         <div class="question-history-search-grid">
           <div class="form-field">
-            <input id="questionHistorySearch" value="${duariEscapeHtml(query)}" placeholder="질문이나 답변 검색" />
+            <input id="questionHistorySearch" value="${duariEscapeHtml(query)}" placeholder="대화이나 답변 검색" />
           </div>
           <div class="form-field">
             <input id="questionHistoryDate" type="month" value="${String(date || "").slice(0, 7).replaceAll(".", "-")}" />
@@ -15634,12 +15645,12 @@ function openQuestionHistoryDetail(index = 0, backAction = null) {
     <div class="modal-sheet notification-page question-history-detail-page">
       <header class="notification-header">
         <button class="notification-nav-btn" data-question-detail-back aria-label="뒤로가기">←</button>
-        <h3>질문 보기</h3>
+        <h3>대화 보기</h3>
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">질문</p>
+          <p class="eyebrow">대화</p>
           <h3>${duariEscapeHtml(item.question)}</h3>
         </section>
         <section class="card">
@@ -15732,7 +15743,7 @@ function duariAlbumExploreFilters() {
   return {
     query: state.albumSearchQuery || "",
     type: state.albumTypeFilter || "전체",
-    date: state.albumDateFilter || ""
+    date: String(state.albumDateFilter || "").slice(0, 7)
   };
 }
 
@@ -15905,6 +15916,41 @@ function renderAlbumCalendar(memories = state.memories) {
   `;
 }
 
+function duariAlbumFilteredMemoriesFromState() {
+  const filters = duariAlbumExploreFilters();
+  return duariAlbumFilterMemories({
+    query: filters.query,
+    type: filters.type,
+    date: filters.date
+  });
+}
+
+function duariBindAlbumExploreLoadMore(root = qs("#album")) {
+  qs("[data-album-record-load-more]", root)?.addEventListener("click", () => {
+    duariIncreaseAlbumRecordVisibleCount();
+    duariRenderAlbumExploreResults(root);
+  });
+}
+
+function duariRenderAlbumExploreResults(root = qs("#album")) {
+  if (!root) return;
+  const filteredMemories = duariAlbumFilteredMemoriesFromState();
+  const recordList = renderAlbumRecordList(filteredMemories);
+  const resultCount = qs("[data-album-result-count]", root);
+  const resultList = qs("[data-album-record-list]", root);
+  const loadMoreSlot = qs("[data-album-load-more-slot]", root);
+
+  if (resultCount) resultCount.textContent = `총 ${filteredMemories.length}개`;
+  if (resultList) {
+    resultList.innerHTML = recordList.html;
+    bindActions(resultList);
+  }
+  if (loadMoreSlot) {
+    loadMoreSlot.innerHTML = recordList.hasMore ? `<button class="ghost-btn full album-record-load-more" type="button" data-album-record-load-more>더보기</button>` : "";
+    duariBindAlbumExploreLoadMore(root);
+  }
+}
+
 function duariNormalizeTwoButtonRows(root = document) {
   qsa(".section-stack, .card, .diary-editor-action-stack, .ai-confirm-sheet", root).forEach((parent) => {
     if (parent.closest(".tabs, .chip-row, .home-question-actions, .inline-action-pair, .ai-action-grid, .record-picker-actions")) return;
@@ -15941,11 +15987,7 @@ function renderAlbum() {
   if (!["calendar", "explore"].includes(state.albumView)) state.albumView = "calendar";
   const view = state.albumView;
   const filters = duariAlbumExploreFilters();
-  const filteredMemories = duariAlbumFilterMemories({
-    query: filters.query,
-    type: filters.type,
-    date: filters.date
-  });
+  const filteredMemories = duariAlbumFilteredMemoriesFromState();
   const recordList = renderAlbumRecordList(filteredMemories);
   const memoryTypes = ["전체", "데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
 
@@ -15955,26 +15997,38 @@ function renderAlbum() {
         <button class="chip-btn ${view === "calendar" ? "active" : ""}" type="button" data-album-view="calendar" role="tab" aria-selected="${view === "calendar"}">캘린더</button>
         <button class="chip-btn ${view === "explore" ? "active" : ""}" type="button" data-album-view="explore" role="tab" aria-selected="${view === "explore"}">모아보기</button>
       </div>
-      ${view === "calendar" ? renderAlbumCalendar() : `
-        <div class="form-field">
-          <input id="albumSearch" value="${duariEscapeHtml(filters.query)}" placeholder="추억 검색" data-album-search />
-        </div>
-        <div class="form-field">
-          <select data-album-type-filter aria-label="유형 선택">
-            ${memoryTypes.map((type) => `<option value="${type}" ${filters.type === type ? "selected" : ""}>${type}</option>`).join("")}
-          </select>
-        </div>
-        <div class="form-field">
-          <input type="date" value="${duariEscapeHtml(filters.date)}" data-album-date-filter aria-label="날짜 선택" />
-        </div>
+      ${view === "calendar" ? `
         <div class="album-record-toolbar">
           <div class="between">
-            <span class="meta">총 ${filteredMemories.length}개</span>
+            <span class="meta">총 ${state.memories.length}개</span>
             <button class="primary-btn" type="button" data-action="new-memory">추억 남기기</button>
           </div>
         </div>
-        <div class="album-record-list list">${recordList.html}</div>
-        ${recordList.hasMore ? `<button class="ghost-btn full album-record-load-more" type="button" data-album-record-load-more>더보기</button>` : ""}
+        ${renderAlbumCalendar()}
+      ` : `
+        <div class="form-field">
+          <input id="albumSearch" value="${duariEscapeHtml(filters.query)}" placeholder="추억 검색" data-album-search />
+        </div>
+        <div class="album-filter-grid">
+          <div class="form-field">
+            <select data-album-type-filter aria-label="유형 선택">
+              ${memoryTypes.map((type) => `<option value="${type}" ${filters.type === type ? "selected" : ""}>${type}</option>`).join("")}
+            </select>
+          </div>
+          <div class="form-field">
+            <input type="month" value="${duariEscapeHtml(filters.date)}" data-album-date-filter aria-label="월 선택" />
+          </div>
+        </div>
+        <div class="album-record-toolbar">
+          <div class="between">
+            <span class="meta" data-album-result-count>총 ${filteredMemories.length}개</span>
+            <button class="primary-btn" type="button" data-action="new-memory">추억 남기기</button>
+          </div>
+        </div>
+        <div class="album-record-list list" data-album-record-list>${recordList.html}</div>
+        <div data-album-load-more-slot>
+          ${recordList.hasMore ? `<button class="ghost-btn full album-record-load-more" type="button" data-album-record-load-more>더보기</button>` : ""}
+        </div>
       `}
     </div>
   `;
@@ -15985,31 +16039,38 @@ function renderAlbum() {
       renderAlbum();
     });
   });
-  qs("[data-album-search]", album)?.addEventListener("input", (event) => {
+  const albumSearchInput = qs("[data-album-search]", album);
+  albumSearchInput?.addEventListener("compositionstart", () => {
+    state.albumSearchComposing = true;
+  });
+  albumSearchInput?.addEventListener("compositionend", (event) => {
+    state.albumSearchComposing = false;
     state.albumSearchQuery = event.target.value;
     state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
-    renderAlbum();
-    qs("[data-album-search]", album)?.focus();
+    duariRenderAlbumExploreResults(album);
+  });
+  albumSearchInput?.addEventListener("input", (event) => {
+    state.albumSearchQuery = event.target.value;
+    if (event.isComposing || state.albumSearchComposing) return;
+    state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+    duariRenderAlbumExploreResults(album);
   });
   qs("[data-album-type-filter]", album)?.addEventListener("change", (event) => {
     state.albumTypeFilter = event.target.value || "전체";
     state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
-    renderAlbum();
+    duariRenderAlbumExploreResults(album);
   });
   qs("[data-album-date-filter]", album)?.addEventListener("input", (event) => {
     state.albumDateFilter = event.target.value;
     state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
-    renderAlbum();
+    duariRenderAlbumExploreResults(album);
   });
   qs("[data-album-date-filter]", album)?.addEventListener("change", (event) => {
     state.albumDateFilter = event.target.value;
     state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
-    renderAlbum();
+    duariRenderAlbumExploreResults(album);
   });
-  qs("[data-album-record-load-more]", album)?.addEventListener("click", () => {
-    duariIncreaseAlbumRecordVisibleCount();
-    renderAlbum();
-  });
+  duariBindAlbumExploreLoadMore(album);
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
     duariCalendarShiftMonth(-1);
     renderAlbum();
@@ -16210,26 +16271,29 @@ function openQuestionModal() {
       </header>
       <div class="section-stack">
         <section class="card">
-          <p class="eyebrow">오늘의 질문</p>
+          <p class="eyebrow">오늘의 대화</p>
           <h3>${duariEscapeHtml(duariQuestionAnswerDraft.question)}</h3>
         </section>
         <div class="form-field">
-          <label>답변</label>
-          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 답변을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
+          <textarea id="questionAnswerBody" class="diary-body-large" placeholder="상대에게 전하고 싶은 마음을 적어보세요.">${duariEscapeHtml(duariQuestionAnswerDraft.body)}</textarea>
         </div>
-        <p class="meta question-delivery-note">작성한 답변은 상대에게 전달됩니다.</p>
-        <div class="diary-editor-action-stack">
+        <div class="question-ai-action">
           <button class="ghost-btn full" type="button" data-question-ai>AI로 다듬기</button>
-          <button class="primary-btn full" type="button" data-question-send-original>상대에게 보내기</button>
+        </div>
+        <div class="inline-action-pair question-answer-actions">
+          <button class="ghost-btn" type="button" data-question-cancel>취소</button>
+          <button class="primary-btn" type="button" data-question-send-original>상대에게 보내기</button>
         </div>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-question-back]")?.addEventListener("click", () => {
+  const closeQuestionAnswerPage = () => {
     closeModal();
     setTab(activeTab);
-  });
+  };
+  qs("[data-question-back]")?.addEventListener("click", closeQuestionAnswerPage);
+  qs("[data-question-cancel]")?.addEventListener("click", closeQuestionAnswerPage);
   qs("#questionAnswerBody")?.addEventListener("input", (event) => {
     duariQuestionAnswerDraft.body = event.target.value;
   });
@@ -16792,14 +16856,14 @@ ${photoSection}
       <div class="modal-sheet notification-page another-question-page">
         <header class="notification-header">
           <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
-          <h3>다른 질문 보기</h3>
+          <h3>다른 대화 보기</h3>
           <span class="notification-header-spacer" aria-hidden="true"></span>
         </header>
         <div class="section-stack">
           ${questions.map((question) => `
             <article class="question-history-card">
               <h3>${duariEscapeHtml(question)}</h3>
-              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 질문에 답하기</button>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(question)}">이 대화에 답하기</button>
             </article>
           `).join("")}
         </div>
@@ -16892,13 +16956,16 @@ ${photoSection}
     "사진으로 보는 순간": "사진 보기",
     "기록 선택": "기록 선택",
     "마음 남기기": "마음 남기기",
-    "다른 질문 보기": "다른 질문",
-    "질문 상세": "질문 보기",
+    "다른 대화 보기": "다른 대화",
+    "다른 대화 보기": "다른 대화",
+    "대화 상세": "대화 보기",
+    "대화 보기": "대화 보기",
     "최근 공유 일기": "최근 마음",
     "최근 일기": "최근 마음",
     "일기 추가 제안": "마음 남기기",
-    "함께 나눈 질문": "나눈 질문",
-    "전달한 질문": "나눈 질문"
+    "함께 나눈 대화": "나눈 대화",
+    "전달한 대화": "나눈 대화",
+    "나눈 대화": "나눈 대화"
   };
   const sectionCopy = {
     "사진 관리": "사진",
@@ -16923,9 +16990,11 @@ ${photoSection}
     "우리 기록 남기기": "기록 남기기",
     "새 기록 추가": "기록 남기기",
     "마음 남기기": "마음 남기기",
-    "질문 더 보기": "다른 질문",
+    "대화 더 보기": "다른 대화",
+    "다른 대화": "다른 대화",
     "답변 남기기": "답변 남기기",
-    "이 질문에 답하기": "답변 남기기",
+    "이 대화에 답하기": "답변 남기기",
+    "이 대화에 답하기": "답변 남기기",
     "답변 추가": "답변 남기기",
     "일기 연결 추가": "마음 남기기",
     "연결된 일기 추가": "마음 남기기",
@@ -16972,7 +17041,7 @@ ${photoSection}
   function replaceInlineText(root) {
     qsa("p, span, strong, li", root).forEach((node) => {
       const text = node.textContent?.trim();
-      if (text === "오늘 나눌 질문") node.textContent = "오늘의 질문";
+      if (text === "오늘 나눌 대화") node.textContent = "오늘의 대화";
       if (text === "남긴 마음은 상대방에게 전달됩니다.") node.textContent = "작성한 마음은 상대에게 전달됩니다.";
       if (text === "작성한 답변은 상대에게 전달됩니다.") node.textContent = "작성한 마음은 상대에게 전달됩니다.";
       if (text === "연결 전에는 공유 일기를 사용할 수 없어요.") node.textContent = "연결 전에는 함께 보는 마음을 사용할 수 없어요.";
@@ -17348,14 +17417,14 @@ ${photoSection}
       <div class="modal-sheet notification-page another-question-page">
         <header class="notification-header">
           <button class="notification-nav-btn" type="button" data-another-question-back aria-label="뒤로가기">←</button>
-          <h3>다른 질문 보기</h3>
+          <h3>다른 대화 보기</h3>
           <span class="notification-header-spacer"></span>
         </header>
         <div class="section-stack another-question-list">
           ${questions.map((item) => `
             <article class="another-question-card">
               <h3>${duariEscapeHtml(item.text)}</h3>
-              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(item.text)}">이 질문에 답하기</button>
+              <button class="ghost-btn full" type="button" data-question-option="${duariEscapeHtml(item.text)}">이 대화에 답하기</button>
             </article>
           `).join("")}
         </div>
@@ -17642,6 +17711,10 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
 
   function photoManageGridHtml(memoryIndex = 0, createMode = false) {
     const photos = photoListFor(memoryIndex, createMode).filter((photo) => !!photoSrc(photo));
+    const rawRepresentativeIndex = createMode
+      ? Number(state.memoryCreateDraft?.representativePhotoIndex)
+      : Number(state.memories?.[memoryIndex]?.representativePhotoIndex);
+    const representativeIndex = Math.min(Math.max(Number.isFinite(rawRepresentativeIndex) ? rawRepresentativeIndex : 0, 0), Math.max(photos.length - 1, 0));
     if (!photos.length) {
       return `
         <section class="card memory-heart-photo-manage" data-photo-manage-card>
@@ -17656,7 +17729,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         <div class="between"><h3>사진</h3><span class="meta" data-photo-manage-count>${photos.length}장</span></div>
         <div class="photo-order-grid compact" data-photo-manage-grid>
           ${photos.map((photo, index) => `
-            <div class="photo-order-card ${index === 0 ? "is-representative" : ""}">
+            <div class="photo-order-card ${index === representativeIndex ? "is-representative" : ""}">
               <img src="${signupAttr(photoSrc(photo))}" alt="" />
               <button class="photo-delete-mini" type="button" data-photo-manage-delete="${index}" aria-label="사진 삭제">×</button>
             </div>
@@ -17774,10 +17847,19 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   };
   window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
 
+  function duariMemoryEditSnapshot(index, memory) {
+    if (!state.memoryEditSnapshots) state.memoryEditSnapshots = {};
+    if (!state.memoryEditSnapshots[index]) {
+      state.memoryEditSnapshots[index] = duariCloneMemory(memory);
+    }
+    return duariCloneMemory(state.memoryEditSnapshots[index]);
+  }
+
   openMemoryEditPageLatest = function openMemoryEditPageLatest(index, backAction = null) {
     const safeIndex = Number.isFinite(Number(index)) ? Number(index) : 0;
     state.activeMemoryIndex = safeIndex;
     const memory = state.memories?.[safeIndex] || {};
+    const editOriginalMemory = duariMemoryEditSnapshot(safeIndex, memory);
     const body = memoryBody(memory);
     const photos = photoListFor(safeIndex, false);
 
@@ -17816,7 +17898,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     });
     qs("[data-memory-edit-back]")?.addEventListener("click", () => {
       if (typeof openMemoryEditBackConfirm === "function") {
-        openMemoryEditBackConfirm(backAction || (() => openMemoryDetailLatestV3(safeIndex)), safeIndex, memory);
+        openMemoryEditBackConfirm(backAction || (() => openMemoryDetailLatestV3(safeIndex)), safeIndex, editOriginalMemory);
       } else {
         openMemoryDetailLatestV3(safeIndex);
       }
@@ -17848,6 +17930,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         scope: "우리 둘이 보기",
         author: target.author || "나"
       });
+      if (state.memoryEditSnapshots) delete state.memoryEditSnapshots[safeIndex];
       saveAndRefresh();
       showToast("추억을 저장했어요.");
       openMemoryDetailLatestV3(safeIndex, backAction);
@@ -17877,7 +17960,11 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
           <div class="form-field"><label for="memoryType">유형</label><select id="memoryType">${typeOptions(draft.type || "일상")}</select></div>
           <div class="form-field memory-edit-feelings"><label>감정</label>${feelingChipButtons((draft.feelings || []).slice(0, 2))}</div>
           <div class="form-field"><label for="memoryHeartBody">마음 본문</label><textarea id="memoryHeartBody" class="diary-body-large" required>${escapeText(draft.body || "")}</textarea></div>
-          <button class="primary-btn full" type="button" data-save-memory-create>저장</button>
+          <button class="ghost-btn full" type="button" data-memory-heart-ai>AI로 다듬기</button>
+          <div class="memory-create-actions inline-action-pair">
+            <button class="ghost-btn" type="button" data-memory-create-cancel>취소</button>
+            <button class="primary-btn" type="button" data-save-memory-create>저장</button>
+          </div>
         </div>
       </div>
     `);
@@ -17895,6 +17982,19 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         closeModal();
         setTab("album");
       }
+    });
+    qs("[data-memory-create-cancel]")?.addEventListener("click", () => {
+      state.memoryCreateDraft = null;
+      if (typeof backAction === "function") backAction();
+      else {
+        closeModal();
+        setTab("album");
+      }
+    });
+    qs("[data-memory-heart-ai]")?.addEventListener("click", () => {
+      const bodyValue = qs("#memoryHeartBody")?.value || "";
+      if (typeof openAiResultPage === "function") openAiResultPage({ original: bodyValue, result: typeof generateAiRefinement === "function" ? generateAiRefinement(bodyValue) : bodyValue });
+      else showToast("AI 다듬기는 현재 준비 중이에요.");
     });
     qs("[data-save-memory-create]")?.addEventListener("click", () => {
       const next = readMemoryEditorValues(qs(".modal-sheet"));
@@ -18141,7 +18241,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     todayConversation: "\uC624\uB298\uC758 \uB300\uD654",
     sharedConversation: "\uB098\uB208 \uB300\uD654",
     answer: "\uB2F5\uBCC0 \uB0A8\uAE30\uAE30",
-    otherQuestion: "\uB2E4\uB978 \uC9C8\uBB38",
+    otherQuestion: "\uB2E4\uB978 \uB300\uD654",
     noQuestions: "\uC544\uC9C1 \uB098\uB208 \uB300\uD654\uAC00 \uC5C6\uC5B4\uC694.",
     more: "\uB354\uBCF4\uAE30",
     createMemory: "\uCD94\uC5B5 \uB0A8\uAE30\uAE30",
@@ -18187,12 +18287,107 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     `;
   }
 
+  function conversationFilterState() {
+    state.conversationFilters = state.conversationFilters || { query: "", status: "전체", month: "" };
+    return state.conversationFilters;
+  }
+
+  function conversationHistoryMonths(history = []) {
+    return [...new Set(history.map((item) => String(item.date || "").slice(0, 7).replaceAll(".", "-")).filter(Boolean))]
+      .sort((a, b) => b.localeCompare(a));
+  }
+
+  function filterConversationHistory(history = [], filter = conversationFilterState()) {
+    const query = String(filter.query || "").trim().toLowerCase();
+    const status = String(filter.status || "전체");
+    const month = String(filter.month || "").slice(0, 7).replaceAll("-", ".");
+    return history.filter((item) => {
+      const matchesStatus = status === "전체" || item.status === status;
+      const matchesMonth = !month || String(item.date || "").startsWith(month);
+      const target = [item.question, item.original, item.sent, item.body, item.status, item.date]
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery = !query || target.includes(query);
+      return matchesStatus && matchesMonth && matchesQuery;
+    });
+  }
+
+  function conversationEmptyMessage(filter = conversationFilterState()) {
+    if (String(filter.status || "") === "읽음") return "아직 읽은 대화가 없어요.";
+    if (String(filter.status || "") === "전달됨") return "아직 전달된 대화가 없어요.";
+    return COPY.noQuestions;
+  }
+
+  function conversationListHtml(history = [], filtered = [], visibleCount = 5, filter = conversationFilterState()) {
+    const visible = filtered.slice(0, visibleCount);
+    return visible.length
+      ? visible.map((item) => questionHistoryCardFinal(item, history.indexOf(item))).join("")
+      : `<p class="linked-record-empty">${conversationEmptyMessage(filter)}</p>`;
+  }
+
+  function conversationLoadMoreHtml(filtered = [], visibleCount = 5) {
+    return filtered.length > visibleCount
+      ? `<button class="ghost-btn full diary-load-more" type="button" data-conversation-load-more>${COPY.more}</button>`
+      : "";
+  }
+
+  function bindConversationFilters(root, history) {
+    const searchInput = qs("[data-conversation-search]", root);
+    const statusSelect = qs("[data-conversation-status]", root);
+    const monthSelect = qs("[data-conversation-month]", root);
+    const filter = conversationFilterState();
+    const renderConversationList = () => {
+      const nextFilter = conversationFilterState();
+      const filtered = filterConversationHistory(history, nextFilter);
+      const visibleCount = Number(state.questionHistoryVisibleCount || 5);
+      const list = qs("[data-conversation-list]", root);
+      const count = qs("[data-conversation-count]", root);
+      const loadMoreSlot = qs("[data-conversation-load-more-slot]", root);
+      if (list) list.innerHTML = conversationListHtml(history, filtered, visibleCount, nextFilter);
+      if (count) count.textContent = `총 ${filtered.length}개`;
+      if (loadMoreSlot) loadMoreSlot.innerHTML = conversationLoadMoreHtml(filtered, visibleCount);
+      qs("[data-conversation-load-more]", root)?.addEventListener("click", () => {
+        state.questionHistoryVisibleCount = visibleCount + 5;
+        renderConversationList();
+      });
+      if (typeof bindQuestionHistoryCards === "function") bindQuestionHistoryCards(root, () => setTab("diary"));
+    };
+    const resetAndRender = () => {
+      state.questionHistoryVisibleCount = 5;
+      renderConversationList();
+    };
+    searchInput?.addEventListener("input", (event) => {
+      filter.query = event.target.value || "";
+      if (event.isComposing) return;
+      resetAndRender();
+    });
+    searchInput?.addEventListener("compositionend", (event) => {
+      filter.query = event.target.value || "";
+      resetAndRender();
+    });
+    statusSelect?.addEventListener("change", (event) => {
+      filter.status = event.target.value || "전체";
+      resetAndRender();
+    });
+    monthSelect?.addEventListener("change", (event) => {
+      filter.month = event.target.value || "";
+      resetAndRender();
+    });
+    qs("[data-conversation-load-more]", root)?.addEventListener("click", () => {
+      state.questionHistoryVisibleCount = Number(state.questionHistoryVisibleCount || 5) + 5;
+      renderConversationList();
+    });
+    if (typeof bindQuestionHistoryCards === "function") bindQuestionHistoryCards(root, () => setTab("diary"));
+  }
+
   renderDiary = function renderDiaryConversationOnly() {
     const diary = qs("#diary");
     if (!diary) return;
     const history = questionHistoryFinal();
+    const filter = conversationFilterState();
+    const filtered = filterConversationHistory(history, filter);
     const visibleCount = Number(state.questionHistoryVisibleCount || 5);
-    const visible = history.slice(0, visibleCount);
+    const months = conversationHistoryMonths(history);
     diary.innerHTML = `
       <div class="section-stack conversation-tab-page">
         <section class="question-card">
@@ -18206,20 +18401,31 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         <section class="question-history-section">
           <div class="between">
             <h3>${COPY.sharedConversation}</h3>
-            <span class="meta">\uCD1D ${history.length}\uAC1C</span>
+            <span class="meta" data-conversation-count>\uCD1D ${filtered.length}\uAC1C</span>
           </div>
-          <div class="question-history-list">
-            ${visible.length ? visible.map(questionHistoryCardFinal).join("") : `<p class="linked-record-empty">${COPY.noQuestions}</p>`}
+          <div class="question-history-search-grid conversation-filter-grid">
+            <div class="form-field conversation-search-field">
+              <input value="${escapeText(filter.query || "")}" placeholder="\uB300\uD654 \uAC80\uC0C9" data-conversation-search />
+            </div>
+            <div class="form-field">
+              <select data-conversation-status aria-label="\uB300\uD654 \uC0C1\uD0DC">
+                ${["전체", "전달됨", "읽음"].map((item) => `<option value="${item}" ${filter.status === item ? "selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </div>
+            <div class="form-field">
+              <input type="month" value="${escapeText(String(filter.month || "").slice(0, 7).replaceAll(".", "-"))}" data-conversation-month aria-label="\uB300\uD654 \uC6D4" />
+            </div>
           </div>
-          ${history.length > visible.length ? `<button class="ghost-btn full diary-load-more" type="button" data-conversation-load-more>${COPY.more}</button>` : ""}
+          <div class="question-history-list" data-conversation-list>
+            ${conversationListHtml(history, filtered, visibleCount, filter)}
+          </div>
+          <div data-conversation-load-more-slot>
+            ${conversationLoadMoreHtml(filtered, visibleCount)}
+          </div>
         </section>
       </div>
     `;
-    qs("[data-conversation-load-more]", diary)?.addEventListener("click", () => {
-      state.questionHistoryVisibleCount = visibleCount + 5;
-      renderDiary();
-    });
-    if (typeof bindQuestionHistoryCards === "function") bindQuestionHistoryCards(diary, () => setTab("diary"));
+    bindConversationFilters(diary, history);
     bindActions(diary);
   };
   window.renderDiary = renderDiary;
