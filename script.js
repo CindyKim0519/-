@@ -206,7 +206,7 @@ function duariInstallContentPersistenceHooks() {
   duariWrapPersistentArray(state.questionHistory);
 }
 
-const titles = { home: "오늘의 우리", album: "우리 기록", diary: "마음", questions: "대화", my: "설정" };
+const titles = { home: "오늘의 우리", album: "우리 기록", diary: "우리 대화", questions: "우리 대화", my: "설정" };
 
 function qs(selector, root = document) {
   return root.querySelector(selector);
@@ -1662,7 +1662,7 @@ function startSetup() {
         <div class="form-field"><label>닉네임</label><input value="하린" /></div>
         <div class="form-field"><label>앱 보안 PIN 6자리</label><input maxlength="6" value="123456" aria-label="앱 보안 PIN" /></div>
         <section class="card"><h3>프로필 사진</h3><p>선택 사항입니다. 사진 권한은 온보딩에서 요청합니다.</p><button class="ghost-btn full" data-action="photo-permission">사진 권한 요청</button></section>
-        <div class="tabs"><button class="chip-btn active">상대와 연결하기</button><button class="chip-btn">혼자 먼저 시작하기</button></div>
+        <div class="tabs"><button class="chip-btn active">상대와 연결하기</button></div>
         <button class="primary-btn full" data-complete-setup>듀아리 시작</button>
       </div>
     </div>
@@ -1958,9 +1958,7 @@ function renderMy() {
         </div>
       </section>
       <div class="list">${[
-        ["우리 관계", "관계 전환과 새로운 연결", "relation-management"],
         ["우리 기념일", "자동 기념일과 직접 추가한 날", "couple-settings"],
-        ["보안 PIN", "6자리 PIN과 관계 전환 확인", "security"],
         ["문의하기", "문의 접수와 답변 내역", "support-contact"],
         ["이용약관", "서비스 이용 기준과 가입 동의 내용", "terms"],
         ["개인정보처리방침", "개인 데이터 처리와 탈퇴 시 보존 기준", "privacy-policy"],
@@ -2194,7 +2192,6 @@ function startSetup() {
         </section>
         <div class="tabs">
           <button class="chip-btn active" data-action="connect">상대와 연결하기</button>
-          <button class="chip-btn" data-start-alone>혼자 먼저 시작하기</button>
         </div>
         <button class="primary-btn full" data-complete-setup>듀아리 시작</button>
       </div>
@@ -2206,7 +2203,6 @@ function startSetup() {
   qs("[data-album-open]").addEventListener("click", () => {
     showToast("앨범에서 프로필 사진을 선택할 수 있어요.");
   });
-  qs("[data-start-alone]").addEventListener("click", openStartAlonePage);
   qs("[data-complete-setup]").addEventListener("click", () => {
     closeModal();
     qs("#onboarding").classList.add("is-hidden");
@@ -2366,47 +2362,7 @@ function renderQuestions() {
 }
 
 function openStartAlonePage() {
-  openModal(`
-    <div class="modal-sheet notification-page start-alone-page">
-      <header class="notification-header">
-        <button class="notification-nav-btn" data-back-setup aria-label="뒤로가기">←</button>
-        <h3>혼자 먼저 시작하기</h3>
-        <button class="notification-nav-btn" data-close aria-label="닫기">×</button>
-      </header>
-      <div class="section-stack">
-        <section class="hero-card">
-          <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
-          <p>나만 보기 기록과 개인 일기, 비공개 대화 답변, 전할 말 초안을 먼저 쌓아둘 수 있어요.</p>
-        </section>
-        <div class="solo-feature-grid">
-          ${["나만 보기 기록", "개인 일기", "대화 답변 비공개 저장", "전할 말 초안 작성"].map((item) => `<section class="card"><strong>${item}</strong></section>`).join("")}
-        </div>
-        <section class="card">
-          <h3>연결 전 제한</h3>
-          <ul class="solo-limit-list">
-            <li>상대에게 보내기</li>
-            <li>공유 일기</li>
-            <li>상대 반응</li>
-            <li>커플 공동 기록</li>
-          </ul>
-        </section>
-        <button class="primary-btn full" data-confirm-alone>혼자 시작하기</button>
-        <button class="ghost-btn full" data-action="connect">상대와 연결하기</button>
-      </div>
-    </div>
-  `);
-  qs("#modal").classList.add("page-modal");
-  qs("[data-back-setup]").addEventListener("click", startSetup);
-  qs("[data-confirm-alone]").addEventListener("click", () => {
-    state.connected = false;
-    state.aloneCtaHidden = false;
-    closeModal();
-    qs("#onboarding").classList.add("is-hidden");
-    qs("#app").classList.remove("is-hidden");
-    setTab("home");
-    showToast("혼자 먼저 시작했어요. 상대 초대는 언제든 할 수 있어요.");
-  });
-  bindActions(qs(".modal-sheet"));
+  openStartMethodPage();
 }
 
 function renderHome() {
@@ -3343,49 +3299,54 @@ function openArchiveModal() {
 }
 
 function openWithdrawalModal() {
-  openPinGate("회원 탈퇴", () => {
-    openModal(`
-      <div class="modal-sheet notification-page withdrawal-page">
-        <header class="notification-header">
-          <button class="notification-nav-btn" data-withdraw-back aria-label="뒤로가기">←</button>
-          <h3>회원 탈퇴</h3>
-          <span class="notification-header-spacer" aria-hidden="true"></span>
-        </header>
-        <div class="section-stack">
-          <section class="card">
-            <h3>탈퇴 사유</h3>
-            <div class="chip-row withdrawal-reasons" data-withdraw-reasons>
-              ${["사용 빈도가 낮아요", "기록을 정리하고 싶어요", "사용이 어려워요", "다른 서비스를 사용할게요", "기타"].map((reason) => `<button class="chip-btn" type="button" data-withdraw-reason="${reason}">${reason}</button>`).join("")}
-            </div>
-            <div class="form-field withdrawal-other-field" data-withdraw-other hidden>
-              <label>기타 사유</label>
-              <textarea placeholder="탈퇴 사유를 적어주세요."></textarea>
-            </div>
-          </section>
-          <section class="card">
-            <h3>탈퇴 후 데이터</h3>
-            <p>공유 기록이나 일기, 전달한 대화은 상대방 화면에 보존되고 나머지는 영구적으로 삭제됩니다.</p>
-          </section>
-          <button class="primary-btn full" type="button" data-withdraw-final>최종 탈퇴</button>
-        </div>
+  openModal(`
+    <div class="modal-sheet notification-page withdrawal-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-withdraw-back aria-label="\uB4A4\uB85C\uAC00\uAE30">\u2190</button>
+        <h3>\uD68C\uC6D0 \uD0C8\uD1F4</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card">
+          <h3>\uD0C8\uD1F4 \uC0AC\uC720</h3>
+          <div class="chip-row withdrawal-reasons" data-withdraw-reasons>
+            <button class="chip-btn" type="button" data-withdraw-reason="\uC0AC\uC6A9 \uBE48\uB3C4\uAC00 \uB0AE\uC544\uC694">\uC0AC\uC6A9 \uBE48\uB3C4\uAC00 \uB0AE\uC544\uC694</button>
+            <button class="chip-btn" type="button" data-withdraw-reason="\uAE30\uB85D\uC744 \uC815\uB9AC\uD558\uACE0 \uC2F6\uC5B4\uC694">\uAE30\uB85D\uC744 \uC815\uB9AC\uD558\uACE0 \uC2F6\uC5B4\uC694</button>
+            <button class="chip-btn" type="button" data-withdraw-reason="\uC0AC\uC6A9\uC774 \uC5B4\uB824\uC6CC\uC694">\uC0AC\uC6A9\uC774 \uC5B4\uB824\uC6CC\uC694</button>
+            <button class="chip-btn" type="button" data-withdraw-reason="\uB2E4\uB978 \uC11C\uBE44\uC2A4\uB97C \uC0AC\uC6A9\uD560\uAC8C\uC694">\uB2E4\uB978 \uC11C\uBE44\uC2A4\uB97C \uC0AC\uC6A9\uD560\uAC8C\uC694</button>
+            <button class="chip-btn" type="button" data-withdraw-reason="\uAE30\uD0C0">\uAE30\uD0C0</button>
+          </div>
+          <div class="form-field withdrawal-other-field" data-withdraw-other hidden>
+            <label>\uAE30\uD0C0 \uC0AC\uC720</label>
+            <textarea placeholder="\uD0C8\uD1F4 \uC0AC\uC720\uB97C \uC801\uC5B4\uC8FC\uC138\uC694."></textarea>
+          </div>
+        </section>
+        <section class="card">
+          <h3>\uD0C8\uD1F4 \uD6C4 \uB370\uC774\uD130</h3>
+          <p>\uD0C8\uD1F4\uD558\uBA74 \uB0B4 \uACC4\uC815 \uC815\uBCF4\uB294 \uC0AD\uC81C\uB418\uACE0, \uD568\uAED8 \uB0A8\uAE34 \uCD94\uC5B5\uACFC \uB300\uD654\uB294 \uC0C1\uB300\uBC29\uC5D0\uAC8C \uB0A8\uC744 \uC218 \uC788\uC5B4\uC694.</p>
+        </section>
+        <button class="primary-btn full" type="button" data-withdraw-final>\uCD5C\uC885 \uD0C8\uD1F4</button>
       </div>
-    `);
-    qs("#modal").classList.add("page-modal");
-    const sheet = qs(".withdrawal-page");
-    qs("[data-withdraw-back]", sheet)?.addEventListener("click", openAccountModal);
-    qsa("[data-withdraw-reason]", sheet).forEach((button) => {
-      button.addEventListener("click", () => {
-        qsa("[data-withdraw-reason]", sheet).forEach((item) => item.classList.remove("active"));
-        button.classList.add("active");
-        const otherField = qs("[data-withdraw-other]", sheet);
-        if (otherField) otherField.hidden = button.dataset.withdrawReason !== "기타";
-      });
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const sheet = qs(".withdrawal-page");
+  qs("[data-withdraw-back]", sheet)?.addEventListener("click", () => {
+    closeModal();
+    setTab("my");
+  });
+  qsa("[data-withdraw-reason]", sheet).forEach((button) => {
+    button.addEventListener("click", () => {
+      qsa("[data-withdraw-reason]", sheet).forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      const otherField = qs("[data-withdraw-other]", sheet);
+      if (otherField) otherField.hidden = button.dataset.withdrawReason !== "\uAE30\uD0C0";
     });
-    qs("[data-withdraw-final]", sheet)?.addEventListener("click", () => {
-      deleteCurrentLoginAccount();
-      closeModal();
-      returnToEntryScreen("회원 탈퇴가 완료됐어요.");
-    });
+  });
+  qs("[data-withdraw-final]", sheet)?.addEventListener("click", () => {
+    deleteCurrentLoginAccount();
+    closeModal();
+    returnToEntryScreen("\uD68C\uC6D0 \uD0C8\uD1F4\uAC00 \uC644\uB8CC\uB410\uC5B4\uC694.");
   });
 }
 
@@ -3855,10 +3816,85 @@ function openRelationDeleteConfirm(option) {
   });
 }
 
+function duariGenerateInviteCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "DUR-";
+  for (let index = 0; index < 5; index += 1) {
+    code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return code;
+}
+
+function duariTodayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function duariAddDaysIso(dateIso, days) {
+  const date = new Date(`${dateIso || duariTodayIso()}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function duariFormatDotDate(dateIso = "") {
+  return String(dateIso).replaceAll("-", ".");
+}
+
+function duariActiveInvite() {
+  const today = duariTodayIso();
+  const invite = state.activeInviteCode;
+  if (invite?.code && invite?.expiresAt && invite.expiresAt >= today && invite.status !== "used") return invite;
+  const nextInvite = {
+    code: duariGenerateInviteCode(),
+    createdAt: today,
+    expiresAt: duariAddDaysIso(today, 7),
+    status: "active"
+  };
+  state.activeInviteCode = nextInvite;
+  return nextInvite;
+}
+
+function duariRenewInviteCode() {
+  const today = duariTodayIso();
+  state.activeInviteCode = {
+    code: duariGenerateInviteCode(),
+    createdAt: today,
+    expiresAt: duariAddDaysIso(today, 7),
+    status: "active"
+  };
+  return state.activeInviteCode;
+}
+
+function duariInviteLink(code = duariActiveInvite().code) {
+  return `https://duari.app/invite?code=${encodeURIComponent(code)}`;
+}
+
+async function duariShareInviteLink() {
+  const invite = duariActiveInvite();
+  const link = duariInviteLink(invite.code);
+  const title = "듀아리 초대";
+  const text = `듀아리에서 우리 공간을 함께 시작해요. 초대 코드: ${invite.code}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title, text, url: link });
+      showToast("초대 링크를 공유했어요.");
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link);
+      showToast("초대 링크를 복사했어요.");
+      return;
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+  }
+  showToast(link);
+}
+
 function relationAddDraftDefaults(draft = {}) {
+  const invite = duariActiveInvite();
   return {
     method: draft.method || "link",
-    code: draft.code || "DUARI-0520",
+    code: draft.code || invite.code,
     partnerName: draft.partnerName || "봄이",
     myName: draft.myName || state.accountNickname || "하린",
     startDate: draft.startDate || "2026-05-02",
@@ -3901,25 +3937,28 @@ function openRelationAddPage(step = 1, draft = {}) {
   const stepBodies = {
     1: `
       <section class="card relation-add-card">
-        <h3>연결 방식을 선택해 주세요</h3>
-        <p>초대 링크를 보내거나, 상대에게 받은 초대 코드를 입력해서 새 관계를 추가할 수 있어요.</p>
-        <div class="relation-method-grid">
-          <button class="card inner-card relation-method-card ${data.method === "link" ? "active" : ""}" type="button" data-relation-method="link">
-            <strong>초대 링크 공유</strong>
-            <span class="meta">7일 동안 유효한 링크를 만들어요.</span>
-          </button>
-          <button class="card inner-card relation-method-card ${data.method === "code" ? "active" : ""}" type="button" data-relation-method="code">
-            <strong>초대 코드 입력</strong>
-            <span class="meta">상대가 보낸 코드를 입력해요.</span>
-          </button>
+        <h3>내 초대 코드</h3>
+        <p>상대에게 이 코드를 보내면 둘만의 듀아리 공간을 연결할 수 있어요.</p>
+        <div class="invite-code-display" aria-label="내 초대 코드">${data.code}</div>
+        <div class="invite-code-meta">
+          <span>7일 후 만료</span>
+          <span>${duariFormatDotDate(duariActiveInvite().expiresAt)}까지</span>
+        </div>
+        <div class="button-row two invite-code-actions">
+          <button class="ghost-btn" type="button" data-relation-link-copy>초대 링크 공유</button>
+          <button class="ghost-btn" type="button" data-relation-new-code>새 코드 만들기</button>
         </div>
       </section>
-      <div class="form-field">
-        <label>초대 코드</label>
-        <input data-relation-add-code value="${data.code}" placeholder="예: DUARI-0520" />
-      </div>
+      <section class="card relation-add-card">
+        <h3>초대 코드 입력</h3>
+        <p>상대가 보낸 코드를 받았다면 아래에 입력해 연결을 이어갈 수 있어요.</p>
+        <div class="form-field">
+          <label>받은 초대 코드</label>
+          <input data-relation-add-code value="${data.method === "code" ? data.code : ""}" placeholder="예: DUR-8K27Q" />
+        </div>
+      </section>
       <div class="button-row two">
-        <button class="ghost-btn" type="button" data-relation-link-copy>초대 링크 공유</button>
+        <button class="ghost-btn" type="button" data-relation-add-cancel>취소</button>
         <button class="primary-btn" type="button" data-relation-add-next>다음</button>
       </div>
     `,
@@ -3992,7 +4031,17 @@ function openRelationAddPage(step = 1, draft = {}) {
       button.classList.add("active");
     });
   });
-  qs("[data-relation-link-copy]", sheet)?.addEventListener("click", () => showToast("초대 링크를 만들었어요. 코드는 7일 뒤 만료됩니다."));
+  qs("[data-relation-link-copy]", sheet)?.addEventListener("click", duariShareInviteLink);
+  qs("[data-relation-new-code]", sheet)?.addEventListener("click", () => {
+    const nextInvite = duariRenewInviteCode();
+    openRelationAddPage(1, { ...data, method: "link", code: nextInvite.code });
+    showToast("새 초대 코드를 만들었어요. 이전 코드는 사용할 수 없어요.");
+  });
+  qs("[data-relation-add-cancel]", sheet)?.addEventListener("click", () => {
+    closeModal();
+    qs("#onboarding")?.classList.remove("is-hidden");
+    qs("#app")?.classList.add("is-hidden");
+  });
   qs("[data-relation-add-prev]", sheet)?.addEventListener("click", backTarget);
   qs("[data-relation-add-next]", sheet)?.addEventListener("click", () => openRelationAddPage(step + 1, collectRelationAddDraft(sheet, data)));
   qs("[data-relation-add-complete]", sheet)?.addEventListener("click", () => {
@@ -4007,6 +4056,7 @@ function openRelationAddPage(step = 1, draft = {}) {
       myName: nextData.myName,
     };
     state.connected = true;
+    if (state.activeInviteCode?.code === nextData.code) state.activeInviteCode.status = "used";
     markCurrentAccountSetupComplete();
     saveCurrentRelationToAccount();
     openRelationAddPage(4, nextData);
@@ -13721,7 +13771,7 @@ function openLoginModal(provider = "이메일") {
         ` : `
           <section class="card">
             <h3>소셜 계정으로 계속하기</h3>
-            <p>처음 로그인하는 계정이라면 6자리 PIN을 설정한 뒤, 혼자 먼저 쓸지 상대와 연결할지 선택하게 돼요.</p>
+            <p>처음 로그인하는 계정이라면 상대와 연결한 뒤 듀아리를 시작하게 돼요.</p>
           </section>
           <button class="primary-btn full" type="button" data-entry-login-complete>계속하기</button>
         `}
@@ -14128,35 +14178,7 @@ function completeEmailLogin() {
 }
 
 function openFirstSetupPage() {
-  openModal(`
-    <div class="modal-sheet notification-page entry-flow-page">
-      <header class="notification-header">
-        <button class="notification-nav-btn" data-close aria-label="뒤로가기">←</button>
-        <h3>첫 설정</h3>
-        <span class="notification-header-spacer" aria-hidden="true"></span>
-      </header>
-      <div class="section-stack">
-        <section class="card">
-          <h3>앱 보안 PIN</h3>
-          <p>둘만의 기록을 더 안전하게 지킬 수 있도록 6자리 PIN을 설정해요. 관계 전환이나 회원 탈퇴처럼 중요한 순간에 한 번 더 확인합니다.</p>
-        </section>
-        <div class="form-field">
-          <label>앱 보안 PIN 6자리</label>
-          <input data-entry-pin maxlength="6" value="123456" inputmode="numeric" />
-        </div>
-        <button class="primary-btn full" type="button" data-entry-setup-next>시작 방식 선택</button>
-      </div>
-    </div>
-  `);
-  qs("#modal").classList.add("page-modal");
-  qs("[data-entry-setup-next]")?.addEventListener("click", () => {
-    const pin = qs("[data-entry-pin]")?.value.trim();
-    if (!/^\d{6}$/.test(pin || "")) {
-      showToast("PIN은 숫자 6자리로 입력해 주세요.");
-      return;
-    }
-    openStartMethodPage();
-  });
+  openStartMethodPage();
 }
 
 function openStartMethodPage() {
@@ -14169,53 +14191,22 @@ function openStartMethodPage() {
       </header>
       <div class="section-stack">
         <section class="card">
-          <h3>어떻게 시작할까요?</h3>
-          <p>지금 바로 상대와 연결해 둘만의 공간을 만들 수도 있고, 먼저 혼자 마음과 기록을 차분히 쌓아둘 수도 있어요.</p>
+          <h3>상대와 연결하고 시작해요</h3>
+          <p>듀아리는 둘이 함께 남기는 추억과 대화를 중심으로 사용해요. 상대와 연결한 뒤 홈 화면으로 이동합니다.</p>
         </section>
         <button class="primary-btn full" type="button" data-entry-connect>상대와 연결하기</button>
-        <button class="ghost-btn full" type="button" data-entry-alone>혼자 먼저 시작하기</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qs("[data-entry-setup-back]")?.addEventListener("click", openFirstSetupPage);
+  qs("[data-entry-setup-back]")?.addEventListener("click", closeModal);
   qs("[data-entry-connect]")?.addEventListener("click", () => {
     openRelationAddPage(1, { fromOnboarding: true });
   });
-  qs("[data-entry-alone]")?.addEventListener("click", openStartAlonePage);
 }
 
 function openStartAlonePage() {
-  openModal(`
-    <div class="modal-sheet notification-page start-alone-page">
-      <header class="notification-header">
-        <button class="notification-nav-btn" data-start-method-back aria-label="뒤로가기">←</button>
-        <h3>혼자 먼저 시작하기</h3>
-        <span class="notification-header-spacer" aria-hidden="true"></span>
-      </header>
-      <div class="section-stack">
-        <section class="hero-card">
-          <h3>연결 전에도 듀아리를 사용할 수 있어요</h3>
-          <p>아직 연결하지 않아도 괜찮아요. 나만 보기 기록과 개인 일기로 먼저 시작하고, 준비되면 언제든 상대를 초대할 수 있어요.</p>
-        </section>
-        <button class="primary-btn full" type="button" data-entry-confirm-alone>혼자 시작하기</button>
-        <button class="ghost-btn full" type="button" data-entry-connect>상대와 연결하기</button>
-      </div>
-    </div>
-  `);
-  qs("#modal").classList.add("page-modal");
-  qs("[data-start-method-back]")?.addEventListener("click", openStartMethodPage);
-  qs("[data-entry-confirm-alone]")?.addEventListener("click", () => {
-    state.connected = false;
-    state.aloneCtaHidden = false;
-    markCurrentAccountSetupComplete();
-    closeModal();
-    qs("#onboarding").classList.add("is-hidden");
-    qs("#app").classList.remove("is-hidden");
-    setTab("home");
-    showToast("나만의 듀아리를 먼저 열었어요. 상대 초대는 언제든 할 수 있어요.");
-  });
-  qs("[data-entry-connect]")?.addEventListener("click", () => openRelationAddPage(1, { fromOnboarding: true }));
+  openStartMethodPage();
 }
 
 (() => {
@@ -17395,7 +17386,7 @@ ${photoSection}
     const tabIcons = {
       home: "home-outline",
       album: "albums-outline",
-      diary: "heart-outline",
+      diary: "chatbubble-ellipses-outline",
       questions: "chatbubble-ellipses-outline",
       my: "settings-outline"
     };
@@ -18447,7 +18438,8 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   window.__duariConversationTabAndMemoryDropdownFinalInstalled = true;
 
   const COPY = {
-    conversation: "\uB300\uD654",
+    conversation: "\uC6B0\uB9AC \uB300\uD654",
+    conversationNav: "\uB300\uD654",
     todayConversation: "\uC624\uB298\uC758 \uB300\uD654",
     sharedConversation: "\uB098\uB208 \uB300\uD654",
     answer: "\uB2F5\uBCC0 \uB0A8\uAE30\uAE30",
@@ -18766,7 +18758,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   const diaryNav = qs(".nav-item[data-tab='diary']");
   if (diaryNav) {
     const icon = qs("span", diaryNav)?.outerHTML || "<span>\u270E</span>";
-    diaryNav.innerHTML = `${icon}${COPY.conversation}`;
+    diaryNav.innerHTML = `${icon}${COPY.conversationNav}`;
   }
   if (state.tab === "diary" || qs("#diary")?.classList.contains("active")) {
     qs("#screenTitle").textContent = COPY.conversation;
@@ -18826,4 +18818,69 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
       return result;
     };
   });
+})();
+
+(function installConnectionOnlyStartGuard() {
+  if (window.__duariConnectionOnlyStartGuardInstalled) return;
+  window.__duariConnectionOnlyStartGuardInstalled = true;
+
+  const soloTexts = ["혼자 먼저 시작하기", "혼자 시작하기", "혼자 계속 쓰기", "나만 먼저 쓰기"];
+  const soloSelectors = [
+    "[data-start-alone]",
+    "[data-entry-alone]",
+    "[data-confirm-alone]",
+    "[data-entry-confirm-alone]",
+    "[data-action='continue-alone']"
+  ].join(",");
+
+  function removeSoloStartButtons(root = document) {
+    root.querySelectorAll?.(soloSelectors).forEach((button) => button.remove());
+    root.querySelectorAll?.("button").forEach((button) => {
+      const text = (button.textContent || "").trim();
+      if (soloTexts.some((soloText) => text.includes(soloText))) button.remove();
+    });
+  }
+
+  function connectionOnlyOpenStartAlonePage() {
+    if (typeof openStartMethodPage === "function") openStartMethodPage();
+  }
+
+  window.openStartAlonePage = connectionOnlyOpenStartAlonePage;
+  if (typeof openStartAlonePage === "function") openStartAlonePage = connectionOnlyOpenStartAlonePage;
+
+  const originalOpenStartMethodPage = window.openStartMethodPage || (typeof openStartMethodPage === "function" ? openStartMethodPage : null);
+  if (typeof originalOpenStartMethodPage === "function") {
+    const wrappedOpenStartMethodPage = function duariConnectionOnlyStartMethod(...args) {
+      const result = originalOpenStartMethodPage.apply(this, args);
+      removeSoloStartButtons(document);
+      return result;
+    };
+    window.openStartMethodPage = wrappedOpenStartMethodPage;
+    if (typeof openStartMethodPage === "function") openStartMethodPage = wrappedOpenStartMethodPage;
+  }
+
+  const originalStartSetup = window.startSetup || (typeof startSetup === "function" ? startSetup : null);
+  if (typeof originalStartSetup === "function") {
+    const wrappedStartSetup = function duariConnectionOnlyStartSetup(...args) {
+      const result = originalStartSetup.apply(this, args);
+      removeSoloStartButtons(document);
+      return result;
+    };
+    window.startSetup = wrappedStartSetup;
+    if (typeof startSetup === "function") startSetup = wrappedStartSetup;
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.(soloSelectors);
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    removeSoloStartButtons(document);
+    if (typeof openStartMethodPage === "function") openStartMethodPage();
+  }, true);
+
+  const observer = new MutationObserver(() => removeSoloStartButtons(document));
+  observer.observe(document.body, { childList: true, subtree: true });
+  removeSoloStartButtons(document);
 })();
