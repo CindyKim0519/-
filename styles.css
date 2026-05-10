@@ -201,11 +201,13 @@ h3 {
 }
 
 .onboarding-card {
+  cursor: grab;
   margin: 0 0 14px;
   min-height: 286px;
   overflow: hidden;
   padding: 20px;
   position: relative;
+  touch-action: pan-y;
   z-index: 2;
 }
 
@@ -1981,7 +1983,7 @@ h3 {
 }
 
 .relation-add-complete-card {
-  text-align: center;
+  text-align: left;
 }
 
 .faq-page .inner-card strong {

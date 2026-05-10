@@ -18884,3 +18884,208 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   observer.observe(document.body, { childList: true, subtree: true });
   removeSoloStartButtons(document);
 })();
+
+(function installFinalRelationAddFlow() {
+  if (window.__duariFinalRelationAddFlowInstalled) return;
+  window.__duariFinalRelationAddFlowInstalled = true;
+
+  const copy = {
+    back: "\uB4A4\uB85C\uAC00\uAE30",
+    title: "\uAD00\uACC4 \uCD94\uAC00",
+    info: "\uB0B4 \uC815\uBCF4",
+    invite: "\uCD08\uB300 \uCF54\uB4DC",
+    confirm: "\uC0C1\uB300 \uD655\uC778",
+    done: "\uC644\uB8CC",
+    cancel: "\uCDE8\uC18C",
+    next: "\uB2E4\uC74C",
+    prev: "\uC774\uC804",
+    connect: "\uC5F0\uACB0\uD558\uAE30",
+    home: "\uD648\uC73C\uB85C \uC774\uB3D9"
+  };
+
+  function normalizeRelationDraft(draft = {}) {
+    const base = relationAddDraftDefaults(draft);
+    return {
+      ...base,
+      partnerName: draft.partnerName || "\uBD04\uC774",
+      partnerBirthDate: draft.partnerBirthDate || base.partnerBirthDate || "1998.**.**",
+      myName: draft.myName || state.accountNickname || "\uD558\uB9B0",
+      birthDate: draft.birthDate || base.birthDate || "",
+      startDate: draft.startDate || base.startDate || "2026-05-02"
+    };
+  }
+
+  function relationAddShell(step, bodyHtml) {
+    const progressItems = [copy.info, copy.invite, copy.confirm, copy.done];
+    return `
+      <div class="modal-sheet notification-page relation-add-page">
+        <header class="notification-header">
+          <button class="notification-nav-btn" type="button" data-relation-add-back aria-label="${copy.back}">\u2190</button>
+          <h3>${copy.title}</h3>
+          <span class="notification-header-spacer" aria-hidden="true"></span>
+        </header>
+        <div class="relation-add-progress" aria-label="${copy.title}">
+          ${progressItems.map((item, index) => `<span class="${index + 1 <= step ? "active" : ""}">${item}</span>`).join("")}
+        </div>
+        <div class="section-stack">${bodyHtml}</div>
+      </div>
+    `;
+  }
+
+  function collectRelationDraft(sheet, draft = {}) {
+    const inputCode = qs("[data-relation-add-code]", sheet)?.value.trim();
+    return normalizeRelationDraft({
+      ...draft,
+      method: inputCode ? "code" : draft.method,
+      code: inputCode || draft.code,
+      myName: qs("[data-relation-add-my-name]", sheet)?.value.trim() || draft.myName,
+      birthDate: qs("[data-relation-add-birth]", sheet)?.value || draft.birthDate,
+      startDate: qs("[data-relation-add-start]", sheet)?.value || draft.startDate,
+      fromOnboarding: !!draft.fromOnboarding
+    });
+  }
+
+  openRelationAddPage = function openRelationAddPageFinal(step = 1, draft = {}) {
+    const data = normalizeRelationDraft(draft);
+    const invite = duariActiveInvite();
+    const startedAt = data.startDate ? data.startDate.replaceAll("-", ".") : "-";
+    const stepBodies = {
+      1: `
+        <section class="card relation-add-card">
+          <h3>\uB0B4 \uC815\uBCF4\uB97C \uBA3C\uC800 \uC785\uB825\uD574\uC694</h3>
+          <p>\uC0C1\uB300\uAC00 \uCD08\uB300 \uCF54\uB4DC\uB97C \uC785\uB825\uD588\uC744 \uB54C \uD655\uC778\uD560 \uC815\uBCF4\uC785\uB2C8\uB2E4.</p>
+        </section>
+        <div class="form-field">
+          <label>\uB0B4 \uB2C9\uB124\uC784</label>
+          <input data-relation-add-my-name value="${data.myName}" placeholder="\uB0B4 \uB2C9\uB124\uC784" />
+        </div>
+        <div class="form-field">
+          <label>\uC0DD\uB144\uC6D4\uC77C</label>
+          <input type="date" data-relation-add-birth value="${data.birthDate}" />
+        </div>
+        <div class="form-field">
+          <label>\uC6B0\uB9AC \uC2DC\uC791\uC77C</label>
+          <input type="date" data-relation-add-start value="${data.startDate}" />
+        </div>
+        <div class="button-row two">
+          <button class="ghost-btn" type="button" data-relation-add-cancel>${copy.cancel}</button>
+          <button class="primary-btn" type="button" data-relation-add-next>${copy.next}</button>
+        </div>
+      `,
+      2: `
+        <section class="card relation-add-card">
+          <h3>\uB0B4 \uCD08\uB300 \uCF54\uB4DC</h3>
+          <p>${data.myName}\uB2D8\uC758 \uCD08\uB300 \uC815\uBCF4\uB85C \uC0DD\uC131\uB41C \uCF54\uB4DC\uC608\uC694. \uC0C1\uB300\uC5D0\uAC8C \uC774 \uCF54\uB4DC\uB97C \uBCF4\uB0B4\uC8FC\uC138\uC694.</p>
+          <div class="invite-code-display" aria-label="\uB0B4 \uCD08\uB300 \uCF54\uB4DC">${data.code}</div>
+          <div class="invite-code-meta">
+            <span>7\uC77C \uD6C4 \uB9CC\uB8CC</span>
+            <span>${duariFormatDotDate(invite.expiresAt)}\uAE4C\uC9C0</span>
+          </div>
+          <div class="button-row two invite-code-actions">
+            <button class="ghost-btn" type="button" data-relation-link-copy>\uCD08\uB300 \uB9C1\uD06C \uACF5\uC720</button>
+            <button class="ghost-btn" type="button" data-relation-new-code>\uC0C8 \uCF54\uB4DC \uB9CC\uB4E4\uAE30</button>
+          </div>
+        </section>
+        <section class="card relation-add-card">
+          <h3>\uBC1B\uC740 \uCD08\uB300 \uCF54\uB4DC \uC785\uB825</h3>
+          <p>\uC0C1\uB300\uAC00 \uBCF4\uB0B8 \uCF54\uB4DC\uB85C \uC5F0\uACB0\uD560 \uB54C\uB294 \uC544\uB798\uC5D0 \uC785\uB825\uD574\uC694.</p>
+          <div class="form-field">
+            <label>\uBC1B\uC740 \uCD08\uB300 \uCF54\uB4DC</label>
+            <input data-relation-add-code value="${data.method === "code" ? data.code : ""}" placeholder="\uC608: DUR-8K27Q" />
+          </div>
+        </section>
+        <div class="button-row two">
+          <button class="ghost-btn" type="button" data-relation-add-prev>${copy.prev}</button>
+          <button class="primary-btn" type="button" data-relation-add-confirm>${copy.next}</button>
+        </div>
+      `,
+      3: `
+        <section class="card relation-add-card">
+          <h3>\uC0C1\uB300 \uC815\uBCF4\uB97C \uD655\uC778\uD574\uC694</h3>
+          <p>\uC5F0\uACB0\uD558\uAE30 \uC804\uC5D0 \uC0C1\uB300\uC640 \uC6B0\uB9AC \uC2DC\uC791\uC77C\uC774 \uB9DE\uB294\uC9C0 \uD55C \uBC88 \uB354 \uD655\uC778\uD574\uC694.</p>
+          <div class="my-info-row">
+            <span>\uC0C1\uB300 \uB2C9\uB124\uC784</span>
+            <strong>${data.partnerName}</strong>
+          </div>
+          <div class="my-info-row">
+            <span>\uC0C1\uB300 \uC0DD\uB144\uC6D4\uC77C</span>
+            <strong>${data.partnerBirthDate}</strong>
+          </div>
+          <div class="my-info-row">
+            <span>\uC6B0\uB9AC \uC2DC\uC791\uC77C</span>
+            <strong>${startedAt}</strong>
+          </div>
+        </section>
+        <div class="button-row two">
+          <button class="ghost-btn" type="button" data-relation-add-prev>${copy.prev}</button>
+          <button class="primary-btn" type="button" data-relation-add-complete>${copy.connect}</button>
+        </div>
+      `,
+      4: `
+        <section class="card relation-add-complete-card">
+          <h3>\uB458\uB9CC\uC758 \uACF5\uAC04\uC774 \uC900\uBE44\uB410\uC5B4\uC694</h3>
+          <p>\uC624\uB298\uBD80\uD130 \uD568\uAED8 \uB0A8\uAE38 \uCD94\uC5B5\uACFC \uB9C8\uC74C\uC744 \uB4C0\uC544\uB9AC\uC5D0 \uCC28\uACE1\uCC28\uACE1 \uB2F4\uC544\uBD10\uC694.</p>
+        </section>
+        <button class="primary-btn full" type="button" data-relation-add-home>${copy.home}</button>
+      `
+    };
+
+    openModal(relationAddShell(step, stepBodies[step] || stepBodies[1]));
+    qs("#modal")?.classList.add("page-modal");
+    const sheet = qs(".relation-add-page");
+    const backTarget = () => {
+      if (step <= 1) {
+        if (data.fromOnboarding) openStartMethodPage();
+        else {
+          closeModal();
+          setTab("my");
+        }
+        return;
+      }
+      openRelationAddPage(step - 1, collectRelationDraft(sheet, data));
+    };
+
+    qs("[data-relation-add-back]", sheet)?.addEventListener("click", backTarget);
+    qs("[data-relation-link-copy]", sheet)?.addEventListener("click", duariShareInviteLink);
+    qs("[data-relation-new-code]", sheet)?.addEventListener("click", () => {
+      const nextInvite = duariRenewInviteCode();
+      openRelationAddPage(2, { ...data, method: "link", code: nextInvite.code });
+      showToast("\uC0C8 \uCD08\uB300 \uCF54\uB4DC\uB97C \uB9CC\uB4E4\uC5C8\uC5B4\uC694. \uC774\uC804 \uCF54\uB4DC\uB294 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC5B4\uC694.");
+    });
+    qs("[data-relation-add-cancel]", sheet)?.addEventListener("click", () => {
+      closeModal();
+      qs("#onboarding")?.classList.remove("is-hidden");
+      qs("#app")?.classList.add("is-hidden");
+    });
+    qs("[data-relation-add-prev]", sheet)?.addEventListener("click", backTarget);
+    qs("[data-relation-add-next]", sheet)?.addEventListener("click", () => openRelationAddPage(2, collectRelationDraft(sheet, data)));
+    qs("[data-relation-add-confirm]", sheet)?.addEventListener("click", () => openRelationAddPage(3, collectRelationDraft(sheet, data)));
+    qs("[data-relation-add-complete]", sheet)?.addEventListener("click", () => {
+      const nextData = collectRelationDraft(sheet, data);
+      state.relationOptions = [];
+      state.currentRelation = {
+        name: `${nextData.myName} & ${nextData.partnerName}`,
+        date: nextData.startDate.replaceAll("-", "."),
+        status: "\uC5F0\uACB0\uB428",
+        myName: nextData.myName,
+        birthDate: nextData.birthDate
+      };
+      state.connected = true;
+      if (state.activeInviteCode?.code === nextData.code) state.activeInviteCode.status = "used";
+      markCurrentAccountSetupComplete();
+      saveCurrentRelationToAccount();
+      openRelationAddPage(4, nextData);
+    });
+    qs("[data-relation-add-home]", sheet)?.addEventListener("click", () => {
+      markCurrentAccountSetupComplete();
+      closeModal();
+      qs("#onboarding")?.classList.add("is-hidden");
+      qs("#app")?.classList.remove("is-hidden");
+      setTab("home");
+      renderHome();
+      showToast("\uC6B0\uB9AC \uAD00\uACC4 \uD648\uC73C\uB85C \uC774\uB3D9\uD588\uC5B4\uC694.");
+    });
+  };
+
+  window.openRelationAddPage = openRelationAddPage;
+})();
