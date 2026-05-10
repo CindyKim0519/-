@@ -1943,13 +1943,14 @@ function renderQuestions() {
 
 function renderMy() {
   const current = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
+  const relationDisplayName = typeof duariRelationDisplayName === "function" ? duariRelationDisplayName(current) : current.name;
   qs("#my").innerHTML = `
     <div class="section-stack">
       <section class="card my-profile-card">
         <div class="my-profile-header">
           <div class="my-profile-summary">
             <div class="my-profile-text">
-              <h3>${current.name}</h3>
+              <h3>${relationDisplayName}</h3>
               <p class="meta">${current.date}부터</p>
             </div>
           </div>
@@ -2767,6 +2768,7 @@ function openNotificationSettingsModal() {
           </section>
         `).join("")}
         <div class="settings-account-actions">
+          <button class="ghost-btn full" type="button" data-action="password-change">비밀번호 변경</button>
           <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
           <button class="ghost-btn danger-outline full" type="button" data-action="danger-withdraw">회원 탈퇴</button>
         </div>
@@ -2776,6 +2778,12 @@ function openNotificationSettingsModal() {
   qs("#modal").classList.add("page-modal");
   const sheet = qs(".modal-sheet");
   bindActions(sheet);
+  qs(".notification-settings-page [data-close]")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    closeModal();
+    setTab("my");
+  }, true);
   qsa(".setting-switch", sheet).forEach((button) => {
     button.addEventListener("click", () => toggleSettingSwitch(button));
   });
@@ -4110,6 +4118,51 @@ function openSecurityModal() {
   openPinResetPage();
 }
 
+function duariActiveAccount() {
+  return typeof getSignupAccount === "function" ? getSignupAccount(state.currentLoginEmail) : null;
+}
+
+function duariAccountEmail() {
+  return state.currentLoginEmail || duariActiveAccount()?.email || "harin@duari.app";
+}
+
+function duariMyBirthdate() {
+  return duariActiveAccount()?.myBirthdate || state.accountBirthdate || "1998.08.14";
+}
+
+function duariSetMyBirthdate(value = "") {
+  const formatted = String(value || "").replaceAll("-", ".");
+  state.accountBirthdate = formatted || "1998.08.14";
+  const account = duariActiveAccount();
+  if (account) {
+    account.myBirthdate = state.accountBirthdate;
+    if (typeof saveRegisteredAccounts === "function") saveRegisteredAccounts();
+  }
+}
+
+function duariToDateInput(value = "") {
+  return String(value || "").replaceAll(".", "-");
+}
+
+function duariFromDateInput(value = "") {
+  return String(value || "").replaceAll("-", ".");
+}
+
+function duariRelationDisplayName(relation = currentRelationInfo()) {
+  const myName = relationMyName(relation);
+  const partnerName = relationPartnerName(relation);
+  return `${myName} & ${partnerName}`;
+}
+
+function duariUpdateRelationName(relation, nextMyName = "") {
+  const trimmedName = String(nextMyName || "").trim();
+  if (!trimmedName) return relation.name;
+  const partnerName = relationPartnerName(relation);
+  relation.myName = trimmedName;
+  relation.name = `${trimmedName} & ${partnerName}`;
+  return relation.name;
+}
+
 function openAccountModal() {
   const current = currentRelationInfo();
   const myName = relationMyName(current);
@@ -4123,26 +4176,108 @@ function openAccountModal() {
       </header>
       <div class="section-stack">
         <section class="card my-info-readonly-card">
-          <h3>계정 정보</h3>
+          <h3>내 정보</h3>
           <div class="my-info-row"><span>닉네임</span><strong>${myName}</strong></div>
-          <div class="my-info-row"><span>생년월일</span><strong>1998.08.14</strong></div>
+          <div class="my-info-row"><span>생년월일</span><strong>${duariMyBirthdate()}</strong></div>
           <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
-          <div class="my-info-row"><span>이메일</span><strong>harin@duari.app</strong></div>
+          <div class="my-info-row"><span>이메일</span><strong>${duariAccountEmail()}</strong></div>
           <div class="my-info-row"><span>가입일</span><strong>2026.05.02</strong></div>
-          <button class="ghost-btn full" type="button" data-action="password-change">비밀번호 변경</button>
         </section>
         <section class="card my-info-readonly-card">
-          <h3>관계 정보</h3>
+          <h3>우리 정보</h3>
           <div class="my-info-row"><span>우리의 시작일</span><strong>${current.date}</strong></div>
           <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
           <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
         </section>
+        <button class="primary-btn full" type="button" data-open-my-info-edit>수정</button>
       </div>
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  bindActions(qs(".modal-sheet"));
+  const sheet = qs(".modal-sheet");
+  bindActions(sheet);
+  qs("[data-close]", sheet)?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    closeModal();
+    setTab("my");
+  }, true);
+  qs("[data-open-my-info-edit]")?.addEventListener("click", openMyInfoEditPage);
+}
+
+function openMyInfoEditPage() {
+  const current = currentRelationInfo();
+  const myName = relationMyName(current);
+  const partnerName = relationPartnerName(current);
+  openModal(`
+    <div class="modal-sheet notification-page my-info-page my-info-edit-page">
+      <header class="notification-header">
+        <button class="notification-nav-btn" data-my-info-edit-back aria-label="뒤로가기">←</button>
+        <h3>우리 정보 수정</h3>
+        <span class="notification-header-spacer" aria-hidden="true"></span>
+      </header>
+      <div class="section-stack">
+        <section class="card my-info-readonly-card">
+          <h3>수정할 정보</h3>
+          <div class="form-field">
+            <label for="myInfoNickname">내 닉네임</label>
+            <input id="myInfoNickname" value="${signupAttr(myName)}" />
+          </div>
+          <div class="form-field">
+            <label for="myInfoBirthdate">생년월일</label>
+            <input id="myInfoBirthdate" type="date" value="${duariToDateInput(duariMyBirthdate())}" />
+          </div>
+          <div class="form-field">
+            <label for="myInfoStartDate">우리의 시작일</label>
+            <input id="myInfoStartDate" type="date" value="${duariToDateInput(current.date)}" />
+          </div>
+        </section>
+        <section class="card my-info-readonly-card">
+          <h3>조회 정보</h3>
+          <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
+          <div class="my-info-row"><span>이메일</span><strong>${duariAccountEmail()}</strong></div>
+          <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
+        </section>
+        <div class="inline-action-pair">
+          <button class="ghost-btn" type="button" data-my-info-edit-cancel>취소</button>
+          <button class="primary-btn" type="button" data-my-info-edit-save>저장</button>
+        </div>
+      </div>
+    </div>
+  `);
+  qs("#modal").classList.add("page-modal");
+  const goBack = () => openAccountModal();
+  qs("[data-my-info-edit-back]")?.addEventListener("click", goBack);
+  qs("[data-my-info-edit-cancel]")?.addEventListener("click", goBack);
+  qs("[data-my-info-edit-save]")?.addEventListener("click", () => {
+    const nickname = qs("#myInfoNickname")?.value.trim() || "";
+    const birthdate = qs("#myInfoBirthdate")?.value || "";
+    const startDate = qs("#myInfoStartDate")?.value || "";
+    if (!nickname) {
+      showToast("닉네임을 입력해 주세요.");
+      return;
+    }
+    if (!startDate) {
+      showToast("우리의 시작일을 선택해 주세요.");
+      return;
+    }
+    const selected = new Date(`${startDate}T00:00:00`);
+    const today = new Date();
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (selected > todayMidnight) {
+      showToast("오늘 이후 날짜는 시작일로 설정할 수 없어요.");
+      return;
+    }
+    duariUpdateRelationName(current, nickname);
+    current.date = duariFromDateInput(startDate);
+    duariSetMyBirthdate(birthdate);
+    saveCurrentRelationToAccount();
+    renderHome();
+    renderMy();
+    showToast("우리 정보를 저장했어요.");
+    openAccountModal();
+  });
 }
 
 function logoutToLogin() {
@@ -4223,10 +4358,10 @@ function openPasswordChangePage() {
     </div>
   `);
   qs("#modal").classList.add("page-modal");
-  qsa("[data-password-back]").forEach((button) => button.addEventListener("click", openAccountModal));
+  qsa("[data-password-back]").forEach((button) => button.addEventListener("click", openNotificationSettingsModal));
   qs("[data-password-save]")?.addEventListener("click", () => {
     showToast("비밀번호 변경 확인 흐름을 완료했어요.");
-    openAccountModal();
+    openNotificationSettingsModal();
   });
 }
 
@@ -14432,6 +14567,7 @@ renderHome = function renderHome() {
     ? memoryCards(recentMemories, true)
     : `<p>아직 남긴 기록이 없어요. 오늘의 작은 장면부터 편하게 남겨보세요.</p>`;
   const currentRelation = typeof currentRelationInfo === "function" ? currentRelationInfo() : { name: "봄이 & 하린", date: "2025.03.05" };
+  const relationDisplayName = typeof duariRelationDisplayName === "function" ? duariRelationDisplayName(currentRelation) : currentRelation.name;
   const relationshipDays = typeof duariRelationDays === "function" ? duariRelationDays(currentRelation.date) : 421;
   const anniversaryPill = duariHomeAnniversaryPillHtml();
 
@@ -14440,7 +14576,7 @@ renderHome = function renderHome() {
       <section class="hero-card home-hero">
         <div class="between">
           <div>
-            <p class="relationship-name">${duariEscapeHtml(currentRelation.name)}</p>
+            <p class="relationship-name">${duariEscapeHtml(relationDisplayName)}</p>
             <h3 class="together-days"><span>함께한 지 </span><strong class="together-days-number">${relationshipDays}</strong><span>일</span></h3>
           </div>
           ${anniversaryPill}
