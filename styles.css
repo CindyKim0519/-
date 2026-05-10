@@ -5006,6 +5006,10 @@ button,
   gap: var(--gap-list) !important;
 }
 
+#diary .conversation-tab-page .question-history-section {
+  gap: var(--gap-list) !important;
+}
+
 #app :is(.screen, .modal-sheet) :is(
   .card,
   .inner-card,

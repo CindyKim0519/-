@@ -1313,13 +1313,13 @@ function openLinkedDiaryDetailLatest(index, backAction = restorePreviousModal) {
 }
 
 function limitMemoryEditTitle(value) {
-  return Array.from(value || "").slice(0, 10).join("");
+  return Array.from(value || "").slice(0, 17).join("");
 }
 
 function syncMemoryTitleLimit(input, count) {
   input.value = limitMemoryEditTitle(input.value);
-  input.setAttribute("maxlength", "10");
-  count.textContent = `${Array.from(input.value).length}/10`;
+  input.setAttribute("maxlength", "17");
+  count.textContent = `${Array.from(input.value).length}/17`;
 }
 
 function openMemoryEditPageLatest(index) {
@@ -11191,7 +11191,7 @@ function openMemoryEditPageLatest(index, backAction = null, originalMemorySnapsh
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(memory.scope)}
-        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${editTitle.length}/10</span></div><input class="memory-title-input" value="${editTitle}" maxlength="10" /></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${editTitle.length}/17</span></div><input class="memory-title-input" value="${editTitle}" maxlength="17" /></div>
         <div class="form-field"><label>날짜</label><input type="date" value="${toDateInputValue(memory.date)}" /></div>
         <div class="form-field"><label>장소</label><input value="${memory.place}" /></div>
         <div class="form-field"><label>유형</label><select><option>${memory.type}</option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
@@ -11266,7 +11266,7 @@ function openMemoryCreatePage(backAction = null) {
       </header>
       <div class="section-stack">
         ${memoryScopeFieldHtml(draft.scope || (state.connected ? "우리 둘이 보기" : "나만 보기"))}
-        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${Array.from(limitMemoryEditTitle(draft.title || "")).length}/10</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(limitMemoryEditTitle(draft.title || ""))}" maxlength="10" /></div>
+        <div class="form-field"><div class="field-label-row"><label>기록 제목</label><span class="input-count">${Array.from(limitMemoryEditTitle(draft.title || "")).length}/17</span></div><input class="memory-title-input" id="memoryTitle" value="${signupAttr(limitMemoryEditTitle(draft.title || ""))}" maxlength="17" /></div>
         <div class="form-field"><label>날짜</label><input id="memoryDate" type="date" value="${signupAttr(draft.date || "")}" /></div>
         <div class="form-field"><label>장소</label><input id="memoryPlace" value="${signupAttr(draft.place || "")}" /></div>
         <div class="form-field"><label>유형</label><select id="memoryType"><option value="" selected></option><option>데이트</option><option>여행</option><option>기념일</option><option>일상</option><option>대화</option><option>마음 기록</option><option>기타</option></select></div>
@@ -17657,7 +17657,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
 
   function memoryTitle(value = "") {
     const raw = String(value || "").trim();
-    return raw ? raw.slice(0, 10) : "제목 없는 추억";
+    return raw ? raw.slice(0, 17) : "제목 없는 추억";
   }
 
   function selectedFeelingValues(root = document) {
@@ -17873,8 +17873,8 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         <div class="section-stack">
           ${photoManageGridHtml(safeIndex, false)}
           <div class="form-field">
-            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(memory.title || "").slice(0, 10).length}/10</span></div>
-            <input id="memoryTitle" maxlength="10" value="${escapeText(String(memory.title || "").slice(0, 10))}" />
+            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(memory.title || "").slice(0, 17).length}/17</span></div>
+            <input id="memoryTitle" maxlength="17" value="${escapeText(String(memory.title || "").slice(0, 17))}" />
           </div>
           <div class="form-field"><label for="memoryDate">날짜</label><input id="memoryDate" type="date" value="${inputDate(memory.date)}" required /></div>
           <div class="form-field"><label for="memoryPlace">장소</label><input id="memoryPlace" value="${escapeText(memory.place || "")}" /></div>
@@ -17893,8 +17893,9 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     bindMemoryHeartChips(qs(".modal-sheet"));
     bindPhotoManage(qs(".modal-sheet"), safeIndex, false);
     qs("#memoryTitle")?.addEventListener("input", (event) => {
+      event.target.value = Array.from(event.target.value || "").slice(0, 17).join("");
       const count = event.target.closest(".form-field")?.querySelector(".input-count");
-      if (count) count.textContent = `${event.target.value.length}/10`;
+      if (count) count.textContent = `${event.target.value.length}/17`;
     });
     qs("[data-memory-edit-back]")?.addEventListener("click", () => {
       if (typeof openMemoryEditBackConfirm === "function") {
@@ -17939,6 +17940,42 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   };
   window.openMemoryEditPageLatest = openMemoryEditPageLatest;
 
+  function syncMemoryCreateDraftFromEditor() {
+    state.memoryCreateDraft = {
+      ...(state.memoryCreateDraft || {}),
+      title: memoryTitle(qs("#memoryTitle")?.value || ""),
+      date: qs("#memoryDate")?.value || todayInputValue(),
+      place: qs("#memoryPlace")?.value || "",
+      type: qs("#memoryType")?.value || "일상",
+      feelings: selectedFeelingValues(qs(".modal-sheet")),
+      body: qs("#memoryHeartBody")?.value || ""
+    };
+  }
+
+  function openMemoryCreateBackConfirm(onLeave) {
+    const modal = qs("#modal") || document.body;
+    qs(".photo-delete-overlay", modal)?.remove();
+    syncMemoryCreateDraftFromEditor();
+    modal.insertAdjacentHTML("beforeend", `
+      <div class="photo-delete-overlay" role="dialog" aria-modal="true">
+        <section class="photo-delete-sheet">
+          <h3>저장하지 않고 나갈까요?</h3>
+          <p>저장하지 않고 나가면 방금 입력한 추억 내용은 저장되지 않아요.</p>
+          <div class="inline-action-pair">
+            <button class="ghost-btn" type="button" data-memory-create-stay>취소</button>
+            <button class="primary-btn" type="button" data-memory-create-leave>나가기</button>
+          </div>
+        </section>
+      </div>
+    `);
+    qs("[data-memory-create-stay]", modal)?.addEventListener("click", () => qs(".photo-delete-overlay", modal)?.remove());
+    qs("[data-memory-create-leave]", modal)?.addEventListener("click", () => {
+      qs(".photo-delete-overlay", modal)?.remove();
+      state.memoryCreateDraft = null;
+      onLeave?.();
+    });
+  }
+
   openMemoryCreatePage = function openMemoryCreatePage(backAction = null) {
     const draft = state.memoryCreateDraft || {};
     const photos = Array.isArray(draft.photos) ? draft.photos : [];
@@ -17952,8 +17989,8 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
         <div class="section-stack">
           ${photoManageGridHtml(0, true)}
           <div class="form-field">
-            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(draft.title || "").slice(0, 10).length}/10</span></div>
-            <input id="memoryTitle" maxlength="10" value="${escapeText(String(draft.title || "").slice(0, 10))}" />
+            <div class="field-label-row"><label for="memoryTitle">제목</label><span class="input-count">${String(draft.title || "").slice(0, 17).length}/17</span></div>
+            <input id="memoryTitle" maxlength="17" value="${escapeText(String(draft.title || "").slice(0, 17))}" />
           </div>
           <div class="form-field"><label for="memoryDate">날짜</label><input id="memoryDate" type="date" value="${inputDate(draft.date || todayInputValue())}" required /></div>
           <div class="form-field"><label for="memoryPlace">장소</label><input id="memoryPlace" value="${escapeText(draft.place || "")}" /></div>
@@ -17972,16 +18009,18 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     bindMemoryHeartChips(qs(".modal-sheet"));
     bindPhotoManage(qs(".modal-sheet"), 0, true);
     qs("#memoryTitle")?.addEventListener("input", (event) => {
+      event.target.value = Array.from(event.target.value || "").slice(0, 17).join("");
       const count = event.target.closest(".form-field")?.querySelector(".input-count");
-      if (count) count.textContent = `${event.target.value.length}/10`;
+      if (count) count.textContent = `${event.target.value.length}/17`;
     });
     qs("[data-memory-create-back]")?.addEventListener("click", () => {
-      state.memoryCreateDraft = null;
-      if (typeof backAction === "function") backAction();
-      else {
-        closeModal();
-        setTab("album");
-      }
+      openMemoryCreateBackConfirm(() => {
+        if (typeof backAction === "function") backAction();
+        else {
+          closeModal();
+          setTab("album");
+        }
+      });
     });
     qs("[data-memory-create-cancel]")?.addEventListener("click", () => {
       state.memoryCreateDraft = null;
@@ -18208,7 +18247,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
       const feelings = recommendFeelings(answers);
       const place = answers.place;
       state.memoryCreateDraft = {
-        title: place ? `${place} 추억`.slice(0, 10) : "오늘의 추억",
+        title: place ? `${place} 추억`.slice(0, 17) : "오늘의 추억",
         date: draft.date || new Date().toISOString().slice(0, 10),
         place,
         type: "일상",
