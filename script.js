@@ -4221,8 +4221,11 @@ function openMyInfoEditPage() {
         <section class="card my-info-readonly-card">
           <h3>수정할 정보</h3>
           <div class="form-field">
-            <label for="myInfoNickname">내 닉네임</label>
-            <input id="myInfoNickname" value="${signupAttr(myName)}" />
+            <div class="field-label-row">
+              <label for="myInfoNickname">내 닉네임</label>
+              <span class="input-count" data-my-info-nickname-count>${Array.from(myName || "").slice(0, 6).length}/6</span>
+            </div>
+            <input id="myInfoNickname" maxlength="6" value="${signupAttr(Array.from(myName || "").slice(0, 6).join(""))}" />
           </div>
           <div class="form-field">
             <label for="myInfoBirthdate">생년월일</label>
@@ -4248,10 +4251,15 @@ function openMyInfoEditPage() {
   `);
   qs("#modal").classList.add("page-modal");
   const goBack = () => openAccountModal();
+  qs("#myInfoNickname")?.addEventListener("input", (event) => {
+    event.target.value = Array.from(event.target.value || "").slice(0, 6).join("");
+    const count = qs("[data-my-info-nickname-count]");
+    if (count) count.textContent = `${Array.from(event.target.value || "").length}/6`;
+  });
   qs("[data-my-info-edit-back]")?.addEventListener("click", goBack);
   qs("[data-my-info-edit-cancel]")?.addEventListener("click", goBack);
   qs("[data-my-info-edit-save]")?.addEventListener("click", () => {
-    const nickname = qs("#myInfoNickname")?.value.trim() || "";
+    const nickname = Array.from(qs("#myInfoNickname")?.value.trim() || "").slice(0, 6).join("");
     const birthdate = qs("#myInfoBirthdate")?.value || "";
     const startDate = qs("#myInfoStartDate")?.value || "";
     if (!nickname) {
@@ -15790,12 +15798,10 @@ function openQuestionHistoryDetail(index = 0, backAction = null) {
           <h3>${duariEscapeHtml(item.question)}</h3>
         </section>
         <section class="card">
-          <div class="between"><h3>보낸 답변</h3><span class="linked-diary-type">${duariEscapeHtml(item.status)}</span></div>
+          <div class="between"><p class="meta">${duariEscapeHtml(item.date)}</p><span class="linked-diary-type">${duariEscapeHtml(item.status)}</span></div>
           <p>${duariEscapeHtml(item.sent)}</p>
-          <div class="question-history-meta detail">
-            <span>${duariEscapeHtml(item.date)}</span>
-          </div>
         </section>
+        <button class="ghost-btn danger-outline full" type="button" data-question-history-delete>삭제</button>
       </div>
     </div>
   `);
@@ -15806,7 +15812,36 @@ function openQuestionHistoryDetail(index = 0, backAction = null) {
       return;
     }
     closeModal();
-    setTab("questions");
+    setTab("diary");
+  });
+  qs("[data-question-history-delete]")?.addEventListener("click", () => {
+    const page = qs(".question-history-detail-page");
+    if (!page || qs(".ai-confirm-overlay", page)) return;
+    page.insertAdjacentHTML("beforeend", `
+      <div class="ai-confirm-overlay" role="dialog" aria-modal="true">
+        <div class="ai-confirm-sheet">
+          <h3>대화를 삭제할까요?</h3>
+          <p>삭제한 대화는 나눈 대화 목록에서 사라지고 다시 복구할 수 없어요.</p>
+          <div class="inline-action-pair">
+            <button class="ghost-btn" type="button" data-question-delete-cancel>취소</button>
+            <button class="primary-btn" type="button" data-question-delete-confirm>삭제</button>
+          </div>
+        </div>
+      </div>
+    `);
+    qs("[data-question-delete-cancel]", page)?.addEventListener("click", () => qs(".ai-confirm-overlay", page)?.remove());
+    qs("[data-question-delete-confirm]", page)?.addEventListener("click", () => {
+      qs(".ai-confirm-overlay", page)?.remove();
+      const historyList = duariQuestionHistorySeed();
+      if (historyList[index]) {
+        historyList.splice(index, 1);
+        duariSavePersistentContent();
+      }
+      closeModal();
+      setTab("diary");
+      renderDiary();
+      showToast("나눈 대화를 삭제했어요.");
+    });
   });
 }
 
