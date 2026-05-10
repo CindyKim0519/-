@@ -660,15 +660,16 @@ h3 {
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
-  font-size: 11px;
-  gap: 2px;
-  height: 54px;
+  font-size: var(--font-size-sm);
+  gap: 3px;
+  height: 58px;
   justify-content: center;
+  line-height: var(--line-height-xs);
 }
 
 .nav-item span {
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 20px;
+  line-height: 20px;
 }
 
 .nav-item.active {
@@ -3032,6 +3033,13 @@ h3 {
 .memory-edit-actions {
   display: grid;
   gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.photo-manage-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field-label-row {

@@ -1862,21 +1862,6 @@ function renderHome() {
   bindActions(home);
 }
 
-function memoryCards(memories, homeCompact = false) {
-  return memories
-    .map((memory, index) => `
-      <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-action="memory-detail" data-index="${index}">
-        <div class="photo-stack" aria-label="사진 미리보기"></div>
-        <div>
-          <div class="${homeCompact ? "home-memory-title" : "between"}"><strong>${memory.title}</strong><span class="meta">${memory.type}</span></div>
-          <p class="${homeCompact ? "home-memory-copy" : ""}">${memory.note}</p>
-          <div class="tag-row ${homeCompact ? "home-memory-meta" : ""}" style="margin-top:8px"><span class="meta">${memory.date}</span><span class="meta">${memory.place}</span><span class="meta">${memory.scope}</span></div>
-        </div>
-      </article>
-    `)
-    .join("");
-}
-
 function renderAlbum() {
   const album = qs("#album");
   const views = ["record", "photo", "calendar"];
@@ -6640,22 +6625,6 @@ function openAiResultPage(draft = {}) {
   qs("[data-ai-share]").addEventListener("click", () => openAiShareRecordPickerPage({ original, tone, result: qs("#aiResultText").value }));
 }
 
-// Final memory card/detail scope/type placement override at EOF.
-function memoryCards(memories, homeCompact = false) {
-  return memories
-    .map((memory, index) => `
-      <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-action="memory-detail" data-index="${index}">
-        <div class="photo-stack" aria-label="사진 미리보기"></div>
-        <div>
-          <div class="${homeCompact ? "home-memory-title" : "between"}"><strong>${memory.title}</strong><span class="linked-record-scope">${scopeLabelForRecord(memory)}</span></div>
-          <p class="${homeCompact ? "home-memory-copy" : ""}">${memory.note}</p>
-          <div class="tag-row ${homeCompact ? "home-memory-meta" : ""}" style="margin-top:8px"><span class="meta">${memory.date}</span><span class="meta">${memory.place}</span><span class="meta">${memory.type}</span></div>
-        </div>
-      </article>
-    `)
-    .join("");
-}
-
 function openMemoryDetailLatestV3(index) {
   state.activeMemoryIndex = index;
   const memory = state.memories[index] || state.memories[0];
@@ -8189,27 +8158,6 @@ function linkedDiaryCardsLatest() {
       ${linkedDiaryEmotionRow(diary)}
     </article>
   `).join("");
-}
-
-function memoryCards(memories, homeCompact = false) {
-  return memories
-    .map((memory, index) => `
-      <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-action="memory-detail" data-index="${index}">
-        <div class="photo-stack" aria-label="사진 미리보기"></div>
-        <div>
-          <div class="${homeCompact ? "home-memory-title" : "between"}">
-            <strong>${memory.title}</strong>
-            <span class="linked-record-scope">${scopeLabelForRecord(memory)}</span>
-          </div>
-          <div class="tag-row ${homeCompact ? "home-memory-meta" : ""}" style="margin-top:8px">
-            <span class="meta">${memory.date}</span>
-            <span class="meta">${memory.place}</span>
-            <span class="meta">${memory.type}</span>
-          </div>
-        </div>
-      </article>
-    `)
-    .join("");
 }
 
 function openMemoryDetailLatestV3(index) {
@@ -11766,76 +11714,6 @@ function renderAlbum() {
   bindActions(album);
 }
 
-function openMemoryCardFromElement(card) {
-  if (!card) return;
-  const index = Number(card.dataset.index || 0);
-  const activeTab = qs(".tab-content.active")?.id || "home";
-  openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-    closeModal();
-    setTab(activeTab === "album" ? "album" : "home");
-  });
-}
-
-if (!window.__duariMemoryCardDelegationInstalled) {
-  window.__duariMemoryCardDelegationInstalled = true;
-  document.addEventListener("click", (event) => {
-    const card = event.target.closest?.(".memory-card");
-    if (!card) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    openMemoryCardFromElement(card);
-  }, true);
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest?.(".memory-card");
-    if (!card) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    openMemoryCardFromElement(card);
-  }, true);
-}
-
-// Absolute final v2: reinstall memory navigation with a fresh flag and rerender current screens.
-function openMemoryCardFromElementFinal(card) {
-  if (!card) return;
-  const index = Number(card.dataset.index || 0);
-  const activeTab = qs(".tab-content.active")?.id || qs(".screen.active")?.id || state.tab || "home";
-  openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-    closeModal();
-    setTab(activeTab === "album" ? "album" : "home");
-  });
-}
-
-if (!window.__duariMemoryCardDelegationInstalledV2) {
-  window.__duariMemoryCardDelegationInstalledV2 = true;
-  document.addEventListener("click", (event) => {
-    const card = event.target.closest?.(".memory-card, [data-action='memory-detail']");
-    if (!card) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    openMemoryCardFromElementFinal(card);
-  }, true);
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    const card = event.target.closest?.(".memory-card, [data-action='memory-detail']");
-    if (!card) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    openMemoryCardFromElementFinal(card);
-  }, true);
-}
-
-function refreshCurrentScreenAfterFinalMemoryPatch() {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "album") renderAlbum();
-  else if (activeTab === "home") renderHome();
-}
-
 // Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Absolute final v3: clean Korean home/album render and force current screen refresh.
@@ -11889,38 +11767,12 @@ function renderAlbum() {
   bindActions(album);
 }
 
-function openMemoryCardFromElementFinal(card) {
-  if (!card) return;
-  const index = Number(card.dataset.index || 0);
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-    closeModal();
-    setTab(activeTab === "album" ? "album" : "home");
-  });
-}
-
-document.addEventListener("click", (event) => {
-  const card = event.target.closest?.(".memory-card, [data-action='memory-detail']");
-  if (!card) return;
-  event.preventDefault();
-  event.stopPropagation();
-  event.stopImmediatePropagation();
-  openMemoryCardFromElementFinal(card);
-}, true);
-
-function forceRenderActiveHomeOrAlbum() {
-  if (!qs("#app") || qs("#app").classList.contains("is-hidden")) return;
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  if (activeTab === "album") renderAlbum();
-  if (activeTab === "home") renderHome();
-}
-
 // Disabled old delayed repaint; final synchronous repaint runs at the end.
 
 // Absolute final v4: direct memory cards and a clean record-detail page.
 function memoryCards(memories, homeCompact = false) {
   return memories.map((memory, index) => `
-    <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-memory-open="${index}" onclick="openMemoryDetailLatestV3(${index})">
+    <article class="memory-card ${homeCompact ? "home-memory-card" : ""}" role="button" tabindex="0" data-memory-open="${index}">
       <div class="photo-stack" aria-label="사진 미리보기"></div>
       <div>
         <div class="${homeCompact ? "home-memory-title" : "between"}">
@@ -12155,16 +12007,6 @@ function renderAlbum() {
   bindActions(album);
 }
 
-function openMemoryCardFromElementFinal(card) {
-  if (!card) return;
-  const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
-  const activeTab = qs(".screen.active")?.id || state.tab || "home";
-  openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-    closeModal();
-    setTab(activeTab === "album" ? "album" : "home");
-  });
-}
-
 window.openMemoryDetailLatestV3 = openMemoryDetailLatestV3;
 // Disabled old delayed repaint; final synchronous repaint runs at the end.
 
@@ -12276,46 +12118,6 @@ function renderHome() {
 }
 
 // Disabled old delayed repaint; final synchronous repaint runs at the end.
-
-// Final interaction guard: preserve existing page flows while preventing older handlers from stealing clicks.
-if (!window.__duariFinalRecordFlowGuard) {
-  window.__duariFinalRecordFlowGuard = true;
-
-  const duariOpenRecordFromCard = (card) => {
-    const index = Number(card.dataset.memoryOpen || card.dataset.index || 0);
-    const screen = card.closest(".screen");
-    const sourceTab = screen?.id || state.tab || "home";
-    openMemoryDetailLatestV3(Number.isFinite(index) ? index : 0, () => {
-      closeModal();
-      setTab(sourceTab === "album" ? "album" : "home");
-    });
-  };
-
-  const duariHandleFinalRecordFlowClick = (event) => {
-    const albumButton = event.target.closest?.("[data-album-view] button");
-    if (albumButton) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      state.albumView = albumButton.dataset.view || "record";
-      renderAlbum();
-      return;
-    }
-
-    const card = event.target.closest?.("#home .memory-card, #album .memory-card, #home [data-memory-open], #album [data-memory-open]");
-    if (!card) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    duariOpenRecordFromCard(card);
-  };
-
-  window.addEventListener("click", duariHandleFinalRecordFlowClick, true);
-  window.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    duariHandleFinalRecordFlowClick(event);
-  }, true);
-}
 
 // Final album restore: use the original tab styling and keep all album panels visible per selected tab.
 function renderAlbum() {
@@ -14703,7 +14505,7 @@ function duariLinkedDiaryCardHtml(diary, index, options = {}) {
           <span class="linked-diary-type">${duariEscapeHtml(diary?.type || diaryScopeLabel?.(diary?.scope) || "나만 보기")}</span>
           ${showMenu ? `
             <span class="linked-diary-menu-wrap">
-              <button class="linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
+              <button class="linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
                 <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
               </button>
               <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
@@ -14768,7 +14570,7 @@ function duariLinkedDiaryMenuHtml(index, diary = {}) {
   const canEdit = diary?.editable !== false && !diaryType.includes("상대");
   return `
     <span class="linked-diary-menu-wrap">
-      <button class="icon-btn linked-diary-kebab" type="button" data-linked-diary-menu onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();window.duariToggleLinkedDiaryDropdownFromButton?.(this);" aria-label="더보기" title="더보기">
+      <button class="icon-btn linked-diary-kebab" type="button" data-linked-diary-menu aria-label="더보기" title="더보기">
         <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
       </button>
       <span class="linked-diary-dropdown" data-linked-diary-dropdown hidden>
@@ -17740,6 +17542,7 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
           ${photos.map((photo, index) => `
             <button class="memory-photo-slide" type="button" data-action="photo-detail" data-memory-index="${memoryIndex}" data-photo-index="${index}" data-photo-back="memory" aria-label="${index + 1}번째 사진">
               <img src="${signupAttr(photoSrc(photo))}" alt="" />
+              <span class="memory-photo-index">${index + 1}/${photos.length}</span>
             </button>
           `).join("")}
         </div>
@@ -17769,7 +17572,10 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
             </div>
           `).join("")}
         </div>
-        <button class="primary-btn full" type="button" data-photo-add-choice>사진 추가</button>
+        <div class="photo-manage-actions">
+          <button class="ghost-btn" type="button" data-photo-add-choice>\uC0AC\uC9C4 \uCD94\uAC00</button>
+          <button class="ghost-btn" type="button" data-photo-order-page>\uC0AC\uC9C4 \uC21C\uC11C \uBCC0\uACBD</button>
+        </div>
       </section>
     `;
   }
@@ -17777,6 +17583,14 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
   function bindPhotoManage(root, memoryIndex = 0, createMode = false) {
     qs("[data-photo-add-choice]", root)?.addEventListener("click", () => {
       if (typeof openPhotoAddChoiceModal === "function") openPhotoAddChoiceModal(createMode ? { createMode: true } : { memoryIndex });
+    });
+    qs("[data-photo-order-page]", root)?.addEventListener("click", () => {
+      if (typeof openPhotoOrderManagerPageLatest === "function") {
+        openPhotoOrderManagerPageLatest(() => {
+          if (createMode && typeof openMemoryCreatePage === "function") openMemoryCreatePage();
+          else if (typeof openMemoryEditPageLatest === "function") openMemoryEditPageLatest(memoryIndex);
+        });
+      }
     });
     if (typeof bindPhotoManageDeleteButtons === "function") {
       bindPhotoManageDeleteButtons(root, createMode ? { createMode: true } : { memoryIndex });
@@ -17896,7 +17710,10 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
           <div class="form-field memory-edit-feelings"><label>감정</label>${feelingChipButtons((memory.feelings || []).slice(0, 2))}</div>
           <div class="form-field"><label for="memoryHeartBody">마음 본문</label><textarea id="memoryHeartBody" class="diary-body-large" required>${escapeText(body)}</textarea></div>
           <button class="ghost-btn full" type="button" data-memory-heart-ai>AI로 다듬기</button>
-          <button class="primary-btn full" type="button" data-save-memory-edit>수정 저장</button>
+          <div class="memory-edit-actions">
+            <button class="ghost-btn" type="button" data-delete-memory-edit>추억 삭제</button>
+            <button class="primary-btn" type="button" data-save-memory-edit>수정 저장</button>
+          </div>
         </div>
       </div>
     `);
@@ -17918,6 +17735,14 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
       const bodyValue = qs("#memoryHeartBody")?.value || "";
       if (typeof openAiResultPage === "function") openAiResultPage({ original: bodyValue, result: typeof generateAiRefinement === "function" ? generateAiRefinement(bodyValue) : bodyValue });
       else showToast("AI 다듬기는 현재 준비 중이에요.");
+    });
+    qs("[data-delete-memory-edit]")?.addEventListener("click", () => {
+      if (typeof openMemoryDeleteConfirmOverlay === "function") {
+        openMemoryDeleteConfirmOverlay(safeIndex, backAction || (() => {
+          closeModal();
+          setTab("album");
+        }));
+      }
     });
     qs("[data-save-memory-edit]")?.addEventListener("click", () => {
       const next = readMemoryEditorValues(qs(".modal-sheet"));
@@ -18214,16 +18039,6 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     });
   }
 
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest?.("[data-action='new-memory']");
-    if (button?.hasAttribute("data-memory-create-menu")) return;
-    if (!button) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    openPhotoFirstPicker();
-  }, true);
-
   window.openPhotoFirstMemoryFlow = openPhotoFirstPicker;
 })();
 
@@ -18426,15 +18241,6 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     }, 0);
   }
 
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest?.("[data-memory-create-menu]");
-    if (!button) return;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    toggleMemoryCreateDropdown(button);
-  }, true);
-
   window.addEventListener("click", (event) => {
     const button = event.target.closest?.("[data-memory-create-menu], [data-action='new-memory']");
     if (!button) return;
@@ -18464,4 +18270,54 @@ window.__duariQuestionAnswerButtonCopyPatchInstalled = true;
     if (state.tab === "home") renderHome();
     if (state.tab === "album") renderAlbum();
   }
+})();
+
+(function installMemoryCopyPolish() {
+  if (window.__duariMemoryCopyPolishInstalled) return;
+  window.__duariMemoryCopyPolishInstalled = true;
+
+  const shouldSkip = (node) => {
+    const parent = node.parentElement;
+    return !parent || parent.closest("script, style, template");
+  };
+
+  function polishTextNode(node) {
+    if (shouldSkip(node)) return;
+    const text = node.nodeValue || "";
+    if (text.includes("기록")) node.nodeValue = text.replaceAll("기록", "추억");
+  }
+
+  function polishAttributes(root = document) {
+    root.querySelectorAll?.("[placeholder], [aria-label], [title]").forEach((element) => {
+      ["placeholder", "aria-label", "title"].forEach((name) => {
+        const value = element.getAttribute(name);
+        if (value?.includes("기록")) element.setAttribute(name, value.replaceAll("기록", "추억"));
+      });
+    });
+  }
+
+  function polishMemoryCopy(root = document) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    while (node) {
+      polishTextNode(node);
+      node = walker.nextNode();
+    }
+    polishAttributes(root);
+  }
+
+  const polishSoon = () => window.requestAnimationFrame(() => polishMemoryCopy(document));
+  const observer = new MutationObserver(polishSoon);
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  polishMemoryCopy(document);
+
+  ["renderHome", "renderAlbum", "openMemoryDetailLatestV3", "openMemoryEditPageLatest", "openMemoryCreatePage", "renderDiary"].forEach((name) => {
+    const original = window[name];
+    if (typeof original !== "function") return;
+    window[name] = function duariMemoryCopyWrapper(...args) {
+      const result = original.apply(this, args);
+      polishSoon();
+      return result;
+    };
+  });
 })();
