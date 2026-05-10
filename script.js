@@ -1828,11 +1828,19 @@ function setTab(tab) {
 }
 
 function renderApp() {
-  renderHome();
-  renderAlbum();
-  renderDiary();
-  renderQuestions();
-  renderMy();
+  [
+    ["home", renderHome],
+    ["album", renderAlbum],
+    ["diary", renderDiary],
+    ["questions", renderQuestions],
+    ["my", renderMy]
+  ].forEach(([name, renderer]) => {
+    try {
+      renderer();
+    } catch (error) {
+      console.error(`Duari render failed: ${name}`, error);
+    }
+  });
 }
 
 function renderHome() {
@@ -14431,10 +14439,10 @@ renderHome = function renderHome() {
       <section class="card home-records-card">
         <div class="between">
           <h3>최근 기록</h3>
-          <button class="chip-btn more-chip-btn" data-tab-go="album">더보기 <ion-icon class="duari-ion-icon" name="chevron-forward-outline" aria-hidden="true"></ion-icon></button>
+          <button class="primary-btn" data-action="new-memory">추억 남기기</button>
         </div>
         <div class="list">${homeRecentMemoryCards}</div>
-        <button class="primary-btn full" data-action="new-memory">기록 남기기</button>
+        <button class="ghost-btn full" data-tab-go="album">더보기</button>
       </section>
     </div>
   `;
@@ -15698,11 +15706,34 @@ function duariAlbumFilterMemories({ query = "", date = "", type = "전체" } = {
   const normalizedQuery = String(query || "").trim().toLowerCase();
   const normalizedDate = String(date || "").trim().replaceAll("-", ".");
   return state.memories.filter((memory) => {
-    const matchesQuery = !normalizedQuery || [memory.title, memory.place, memory.type].some((value) => String(value || "").toLowerCase().includes(normalizedQuery));
+    const matchesQuery = !normalizedQuery || [memory.title, memory.place, memory.type, memory.body, memory.note].some((value) => String(value || "").toLowerCase().includes(normalizedQuery));
     const matchesDate = !normalizedDate || String(memory.date || "").startsWith(normalizedDate);
     const matchesType = type === "전체" || memory.type === type;
     return matchesQuery && matchesDate && matchesType;
   });
+}
+
+function duariAlbumMonthOptions(memories = state.memories) {
+  const months = [...new Set((memories || [])
+    .map(duariMemoryDateValue)
+    .filter(Boolean)
+    .map((date) => date.slice(0, 7)))];
+  months.sort((a, b) => b.localeCompare(a));
+  return months;
+}
+
+function duariAlbumMonthLabel(monthValue) {
+  if (!monthValue) return "전체";
+  const [year, month] = String(monthValue).split("-");
+  return `${year}년 ${Number(month)}월`;
+}
+
+function duariAlbumExploreFilters() {
+  return {
+    query: state.albumSearchQuery || "",
+    type: state.albumTypeFilter || "전체",
+    date: state.albumDateFilter || ""
+  };
 }
 
 const DUARI_ALBUM_RECORD_PAGE_SIZE = 5;
@@ -15907,19 +15938,78 @@ openModal = function openModalWithTwoButtonRows(html) {
 
 function renderAlbum() {
   const album = qs("#album");
-  state.albumView = "calendar";
+  if (!["calendar", "explore"].includes(state.albumView)) state.albumView = "calendar";
+  const view = state.albumView;
+  const filters = duariAlbumExploreFilters();
+  const filteredMemories = duariAlbumFilterMemories({
+    query: filters.query,
+    type: filters.type,
+    date: filters.date
+  });
+  const recordList = renderAlbumRecordList(filteredMemories);
+  const memoryTypes = ["전체", "데이트", "여행", "기념일", "일상", "대화", "마음 기록", "기타"];
 
   album.innerHTML = `
     <div class="section-stack">
-      <div class="album-record-toolbar">
-        <div class="between">
-          <span class="meta">총 ${state.memories.length}개</span>
-          <button class="primary-btn" type="button" data-action="new-memory">기록 남기기</button>
-        </div>
+      <div class="tabs" role="tablist" aria-label="추억 보기 방식">
+        <button class="chip-btn ${view === "calendar" ? "active" : ""}" type="button" data-album-view="calendar" role="tab" aria-selected="${view === "calendar"}">캘린더</button>
+        <button class="chip-btn ${view === "explore" ? "active" : ""}" type="button" data-album-view="explore" role="tab" aria-selected="${view === "explore"}">모아보기</button>
       </div>
-      ${renderAlbumCalendar()}
+      ${view === "calendar" ? renderAlbumCalendar() : `
+        <div class="form-field">
+          <input id="albumSearch" value="${duariEscapeHtml(filters.query)}" placeholder="추억 검색" data-album-search />
+        </div>
+        <div class="form-field">
+          <select data-album-type-filter aria-label="유형 선택">
+            ${memoryTypes.map((type) => `<option value="${type}" ${filters.type === type ? "selected" : ""}>${type}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-field">
+          <input type="date" value="${duariEscapeHtml(filters.date)}" data-album-date-filter aria-label="날짜 선택" />
+        </div>
+        <div class="album-record-toolbar">
+          <div class="between">
+            <span class="meta">총 ${filteredMemories.length}개</span>
+            <button class="primary-btn" type="button" data-action="new-memory">추억 남기기</button>
+          </div>
+        </div>
+        <div class="album-record-list list">${recordList.html}</div>
+        ${recordList.hasMore ? `<button class="ghost-btn full album-record-load-more" type="button" data-album-record-load-more>더보기</button>` : ""}
+      `}
     </div>
   `;
+  qsa("[data-album-view]", album).forEach((button) => {
+    button.addEventListener("click", () => {
+      state.albumView = button.dataset.albumView || "calendar";
+      state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+      renderAlbum();
+    });
+  });
+  qs("[data-album-search]", album)?.addEventListener("input", (event) => {
+    state.albumSearchQuery = event.target.value;
+    state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+    renderAlbum();
+    qs("[data-album-search]", album)?.focus();
+  });
+  qs("[data-album-type-filter]", album)?.addEventListener("change", (event) => {
+    state.albumTypeFilter = event.target.value || "전체";
+    state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+    renderAlbum();
+  });
+  qs("[data-album-date-filter]", album)?.addEventListener("input", (event) => {
+    state.albumDateFilter = event.target.value;
+    state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+    renderAlbum();
+  });
+  qs("[data-album-date-filter]", album)?.addEventListener("change", (event) => {
+    state.albumDateFilter = event.target.value;
+    state.albumRecordVisibleCount = DUARI_ALBUM_RECORD_PAGE_SIZE;
+    renderAlbum();
+  });
+  qs("[data-album-record-load-more]", album)?.addEventListener("click", () => {
+    duariIncreaseAlbumRecordVisibleCount();
+    renderAlbum();
+  });
   qs("[data-calendar-prev]", album)?.addEventListener("click", () => {
     duariCalendarShiftMonth(-1);
     renderAlbum();
