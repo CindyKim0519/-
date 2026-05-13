@@ -501,7 +501,8 @@ h3 {
   padding: 0 12px;
 }
 
-#openNotifications {
+#openNotifications,
+#openSettings {
   background: var(--color-white);
   border-color: rgba(255, 255, 255, 0.82);
   box-shadow: var(--shadow-soft);
@@ -527,13 +528,15 @@ h3 {
   content: "\1F514";
 }
 
-#openNotifications.is-settings::before {
+#openNotifications.is-settings::before,
+#openSettings::before {
   content: "\2699";
   font-size: 20px;
 }
 
 #openNotifications.has-ionicon::before,
-#openNotifications.is-settings.has-ionicon::before {
+#openNotifications.is-settings.has-ionicon::before,
+#openSettings.has-ionicon::before {
   content: none;
 }
 
@@ -549,6 +552,7 @@ h3 {
 
 .icon-btn .duari-ion-icon,
 #openNotifications .duari-ion-icon,
+#openSettings .duari-ion-icon,
 .notification-nav-btn .duari-ion-icon,
 .terms-chevron-btn .duari-ion-icon,
 .chip-btn.icon-only .duari-ion-icon {
@@ -920,11 +924,24 @@ h3 {
 }
 
 .conversation-filter-grid {
+  align-items: start;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .conversation-filter-grid .conversation-search-field {
   grid-column: 1 / -1;
+}
+
+#diary .conversation-filter-grid > .form-field,
+#questions .conversation-filter-grid > .form-field {
+  align-self: start;
+  margin-top: 0 !important;
+}
+
+#diary .conversation-filter-grid :is(input, select),
+#questions .conversation-filter-grid :is(input, select) {
+  height: 44px;
+  min-height: 44px;
 }
 
 #questions .section-stack,

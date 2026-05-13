@@ -1679,11 +1679,14 @@ function startSetup() {
 
 openMemoryDetailPageFinal = (index) => openMemoryDetail(index);
 
-qs("#openNotifications").onclick = (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  openNotificationPageV4();
-};
+const notificationButtonInitial = qs("#openNotifications");
+if (notificationButtonInitial) {
+  notificationButtonInitial.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openNotificationPageV4();
+  };
+}
 
 const notificationFilterOptionsFinal = [
   { value: "all", label: "전체" },
@@ -1766,12 +1769,14 @@ function openNotificationPageV4() {
 }
 
 const notificationButtonFinal = qs("#openNotifications");
-notificationButtonFinal.onclick = (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  if (state.tab === "my") openNotificationSettingsModal();
-  else openNotificationPageV4();
-};
+if (notificationButtonFinal) {
+  notificationButtonFinal.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (state.tab === "my") openNotificationSettingsModal();
+    else openNotificationPageV4();
+  };
+}
 
 function renderHome() {
   const home = qs("#home");
@@ -2712,17 +2717,15 @@ function openNotificationSettingsModal() {
         <span class="notification-header-spacer" aria-hidden="true"></span>
       </header>
       <div class="section-stack">
-        ${["앱 알림", "우리 기념일 알림"].map((item) => `
-          <section class="card notification-setting-card">
-            <div class="between">
-              <strong>${item}</strong>
-              <button class="setting-switch active" type="button" aria-pressed="true">
-                <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
-                <span class="setting-switch-label">켬</span>
-              </button>
-            </div>
-          </section>
-        `).join("")}
+        <section class="card notification-setting-card">
+          <div class="between">
+            <strong>우리 기념일 알림</strong>
+            <button class="setting-switch active" type="button" aria-pressed="true">
+              <span class="setting-switch-track" aria-hidden="true"><span class="setting-switch-knob"></span></span>
+              <span class="setting-switch-label">켬</span>
+            </button>
+          </div>
+        </section>
         <div class="settings-account-actions">
           <button class="ghost-btn full" type="button" data-action="password-change">비밀번호 변경</button>
           <button class="ghost-btn full" type="button" data-action="logout">로그아웃</button>
@@ -3752,6 +3755,7 @@ function relationMyName(relation = currentRelationInfo()) {
 }
 
 function relationPartnerName(relation = currentRelationInfo()) {
+  if (relation.partnerName) return relation.partnerName;
   const parts = String(relation.name || "").split("&").map((item) => item.trim()).filter(Boolean);
   const myName = relationMyName(relation);
   return parts.find((item) => item !== myName) || parts[0] || "봄이";
@@ -4190,6 +4194,27 @@ function duariSetMyBirthdate(value = "") {
   }
 }
 
+function duariPartnerBirthdate(relation = currentRelationInfo()) {
+  return relation.partnerBirthdate || relation.partnerBirthDate || duariActiveAccount()?.partnerBirthdate || "1997.11.03";
+}
+
+function duariSetPartnerBirthdate(value = "") {
+  const formatted = String(value || "").replaceAll("-", ".");
+  const current = currentRelationInfo();
+  current.partnerBirthdate = formatted || duariPartnerBirthdate(current);
+  current.partnerBirthDate = current.partnerBirthdate;
+  const account = duariActiveAccount();
+  if (account) {
+    account.partnerBirthdate = current.partnerBirthdate;
+    account.currentRelation = { ...current };
+    if (typeof saveRegisteredAccounts === "function") saveRegisteredAccounts();
+  }
+}
+
+function duariLimitProfileName(value = "") {
+  return Array.from(String(value || "").trim()).slice(0, 6).join("");
+}
+
 function duariToDateInput(value = "") {
   return String(value || "").replaceAll(".", "-");
 }
@@ -4229,15 +4254,12 @@ function openAccountModal() {
           <h3>내 정보</h3>
           <div class="my-info-row"><span>닉네임</span><strong>${myName}</strong></div>
           <div class="my-info-row"><span>생년월일</span><strong>${duariMyBirthdate()}</strong></div>
-          <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
-          <div class="my-info-row"><span>이메일</span><strong>${duariAccountEmail()}</strong></div>
-          <div class="my-info-row"><span>가입일</span><strong>2026.05.02</strong></div>
         </section>
         <section class="card my-info-readonly-card">
           <h3>우리 정보</h3>
           <div class="my-info-row"><span>우리의 시작일</span><strong>${current.date}</strong></div>
           <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
-          <div class="my-info-row"><span>상대 생년월일</span><strong>1997.11.03</strong></div>
+          <div class="my-info-row"><span>상대 생년월일</span><strong>${duariPartnerBirthdate(current)}</strong></div>
           <div class="my-info-row"><span>상태</span><strong>${current.status}</strong></div>
         </section>
         <button class="primary-btn full" type="button" data-open-my-info-edit>수정</button>
@@ -4287,10 +4309,18 @@ function openMyInfoEditPage() {
           </div>
         </section>
         <section class="card my-info-readonly-card">
-          <h3>조회 정보</h3>
-          <div class="my-info-row"><span>로그인 방식</span><strong>이메일</strong></div>
-          <div class="my-info-row"><span>이메일</span><strong>${duariAccountEmail()}</strong></div>
-          <div class="my-info-row"><span>연결된 상대</span><strong>${partnerName}</strong></div>
+          <h3>상대방 정보</h3>
+          <div class="form-field">
+            <div class="field-label-row">
+              <label for="partnerInfoNickname">상대방 닉네임</label>
+              <span class="input-count" data-partner-info-nickname-count>${Array.from(partnerName || "").slice(0, 6).length}/6</span>
+            </div>
+            <input id="partnerInfoNickname" maxlength="6" value="${signupAttr(Array.from(partnerName || "").slice(0, 6).join(""))}" />
+          </div>
+          <div class="form-field">
+            <label for="partnerInfoBirthdate">상대방 생년월일</label>
+            <input id="partnerInfoBirthdate" type="date" value="${duariToDateInput(duariPartnerBirthdate(current))}" />
+          </div>
         </section>
         <div class="inline-action-pair">
           <button class="ghost-btn" type="button" data-my-info-edit-cancel>취소</button>
@@ -4306,13 +4336,20 @@ function openMyInfoEditPage() {
     const count = qs("[data-my-info-nickname-count]");
     if (count) count.textContent = `${Array.from(event.target.value || "").length}/6`;
   });
+  qs("#partnerInfoNickname")?.addEventListener("input", (event) => {
+    event.target.value = Array.from(event.target.value || "").slice(0, 6).join("");
+    const count = qs("[data-partner-info-nickname-count]");
+    if (count) count.textContent = `${Array.from(event.target.value || "").length}/6`;
+  });
   qs("[data-my-info-edit-back]")?.addEventListener("click", goBack);
   qs("[data-my-info-edit-cancel]")?.addEventListener("click", goBack);
   qs("[data-my-info-edit-save]")?.addEventListener("click", () => {
-    const nickname = Array.from(qs("#myInfoNickname")?.value.trim() || "").slice(0, 6).join("");
+    const nickname = duariLimitProfileName(qs("#myInfoNickname")?.value || "");
+    const partnerNickname = duariLimitProfileName(qs("#partnerInfoNickname")?.value || "");
     const birthdate = qs("#myInfoBirthdate")?.value || "";
+    const partnerBirthdate = qs("#partnerInfoBirthdate")?.value || "";
     const startDate = qs("#myInfoStartDate")?.value || "";
-    if (!nickname) {
+    if (!nickname || !partnerNickname) {
       showToast("닉네임을 입력해 주세요.");
       return;
     }
@@ -4327,9 +4364,12 @@ function openMyInfoEditPage() {
       showToast("오늘 이후 날짜는 시작일로 설정할 수 없어요.");
       return;
     }
-    duariUpdateRelationName(current, nickname);
+    current.myName = nickname;
+    current.partnerName = partnerNickname;
+    current.name = `${nickname} & ${partnerNickname}`;
     current.date = duariFromDateInput(startDate);
     duariSetMyBirthdate(birthdate);
+    duariSetPartnerBirthdate(partnerBirthdate);
     saveCurrentRelationToAccount();
     renderHome();
     renderMy();
@@ -4678,12 +4718,12 @@ function openNotificationPage() {
 renderOnboarding();
 
 qs("#startApp")?.addEventListener("click", startSetup);
-qs("#openNotifications").addEventListener("click", () => {
+qs("#openNotifications")?.addEventListener("click", () => {
   openModal(`<div class="modal-sheet"><div class="between"><h3>알림</h3><button class="icon-btn" data-close>닫기</button></div><div class="tabs" style="margin:10px 0">${["전체", "기록", "다이어리", "메시지", "기념일", "시스템"].map((item, index) => `<button class="chip-btn ${index === 0 ? "active" : ""}">${item}</button>`).join("")}</div><div class="list">${state.notifications.filter((item) => !item.text.includes("공유 동의")).map((item) => `<section class="card"><div class="between"><strong>${item.type}</strong><span class="meta">알림</span></div><p>${item.text}</p></section>`).join("")}</div></div>`);
   bindActions(qs(".modal-sheet"));
 });
 
-qs("#openNotifications").addEventListener("click", openNotificationPage);
+qs("#openNotifications")?.addEventListener("click", openNotificationPage);
 
 qsa(".nav-item").forEach((button) => button.addEventListener("click", () => setTab(button.dataset.tab)));
 
@@ -4701,13 +4741,16 @@ function openNotificationPageV2() {
   bindActions(qs(".modal-sheet"));
 }
 
-const cleanNotificationButton = qs("#openNotifications").cloneNode(true);
-qs("#openNotifications").replaceWith(cleanNotificationButton);
-cleanNotificationButton.onclick = (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  openNotificationPageV2();
-};
+const notificationButtonForV2 = qs("#openNotifications");
+if (notificationButtonForV2) {
+  const cleanNotificationButton = notificationButtonForV2.cloneNode(true);
+  notificationButtonForV2.replaceWith(cleanNotificationButton);
+  cleanNotificationButton.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openNotificationPageV2();
+  };
+}
 
 function openNotificationPageV3() {
   const filters = [
@@ -4748,12 +4791,20 @@ function openShareConsentDetailOverlay() {
 }
 
 const notificationButtonV3 = qs("#openNotifications");
-notificationButtonV3.onclick = (event) => {
+if (notificationButtonV3) {
+  notificationButtonV3.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (state.tab === "my") openNotificationSettingsModal();
+    else openNotificationPageV4();
+  };
+}
+
+qs("#openSettings")?.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopPropagation();
-  if (state.tab === "my") openNotificationSettingsModal();
-  else openNotificationPageV4();
-};
+  openNotificationSettingsModal();
+});
 
 function openDiaryModal() {
   openModal(`
